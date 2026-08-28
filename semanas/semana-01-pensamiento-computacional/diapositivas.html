@@ -1,0 +1,1187 @@
+<title>Pensamiento Computacional</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  /* =========================================================
+     Aprende con Gutyy IA — Semana 1 (v1.1)
+     Identidad: académico-editorial, claro, un acento, mucho aire.
+     Diseño deliberadamente de un solo tema (light) — la marca del
+     curso debe verse idéntica sin importar el modo del sistema,
+     igual que un PDF de diapositivas. Ver "Guía de marca" al final
+     de la respuesta para la justificación completa.
+     ========================================================= */
+
+  :root{
+    --bg:            #FFFFFF;
+    --bg-alt:        #F5F6FA;
+    --ink:           #171A24;
+    --ink-secondary: #4B4F5E;
+    --ink-tertiary:  #8A8FA3;
+    --accent:        #3548C4;
+    --accent-dark:   #24308C;
+    --accent-tint:   #EAEDFB;
+    --border:        #E2E4EC;
+    --code-bg:       #F3F4F8;
+    --code-border:   #E3E5EE;
+    --code-ink:      #23262F;
+    --code-comment:  #9297A8;
+    --code-string:   #5B5F70;
+
+    --font-display: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-body:    "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-mono:    "IBM Plex Mono", ui-monospace, "Consolas", monospace;
+
+    color-scheme: light;
+  }
+
+  *,*::before,*::after{ box-sizing: border-box; }
+
+  html{
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+  }
+
+  body{
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior: auto; }
+    *{ animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  /* faint structural grid — a nod to computational logic (rows/columns),
+     kept extremely quiet so it reads as texture, not decoration */
+  .grid-field{
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      linear-gradient(to right, rgba(53,72,196,0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(53,72,196,0.05) 1px, transparent 1px);
+    background-size: 48px 48px;
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent 75%);
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent 75%);
+  }
+
+  /* ---------- chrome: brand mark + progress rail ---------- */
+
+  .brand-mark{
+    position: fixed;
+    top: 28px;
+    left: clamp(24px, 5vw, 64px);
+    z-index: 20;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    pointer-events: none;
+  }
+  .brand-mark strong{
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .brand-mark .dot{ color: var(--accent); }
+
+  .slide-counter{
+    position: fixed;
+    top: 28px;
+    right: clamp(24px, 5vw, 64px);
+    z-index: 20;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--ink-tertiary);
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+  .slide-counter strong{ color: var(--ink); font-weight: 600; }
+
+  .rail{
+    position: fixed;
+    right: clamp(14px, 3vw, 30px);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .rail a{
+    position: relative;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    border: 1px solid var(--border);
+    display: block;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .rail a:hover{ transform: scale(1.3); }
+  .rail a.active{
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .rail a .rail-label{
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    color: var(--ink-secondary);
+    background: var(--bg);
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+  }
+  .rail a:hover .rail-label{ opacity: 1; }
+
+  a:focus-visible,
+  .rail a:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  /* ---------- slide scaffold ---------- */
+
+  .deck{ position: relative; z-index: 1; }
+
+  section.slide{
+    min-height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    align-items: center;
+    padding: 120px clamp(24px, 8vw, 96px) 96px;
+    border-bottom: 1px solid var(--border);
+  }
+  section.slide.alt{ background: var(--bg-alt); }
+
+  .slide-inner{
+    max-width: 880px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .kicker{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 18px;
+  }
+  .kicker::before{
+    content: "";
+    width: 18px;
+    height: 1px;
+    background: var(--accent);
+    display: inline-block;
+  }
+
+  h1,h2,h3{
+    font-family: var(--font-display);
+    color: var(--ink);
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  h2{
+    font-size: clamp(28px, 3.6vw, 40px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  .lede{
+    font-size: 19px;
+    line-height: 1.6;
+    color: var(--ink-secondary);
+    max-width: 62ch;
+    margin: 22px 0 0;
+  }
+
+  p{ line-height: 1.65; color: var(--ink-secondary); }
+  p.body-text{ font-size: 16.5px; max-width: 66ch; }
+
+  strong.term{
+    color: var(--ink);
+    font-weight: 600;
+    background: linear-gradient(to bottom, transparent 62%, var(--accent-tint) 62%);
+    padding: 0 1px;
+  }
+
+  em.term-accent{
+    font-style: normal;
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+
+  .section-body{ margin-top: 36px; }
+  .section-body > * + *{ margin-top: 20px; }
+
+  /* ---------- reusable blocks ---------- */
+
+  .callout{
+    border-left: 2px solid var(--accent);
+    padding: 4px 0 4px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .callout .callout-label{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .callout p{ margin: 0; color: var(--ink); font-size: 16px; }
+
+  .pull-quote{
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 600;
+    color: var(--accent-dark);
+    line-height: 1.5;
+    max-width: 48ch;
+    margin: 0;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    text-wrap: balance;
+  }
+
+  .divider-row{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 34px 0 22px;
+  }
+  .divider-row::after{
+    content:"";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .divider-row .divider-label{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    white-space: nowrap;
+  }
+
+  /* code editor card */
+  .code-card{
+    border: 1px solid var(--code-border);
+    background: var(--code-bg);
+    overflow: hidden;
+  }
+  .code-card .code-bar{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--code-border);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+  }
+  .code-card .code-bar .lang-tag{
+    color: var(--accent-dark);
+    font-weight: 500;
+  }
+  .code-card pre{
+    margin: 0;
+    padding: 18px 20px 20px;
+    overflow-x: auto;
+  }
+  .code-card code{
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--code-ink);
+    white-space: pre;
+  }
+  .code-card .cm{ color: var(--code-comment); font-style: italic; }
+  .code-card .kw{ color: var(--accent-dark); font-weight: 600; }
+  .code-card .st{ color: var(--code-string); }
+  .code-card .fn{ color: var(--accent); }
+
+  .code-card.compact pre{ padding: 14px 18px 16px; }
+  .code-card.compact code{ font-size: 13.5px; }
+
+  .code-result{
+    margin-top: 10px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink-secondary);
+  }
+  .code-result .result-tag{
+    color: var(--ink-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 11px;
+  }
+  .code-result .result-val{ color: var(--accent-dark); font-weight: 500; }
+
+  /* three-blocks grid */
+  .blocks-grid{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 8px;
+  }
+  .block-card{
+    background: var(--bg);
+    padding: 26px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .block-card .block-letter{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+  .block-card h3{
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .block-card p{ font-size: 14.5px; margin: 0; }
+  .block-card .block-example{
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+    font-size: 13px;
+    color: var(--ink-tertiary);
+    font-style: italic;
+  }
+
+  .progression{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 26px;
+  }
+  .progression .chip{
+    border: 1px solid var(--border);
+    background: var(--bg);
+    padding: 8px 14px;
+    font-size: 13px;
+    color: var(--ink-secondary);
+    font-family: var(--font-mono);
+  }
+  .progression .chip strong{ color: var(--ink); font-weight: 600; }
+  .progression .arrow{ color: var(--ink-tertiary); font-family: var(--font-mono); }
+
+  /* variable / locker diagram */
+  .locker-row{
+    display: flex;
+    gap: 18px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+  .locker{
+    border: 1px solid var(--border);
+    background: var(--bg);
+    width: 160px;
+    padding: 0;
+    overflow: hidden;
+  }
+  .locker .locker-label{
+    background: var(--ink);
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 7px 10px;
+  }
+  .locker .locker-value{
+    padding: 18px 10px;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--accent-dark);
+  }
+  .locker .locker-when{
+    padding: 6px 10px 10px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--ink-tertiary);
+  }
+  .locker-arrow{
+    align-self: center;
+    color: var(--ink-tertiary);
+    font-size: 20px;
+  }
+
+  /* objectives / itemized list */
+  .obj-list{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .obj-list li{
+    display: flex;
+    gap: 20px;
+    padding: 18px 0;
+    border-top: 1px solid var(--border);
+  }
+  .obj-list li:last-child{ border-bottom: 1px solid var(--border); }
+  .obj-list .obj-num{
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-size: 14px;
+    padding-top: 2px;
+    flex-shrink: 0;
+    width: 24px;
+  }
+  .obj-list p{ margin: 0; color: var(--ink); font-size: 16px; }
+
+  /* two column layout */
+  .two-col{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  @media (max-width: 760px){
+    .two-col{ grid-template-columns: 1fr; }
+    .blocks-grid{ grid-template-columns: 1fr; }
+    section.slide{ padding-top: 96px; }
+  }
+
+  /* self-assessment */
+  .qa-list{
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .qa-item{
+    padding: 18px 0;
+    border-top: 1px solid var(--border);
+  }
+  .qa-item:last-child{ border-bottom: 1px solid var(--border); }
+  .qa-item .q{
+    display: flex;
+    gap: 14px;
+    font-size: 15.5px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .qa-item .q .q-num{
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .qa-item .a{
+    margin: 8px 0 0 34px;
+    font-size: 14.5px;
+    color: var(--ink-secondary);
+  }
+  .qa-item .a .a-tag{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    margin-right: 8px;
+  }
+
+  /* vigencia / status */
+  .status-row{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--accent-dark);
+    background: var(--accent-tint);
+    border: 1px solid #DADFF6;
+    padding: 10px 16px;
+    width: fit-content;
+  }
+  .status-row .status-dot{
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .meta-list{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    margin-top: 8px;
+  }
+  .meta-list div{ font-size: 14px; color: var(--ink-secondary); }
+  .meta-list dt{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-tertiary);
+    margin: 0 0 3px;
+  }
+  .meta-list dd{ margin: 0; color: var(--ink); font-weight: 500; }
+
+  /* cover slide */
+  .cover{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 0 clamp(24px, 8vw, 96px);
+  }
+  .cover-eyebrow{
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .cover-eyebrow::before{
+    content:"";
+    width: 34px;
+    height: 1px;
+    background: var(--accent);
+  }
+  .cover h1{
+    font-size: clamp(40px, 6.4vw, 76px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    max-width: 14ch;
+    margin-top: 26px;
+  }
+  .cover h1 em{
+    font-style: normal;
+    color: var(--accent);
+  }
+  .cover .cover-sub{
+    font-size: clamp(17px, 2vw, 20px);
+    color: var(--ink-secondary);
+    max-width: 56ch;
+    margin-top: 22px;
+    line-height: 1.6;
+  }
+  .cover-footer{
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    margin-top: 56px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .cover-footer .fmeta dt{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-tertiary);
+    margin: 0 0 4px;
+  }
+  .cover-footer .fmeta dd{
+    margin: 0;
+    font-size: 14.5px;
+    color: var(--ink);
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+  .scroll-cue{
+    position: absolute;
+    bottom: 40px;
+    left: clamp(24px, 8vw, 96px);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .scroll-cue .chevron{
+    display: inline-block;
+    animation: bob 1.8s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce){ .scroll-cue .chevron{ animation: none; } }
+  @keyframes bob{
+    0%,100%{ transform: translateY(0); }
+    50%{ transform: translateY(4px); }
+  }
+
+  footer.end{
+    padding: 64px clamp(24px, 8vw, 96px) 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-tertiary);
+    position: relative;
+    z-index: 1;
+  }
+</style>
+
+<div class="grid-field" aria-hidden="true"></div>
+
+<div class="brand-mark">
+  <strong>Aprende con Gutyy IA</strong><span class="dot">·</span><span>Semana 1</span>
+</div>
+<div class="slide-counter"><strong id="counter-current">01</strong> / 18</div>
+
+<nav class="rail" aria-label="Navegación de diapositivas">
+  <a href="#s01" data-label="Portada" class="active"><span class="rail-label">Portada</span></a>
+  <a href="#s02" data-label="Objetivos"><span class="rail-label">Objetivos</span></a>
+  <a href="#s03" data-label="¿Qué es programar?"><span class="rail-label">¿Qué es programar?</span></a>
+  <a href="#s04" data-label="Los 3 bloques"><span class="rail-label">Los 3 bloques</span></a>
+  <a href="#s05" data-label="El laberinto"><span class="rail-label">El laberinto</span></a>
+  <a href="#s06" data-label="Datos y variables"><span class="rail-label">Datos y variables</span></a>
+  <a href="#s07" data-label="Pseudocódigo"><span class="rail-label">Pseudocódigo</span></a>
+  <a href="#s08" data-label="El guardián (pseudo)"><span class="rail-label">El guardián (pseudo)</span></a>
+  <a href="#s09" data-label="El guardián (Python)"><span class="rail-label">El guardián (Python)</span></a>
+  <a href="#s10" data-label="Por qué importa para IA"><span class="rail-label">Por qué importa para IA</span></a>
+  <a href="#s11" data-label="El paraguas"><span class="rail-label">El paraguas</span></a>
+  <a href="#s12" data-label="Paraguas en Python"><span class="rail-label">Paraguas en Python</span></a>
+  <a href="#s13" data-label="Números pares"><span class="rail-label">Números pares</span></a>
+  <a href="#s14" data-label="Vigencia técnica"><span class="rail-label">Vigencia técnica</span></a>
+  <a href="#s15" data-label="Errores comunes"><span class="rail-label">Errores comunes</span></a>
+  <a href="#s16" data-label="Ejercicio propuesto"><span class="rail-label">Ejercicio propuesto</span></a>
+  <a href="#s17" data-label="Autoevaluación I"><span class="rail-label">Autoevaluación I</span></a>
+  <a href="#s18" data-label="Autoevaluación II"><span class="rail-label">Autoevaluación II</span></a>
+</nav>
+
+<main class="deck">
+
+  <!-- 01 — COVER -->
+  <section class="slide" id="s01">
+    <div class="cover">
+      <p class="cover-eyebrow">Aprende con Gutyy IA — Academia de programación, IA y Machine Learning</p>
+      <h1>¿Qué es <em>programar</em>? Pensamiento computacional y los bloques fundamentales de todo programa</h1>
+      <p class="cover-sub">Semana 1 del roadmap — el punto de partida lógico antes de escribir la primera línea de Python. Sin prerrequisitos.</p>
+      <div class="cover-footer">
+        <dl class="fmeta"><dt>Nivel</dt><dd>Básico</dd></dl>
+        <dl class="fmeta"><dt>Prerrequisitos</dt><dd>Ninguno</dd></dl>
+        <dl class="fmeta"><dt>Versión</dt><dd>v1.1</dd></dl>
+        <dl class="fmeta"><dt>Fecha</dt><dd>2026-08-28</dd></dl>
+      </div>
+    </div>
+    <div class="scroll-cue"><span>Desplázate</span><span class="chevron">↓</span></div>
+  </section>
+
+  <!-- 02 — OBJETIVOS -->
+  <section class="slide alt" id="s02">
+    <div class="slide-inner">
+      <p class="kicker">Objetivos de aprendizaje</p>
+      <h2>Al terminar esta semana, vas a poder…</h2>
+      <ol class="obj-list section-body" style="margin-top:36px;">
+        <li><span class="obj-num">01</span><p>Explicar con tus propias palabras qué es un <strong class="term">programa</strong> y qué es un <strong class="term">algoritmo</strong>, usando una analogía cotidiana.</p></li>
+        <li><span class="obj-num">02</span><p>Identificar los tres bloques universales de todo programa: <em class="term-accent">secuencia</em>, <em class="term-accent">decisión</em> y <em class="term-accent">repetición</em>.</p></li>
+        <li><span class="obj-num">03</span><p>Distinguir un <strong class="term">dato</strong> de una <strong class="term">variable</strong>, y explicar por qué una variable es como una caja etiquetada que puede cambiar de contenido.</p></li>
+        <li><span class="obj-num">04</span><p>Leer y describir en lenguaje natural — sin código — un algoritmo sencillo escrito en <strong class="term">pseudocódigo</strong>.</p></li>
+        <li><span class="obj-num">05</span><p>Construir, de forma conceptual, un algoritmo propio de 4–6 pasos para un problema cotidiano, aplicando al menos un condicional y un bucle.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 03 — QUE ES PROGRAMAR -->
+  <section class="slide" id="s03">
+    <div class="slide-inner">
+      <p class="kicker">01 · Fundamentos</p>
+      <h2>¿Qué es "programar", en realidad?</h2>
+      <p class="lede">Programar es dar instrucciones extremadamente precisas a algo que no puede interpretar ambigüedades.</p>
+
+      <div class="section-body">
+        <div class="callout">
+          <span class="callout-label">Analogía · la receta de cocina</span>
+          <p>Le dejas una nota a un compañero que nunca ha cocinado para que haga un huevo frito. Si escribes "haz un huevo frito" sin detalle, fracasará: una computadora es ese compañero — ejecuta instrucciones al pie de la letra, sin sentido común.</p>
+        </div>
+
+        <p class="body-text">Un <strong class="term">programa</strong> es esa receta con nivel de detalle altísimo. Un <strong class="term">algoritmo</strong> es la receta en sí — los pasos. El <strong class="term">código</strong> es esa receta traducida a un idioma que la máquina entiende (Python, en próximas semanas).</p>
+
+        <div class="two-col" style="margin-top:8px;">
+          <div class="callout" style="border-color:var(--border);">
+            <span class="callout-label" style="color:var(--ink-tertiary);">Algoritmo</span>
+            <p>El plan, la lógica, los pasos. Independiente del lenguaje.</p>
+          </div>
+          <div class="callout" style="border-color:var(--border);">
+            <span class="callout-label" style="color:var(--ink-tertiary);">Código</span>
+            <p>La traducción de ese plan a sintaxis concreta y ejecutable.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 — TRES BLOQUES -->
+  <section class="slide alt" id="s04">
+    <div class="slide-inner">
+      <p class="kicker">02 · Fundamentos</p>
+      <h2>Los tres bloques universales de todo programa</h2>
+      <p class="lede">Una app bancaria, un videojuego o un modelo de IA — todos se construyen combinando solo estos tres bloques.</p>
+
+      <div class="blocks-grid">
+        <div class="block-card">
+          <span class="block-letter">A</span>
+          <h3>Secuencia</h3>
+          <p>Pasos uno tras otro, en orden.</p>
+          <p class="block-example">"Armar un mueble: base → patas → tapa."</p>
+        </div>
+        <div class="block-card">
+          <span class="block-letter">B</span>
+          <h3>Decisión</h3>
+          <p>El programa elige un camino u otro según una condición.</p>
+          <p class="block-example">"Si llueve, llevo paraguas; si no, no lo llevo."</p>
+        </div>
+        <div class="block-card">
+          <span class="block-letter">C</span>
+          <h3>Repetición</h3>
+          <p>Una acción se repite hasta que una condición se cumple o deja de cumplirse.</p>
+          <p class="block-example">"Mientras haya platos sucios, lavo un plato."</p>
+        </div>
+      </div>
+
+      <div class="divider-row"><span class="divider-label">Progresión de ejemplos</span></div>
+      <div class="progression">
+        <span class="chip"><strong>Servir un vaso de agua</strong> — solo secuencia</span>
+        <span class="arrow">→</span>
+        <span class="chip"><strong>Cruzar la calle</strong> — secuencia + decisión</span>
+        <span class="arrow">→</span>
+        <span class="chip"><strong>Revisar el correo hasta encontrar uno importante</strong> — secuencia + decisión + repetición</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 — EJEMPLO 4: EL LABERINTO -->
+  <section class="slide" id="s05">
+    <div class="slide-inner">
+      <p class="kicker">Ejemplo 4 · Los tres bloques en acción</p>
+      <h2>El explorador del laberinto</h2>
+      <p class="lede">Imagina a un explorador dentro de un laberinto, linterna en mano, buscando la salida:</p>
+
+      <div class="progression">
+        <span class="chip"><strong>Avanza</strong> un paso</span>
+        <span class="arrow">→</span>
+        <span class="chip">Si hay pared al frente, <strong>gira</strong> hacia el lado libre</span>
+        <span class="arrow">→</span>
+        <span class="chip">Si no hay pared, <strong>sigue</strong> de frente</span>
+        <span class="arrow">→</span>
+        <span class="chip"><strong>Repite</strong> hasta encontrar la salida</span>
+      </div>
+
+      <div class="section-body">
+        <div class="callout">
+          <span class="callout-label">Lo memorable de este ejemplo</span>
+          <p>El explorador no sabe de antemano cuántos pasos dará — puede ser 5 o 500. La repetición continúa exactamente hasta que se cumple la condición de salida, y en cada paso se vuelve a tomar una decisión, dentro de una secuencia estricta.</p>
+        </div>
+
+        <p class="pull-quote">"Programar es, en el fondo, decirle a alguien exactamente cómo salir de un laberinto sin poder verlo tú mismo."</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 — DATOS Y VARIABLES -->
+  <section class="slide alt" id="s06">
+    <div class="slide-inner">
+      <p class="kicker">03 · Fundamentos</p>
+      <h2>Datos y variables: cajas etiquetadas</h2>
+      <p class="lede">Analogía: un casillero de gimnasio con etiqueta "EDAD". Hoy dice "30", mañana puede decir "31".</p>
+
+      <div class="section-body">
+        <div class="locker-row">
+          <div class="locker">
+            <div class="locker-label">EDAD</div>
+            <div class="locker-value">30</div>
+            <div class="locker-when">hoy</div>
+          </div>
+          <span class="locker-arrow">→</span>
+          <div class="locker">
+            <div class="locker-label">EDAD</div>
+            <div class="locker-value">31</div>
+            <div class="locker-when">mañana</div>
+          </div>
+        </div>
+
+        <p class="body-text">El casillero (<strong class="term">variable</strong>) conserva su nombre, pero su contenido cambia. Los <strong class="term">datos</strong> son los valores (30, "Ana", verdadero/falso); las <strong class="term">variables</strong> son las etiquetas que permiten reutilizarlos.</p>
+
+        <div class="callout">
+          <span class="callout-label">Vista previa · próximas semanas</span>
+          <p><code style="font-family:var(--font-mono); color:var(--accent-dark);">edad = 30</code> en código será la traducción sintáctica exacta de este casillero etiquetado.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 — PSEUDOCODIGO (CINE) -->
+  <section class="slide" id="s07">
+    <div class="slide-inner">
+      <p class="kicker">04 · Lectura de algoritmos</p>
+      <h2>Leer un algoritmo en pseudocódigo</h2>
+      <p class="lede">Pseudocódigo es escribir algoritmos en español estructurado, sin sintaxis de un lenguaje real todavía.</p>
+
+      <div class="section-body">
+        <div class="code-card">
+          <div class="code-bar"><span>Entrada a cine para mayores de edad</span><span class="lang-tag">pseudocódigo</span></div>
+          <pre><code><span class="kw">INICIO</span>
+  edad = preguntar la edad de la persona
+  <span class="kw">SI</span> edad es mayor o igual a 18 <span class="kw">ENTONCES</span>
+      mostrar <span class="st">"Puede entrar"</span>
+  <span class="kw">SI NO</span>
+      mostrar <span class="st">"No puede entrar"</span>
+<span class="kw">FIN</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 — GUARDIAN: PSEUDOCODIGO -->
+  <section class="slide alt" id="s08">
+    <div class="slide-inner">
+      <p class="kicker">Segundo algoritmo en pseudocódigo</p>
+      <h2>El guardián y la fila VIP</h2>
+
+      <div class="section-body">
+        <div class="code-card">
+          <div class="code-bar"><span>Atender a cada invitado según su categoría</span><span class="lang-tag">pseudocódigo</span></div>
+          <pre><code><span class="kw">INICIO</span>
+  fila_de_invitados = lista de personas esperando entrar
+  <span class="kw">MIENTRAS</span> queden personas en la fila <span class="kw">HACER</span>
+      invitado = siguiente persona de la fila
+      <span class="kw">SI</span> el nombre de invitado está en la lista VIP <span class="kw">ENTONCES</span>
+          mostrar <span class="st">"Bienvenido, "</span> + invitado + <span class="st">", pase directo"</span>
+      <span class="kw">SI NO</span>
+          mostrar invitado + <span class="st">", por favor espere en la fila general"</span>
+      quitar a invitado de la fila
+<span class="kw">FIN</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 09 — GUARDIAN: PYTHON -->
+  <section class="slide" id="s09">
+    <div class="slide-inner">
+      <p class="kicker">El guardián, ahora en Python</p>
+      <h2>La fila VIP en código real</h2>
+
+      <div class="section-body">
+        <div class="code-card compact">
+          <div class="code-bar"><span>guardian.py</span><span class="lang-tag">python</span></div>
+          <pre><code><span class="cm"># Cada invitado es una tupla (nombre, es_vip): el dato "es VIP" viaja pegado a la persona.</span>
+fila_de_invitados = [
+    (<span class="st">"Marta"</span>, <span class="kw">True</span>),
+    (<span class="st">"Luis"</span>, <span class="kw">False</span>),
+    (<span class="st">"Carla"</span>, <span class="kw">False</span>),
+    (<span class="st">"Diego"</span>, <span class="kw">True</span>),
+]
+
+<span class="cm"># REPETICIÓN: aquí está la diferencia clave con el paraguas. Allá NO sabíamos de
+# antemano cuántos días tocaría revisar, así que hacía falta un "while". Acá la
+# fila YA existe completa: se sabe de entrada cuántos invitados hay, así que
+# "recorrer la fila" se traduce de forma más natural con un "for".</span>
+<span class="kw">for</span> nombre, es_vip <span class="kw">in</span> fila_de_invitados:
+    <span class="cm"># DECISIÓN: "if ... else ..." traduce "SI está en la lista VIP ENTONCES ... SI NO ..."</span>
+    <span class="kw">if</span> es_vip:
+        <span class="fn">print</span>(f<span class="st">"Bienvenido, {nombre}, pase directo"</span>)
+    <span class="kw">else</span>:
+        <span class="fn">print</span>(f<span class="st">"{nombre}, por favor espere en la fila general"</span>)
+    <span class="cm"># SECUENCIA: no hace falta escribir "quitar a invitado de la fila": el propio
+    # "for" ya avanza solo al siguiente invitado en cada vuelta.</span></code></pre>
+        </div>
+
+        <div class="callout">
+          <span class="callout-label">Dos sabores de repetición</span>
+          <p><code style="font-family:var(--font-mono); color:var(--accent-dark); font-weight:600;">while</code> se usa cuando no se sabe de antemano cuántas vueltas hará falta dar — se repite hasta que pase algo (el paraguas). <code style="font-family:var(--font-mono); color:var(--accent-dark); font-weight:600;">for</code> se usa cuando se recorre una colección completa y conocida de antemano (la fila de invitados, o una lista de números). Es el mismo bloque lógico de "repetición"; Python solo ofrece dos sintaxis según el caso.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 — POR QUE IMPORTA PARA IA/ML -->
+  <section class="slide alt" id="s10">
+    <div class="slide-inner">
+      <p class="kicker">Mirando adelante · IA y Machine Learning</p>
+      <h2>Por qué esto importa para IA/ML</h2>
+      <p class="lede">Estos mismos tres bloques no desaparecen cuando el tema se vuelve más avanzado: son la base invisible de cómo funciona un sistema de inteligencia artificial.</p>
+
+      <div class="section-body">
+        <div class="callout">
+          <span class="callout-label">En el entrenamiento de un modelo</span>
+          <p>Más adelante en la academia verás que entrenar un modelo es, en el fondo, un bucle que se <em class="term-accent">repite</em> miles o millones de veces: el modelo revisa un ejemplo, compara su respuesta con la correcta, se ajusta un poco, y vuelve a empezar con el siguiente — igual que el explorador del laberinto repitiendo "avanzar y decidir" hasta encontrar la salida.</p>
+        </div>
+
+        <p class="body-text">Cuando un modelo "<em class="term-accent">decide</em>" algo (ej. si una foto muestra un gato o un perro), ejecuta una versión más sofisticada de nuestro bloque de decisión, comparando probabilidades en vez de una condición simple. Todo ocurre en una <em class="term-accent">secuencia</em> ordenada de pasos, sin saltos ni magia.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 — EL PARAGUAS: PSEUDOCODIGO -->
+  <section class="slide" id="s11">
+    <div class="slide-inner">
+      <p class="kicker">05 · Ejemplo práctico</p>
+      <h2>El paraguas</h2>
+      <p class="lede">Un algoritmo que combina los tres bloques a la vez: revisa el pronóstico día por día hasta encontrar lluvia.</p>
+
+      <div class="section-body">
+        <div class="code-card">
+          <div class="code-bar"><span>Buscar el primer día de lluvia en la semana</span><span class="lang-tag">pseudocódigo</span></div>
+          <pre><code><span class="kw">INICIO</span>
+  dia = 1
+  encontrado_lluvia = falso
+  <span class="kw">MIENTRAS</span> dia sea menor o igual a 7 Y encontrado_lluvia sea falso <span class="kw">HACER</span>
+      pronostico = consultar el pronóstico del día actual
+      <span class="kw">SI</span> pronostico es <span class="st">"lluvia"</span> <span class="kw">ENTONCES</span>
+          mostrar <span class="st">"Lleva paraguas el día "</span> + dia
+          encontrado_lluvia = verdadero
+      <span class="kw">SI NO</span>
+          dia = dia + 1
+<span class="kw">FIN</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 — EL PARAGUAS: PYTHON -->
+  <section class="slide alt" id="s12">
+    <div class="slide-inner">
+      <p class="kicker">05 · Ejemplo práctico</p>
+      <h2>Del pseudocódigo al código real</h2>
+      <p class="lede">La misma lógica del paraguas, ahora traducida a Python.</p>
+
+      <div class="section-body">
+        <div class="code-card">
+          <div class="code-bar"><span>paraguas.py</span><span class="lang-tag">python</span></div>
+          <pre><code><span class="cm"># Lista simulada de pronósticos para 7 días (dato fijo por ahora).</span>
+pronosticos = [<span class="st">"soleado"</span>, <span class="st">"nublado"</span>, <span class="st">"soleado"</span>, <span class="st">"lluvia"</span>, <span class="st">"nublado"</span>, <span class="st">"soleado"</span>, <span class="st">"lluvia"</span>]
+
+<span class="cm"># VARIABLES: mismos "casilleros etiquetados" del pseudocódigo, ahora en Python real.</span>
+dia = 1
+encontrado_lluvia = <span class="kw">False</span>
+
+<span class="cm"># REPETICIÓN: traducción directa de "MIENTRAS ... HACER"</span>
+<span class="kw">while</span> dia &lt;= 7 <span class="kw">and</span> <span class="kw">not</span> encontrado_lluvia:
+    <span class="cm"># SECUENCIA: ocurre siempre primero, en orden, dentro de cada vuelta.</span>
+    pronostico = pronosticos[dia - 1]  <span class="cm"># índice - 1 porque Python cuenta desde 0</span>
+
+    <span class="cm"># DECISIÓN: traducción directa de "SI ... ENTONCES ... SI NO ..."</span>
+    <span class="kw">if</span> pronostico == <span class="st">"lluvia"</span>:
+        <span class="fn">print</span>(f<span class="st">"Lleva paraguas el día {dia}"</span>)
+        encontrado_lluvia = <span class="kw">True</span>
+    <span class="kw">else</span>:
+        dia = dia + 1</code></pre>
+          <div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">Lleva paraguas el día 4</span></div>
+        </div>
+
+        <div class="callout">
+          <span class="callout-label">Punto de confusión clásico</span>
+          <p><code style="font-family:var(--font-mono);">dia = dia + 1</code> está dentro del <code style="font-family:var(--font-mono);">else</code> a propósito — solo se avanza de día si NO llovió. Distinguir <code style="font-family:var(--font-mono); color:var(--accent-dark); font-weight:600;">=</code> (asignación) de <code style="font-family:var(--font-mono); color:var(--accent-dark); font-weight:600;">==</code> (comparación) es clave para principiantes.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 — SEGUNDO EJEMPLO: NUMEROS PARES -->
+  <section class="slide" id="s13">
+    <div class="slide-inner">
+      <p class="kicker">06 · Segundo ejemplo</p>
+      <h2>Contar números pares</h2>
+      <p class="lede">Los mismos tres bloques, en una forma distinta de repetición: el bucle <code style="font-family:var(--font-mono); color:var(--accent-dark);">for</code>.</p>
+
+      <div class="section-body">
+        <div class="code-card">
+          <div class="code-bar"><span>contar_pares.py</span><span class="lang-tag">python</span></div>
+          <pre><code>numeros = [3, 8, 15, 42, 7, 16]
+contador_pares = 0
+
+<span class="kw">for</span> numero <span class="kw">in</span> numeros:              <span class="cm"># REPETICIÓN</span>
+    <span class="kw">if</span> numero % 2 == 0:              <span class="cm"># DECISIÓN</span>
+        contador_pares = contador_pares + 1   <span class="cm"># SECUENCIA</span>
+
+<span class="fn">print</span>(f<span class="st">"Hay {contador_pares} números pares en la lista"</span>)</code></pre>
+          <div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">Hay 3 números pares en la lista</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 — VIGENCIA TECNICA -->
+  <section class="slide alt" id="s14">
+    <div class="slide-inner">
+      <p class="kicker">Nota de vigencia técnica · 2026</p>
+      <h2>Contenido fundacional, sin partes desactualizadas</h2>
+      <div class="section-body">
+        <p class="body-text">Los tres bloques lógicos son atemporales, y Python sigue siendo el lenguaje de entrada estándar a IA/ML.</p>
+        <div class="status-row">
+          <span class="status-dot"></span>
+          <span>Recomendado para la Semana 2: Python 3.12+ · entorno en línea tipo Jupyter / Google Colab / Replit</span>
+        </div>
+        <p class="body-text" style="max-width:60ch;">Un entorno en línea evita bloquear a nadie por instalación local.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15 — ERRORES COMUNES -->
+  <section class="slide" id="s15">
+    <div class="slide-inner">
+      <p class="kicker">Antes de seguir</p>
+      <h2>Errores comunes de principiante</h2>
+      <ol class="obj-list section-body" style="margin-top:36px;">
+        <li><span class="obj-num">01</span><p>Creer que "programar" es lo mismo que "escribir código" desde el día uno.</p></li>
+        <li><span class="obj-num">02</span><p>Pensar que el orden de los pasos "no importa tanto".</p></li>
+        <li><span class="obj-num">03</span><p>Asumir que una variable tiene un solo valor para siempre.</p></li>
+        <li><span class="obj-num">04</span><p>Confundir una decisión con una repetición.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 16 — EJERCICIO PROPUESTO -->
+  <section class="slide alt" id="s16">
+    <div class="slide-inner">
+      <p class="kicker">Practica lo aprendido</p>
+      <h2>Ejercicio propuesto</h2>
+      <p class="lede">Tienes esta lista: <code style="font-family:var(--font-mono); color:var(--accent-dark);">edades = [12, 17, 8, 20, 15, 21]</code></p>
+
+      <div class="section-body">
+        <p class="body-text">Escribe un programa en Python que recorra la lista y, para cada persona, muestre si puede subir a la montaña rusa (edad ≥ 14) o si debe esperar en la zona familiar. Al final, debe mostrar también cuántas personas del grupo sí pueden subir.</p>
+
+        <div class="callout">
+          <span class="callout-label">Pista</span>
+          <p>Vas a necesitar los tres bloques de esta clase y una variable "contador".</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 17 — AUTOEVALUACION I -->
+  <section class="slide" id="s17">
+    <div class="slide-inner">
+      <p class="kicker">Cierre · Parte 1 de 2</p>
+      <h2>Autoevaluación</h2>
+      <div class="qa-list section-body" style="margin-top:30px;">
+        <div class="qa-item">
+          <p class="q"><span class="q-num">01</span><span>¿Cuál es la diferencia principal entre un algoritmo y el código?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>El algoritmo es el plan/lógica independiente del lenguaje; el código es su traducción a sintaxis ejecutable.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">02</span><span>Nombra los tres bloques universales y da un ejemplo cotidiano de cada uno (distinto a los de la clase).</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>Secuencia, decisión, repetición; cualquier ejemplo coherente es válido.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">03</span><span>¿Por qué una variable es un "casillero etiquetado" y no una caja de contenido fijo?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>El nombre permanece igual, pero el valor almacenado puede cambiar durante la ejecución.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">04</span><span>Identifica el bloque de cada línea: a) tomar temperatura_actual&nbsp;&nbsp;b) SI temperatura_actual&nbsp;&gt;&nbsp;30 ENTONCES mostrar "hace calor"&nbsp;&nbsp;c) MIENTRAS haya prendas en la canasta HACER doblar una prenda.</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>a) Secuencia, b) Decisión, c) Repetición.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">05</span><span>V/F: "Para aprender a programar es indispensable saber matemáticas avanzadas primero."</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>Falso: los fundamentos son lógicos y se explican con analogías cotidianas; las matemáticas de ML llegan mucho después en el roadmap.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 18 — AUTOEVALUACION II -->
+  <section class="slide alt" id="s18">
+    <div class="slide-inner">
+      <p class="kicker">Cierre · Parte 2 de 2</p>
+      <h2>Autoevaluación (continuación)</h2>
+      <div class="qa-list section-body" style="margin-top:30px;">
+        <div class="qa-item">
+          <p class="q"><span class="q-num">06</span><span>Explica cómo los tres bloques se relacionan con entrenar un modelo de IA, sin términos técnicos de programación.</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>El entrenamiento repite el mismo ciclo (repetición): revisa un ejemplo, compara con la respuesta correcta, se ajusta, y pasa al siguiente. En cada ejemplo también "decide" comparando probabilidades (decisión). Todo ocurre en un orden fijo (secuencia).</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">07</span><span>En el código del paraguas, ¿por qué <code style="font-family:var(--font-mono);">dia = dia + 1</code> está dentro del <code style="font-family:var(--font-mono);">else</code>?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>Porque solo se debe avanzar de día si no llovió; si llovió, <code style="font-family:var(--font-mono);">encontrado_lluvia</code> ya detiene el bucle.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">08</span><span>En el ejemplo de números pares, ¿qué línea es secuencia, cuál decisión y cuál repetición?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span><code style="font-family:var(--font-mono);">for numero in numeros:</code> repetición; <code style="font-family:var(--font-mono);">if numero % 2 == 0:</code> decisión; <code style="font-family:var(--font-mono);">contador_pares = contador_pares + 1</code> secuencia.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">09</span><span>En el guardián, el pseudocódigo usa MIENTRAS pero el Python usa for. ¿Es un error?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>No: la fila ya es una lista completa y conocida de antemano, así que Python permite expresarlo de forma más directa con for; es la misma lógica de repetición.</p>
+        </div>
+      </div>
+
+      <div class="divider-row" style="margin-top:40px;"><span class="divider-label">Verificación de dependencias</span></div>
+      <p class="body-text">Válido como punto de partida: no requiere lenguaje de programación previo, no requiere matemáticas previas, no requiere herramientas instaladas — y es prerrequisito lógico de todos los módulos siguientes del roadmap (Semana 2 en adelante).</p>
+    </div>
+  </section>
+
+  <footer class="end">
+    <span>Aprende con Gutyy IA — Semana 1 · v1.1</span>
+    <span>2026-08-28</span>
+  </footer>
+
+</main>
+
+<script>
+  (function(){
+    var sections = Array.prototype.slice.call(document.querySelectorAll('section.slide'));
+    var dots = Array.prototype.slice.call(document.querySelectorAll('.rail a'));
+    var counter = document.getElementById('counter-current');
+
+    if (!('IntersectionObserver' in window)) return;
+
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting){
+          var idx = sections.indexOf(entry.target);
+          dots.forEach(function(d){ d.classList.remove('active'); });
+          if (dots[idx]) dots[idx].classList.add('active');
+          if (counter) counter.textContent = String(idx + 1).padStart(2, '0');
+        }
+      });
+    }, { threshold: 0.55 });
+
+    sections.forEach(function(s){ io.observe(s); });
+  })();
+</script>
