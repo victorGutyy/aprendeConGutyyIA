@@ -32,6 +32,7 @@ Cada clase queda versionada (`vX.Y`) con fecha, y el [CHANGELOG.md](CHANGELOG.md
 | Semana | Tema | Versión | Material |
 |---|---|---|---|
 | 1 | ¿Qué es programar? Pensamiento computacional | v1.1 | [clase.md](semanas/semana-01-pensamiento-computacional/clase.md) · [diapositivas.html](semanas/semana-01-pensamiento-computacional/diapositivas.html) · [clase.pdf](semanas/semana-01-pensamiento-computacional/clase.pdf) |
+| 2 | Sintaxis de Python básica: variables, tipos de datos, entrada/salida | v1.0 | [clase.md](semanas/semana-02-sintaxis-python-basica/clase.md) · [diapositivas.html](semanas/semana-02-sintaxis-python-basica/diapositivas.html) · [clase.pdf](semanas/semana-02-sintaxis-python-basica/clase.pdf) |
 
 ## Guía de marca
 
