@@ -2,6 +2,13 @@
 
 Registro de cambios semana a semana. Cada clase mantiene su propio número de versión (`vX.Y`) independiente del historial de Git.
 
+## Semana 3 — Estructuras de control y funciones
+
+### v1.0 — 2026-09-07
+- Primera publicación: operadores lógicos (`and`, `or`, `not`) y decisiones compuestas, precedencia y condicionales anidados, `range()`, control fino de bucles con `break`/`continue`, funciones (`def`, parámetros, valores por defecto, `return`), alcance (*scope*) local vs. global, sección "Por qué esto importa para IA/ML", ejemplo práctico de un validador de contraseñas (pseudocódigo + Python con `break`), segundo ejemplo (refactor del promedio de notas de la Semana 2 en una función reutilizable), notas de vigencia técnica, errores comunes de principiante, ejercicio propuesto (clasificador de triángulos, sin resolver), autoevaluación de 9 preguntas, verificación de dependencias.
+- Diapositivas: 19, mismo diseño y guía de marca fijada en la Semana 1.
+- PDF generado a partir de un documento HTML con la misma guía de marca, vía Python + weasyprint.
+
 ## Semana 2 — Sintaxis de Python básica: variables, tipos de datos, entrada/salida
 
 ### v1.0 — 2026-08-31

@@ -1,0 +1,1219 @@
+<title>Estructuras de Control y Funciones</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  /* =========================================================
+     Aprende con Gutyy IA — Semana 3 (v1.0)
+     Identidad: académico-editorial, claro, un acento, mucho aire.
+     Misma guía de marca fijada en la Semana 1 — sin cambios de
+     identidad, solo aplicada al contenido nuevo.
+     ========================================================= */
+
+  :root{
+    --bg:            #FFFFFF;
+    --bg-alt:        #F5F6FA;
+    --ink:           #171A24;
+    --ink-secondary: #4B4F5E;
+    --ink-tertiary:  #8A8FA3;
+    --accent:        #3548C4;
+    --accent-dark:   #24308C;
+    --accent-tint:   #EAEDFB;
+    --border:        #E2E4EC;
+    --code-bg:       #F3F4F8;
+    --code-border:   #E3E5EE;
+    --code-ink:      #23262F;
+    --code-comment:  #9297A8;
+    --code-string:   #5B5F70;
+
+    --font-display: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-body:    "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-mono:    "IBM Plex Mono", ui-monospace, "Consolas", monospace;
+
+    color-scheme: light;
+  }
+
+  *,*::before,*::after{ box-sizing: border-box; }
+
+  html{
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+  }
+
+  body{
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior: auto; }
+    *{ animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  .grid-field{
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      linear-gradient(to right, rgba(53,72,196,0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(53,72,196,0.05) 1px, transparent 1px);
+    background-size: 48px 48px;
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent 75%);
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent 75%);
+  }
+
+  .brand-mark{
+    position: fixed;
+    top: 28px;
+    left: clamp(24px, 5vw, 64px);
+    z-index: 20;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    pointer-events: none;
+  }
+  .brand-mark strong{
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .brand-mark .dot{ color: var(--accent); }
+
+  .slide-counter{
+    position: fixed;
+    top: 28px;
+    right: clamp(24px, 5vw, 64px);
+    z-index: 20;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--ink-tertiary);
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+  .slide-counter strong{ color: var(--ink); font-weight: 600; }
+
+  .rail{
+    position: fixed;
+    right: clamp(14px, 3vw, 30px);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .rail a{
+    position: relative;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    border: 1px solid var(--border);
+    display: block;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .rail a:hover{ transform: scale(1.3); }
+  .rail a.active{
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .rail a .rail-label{
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    color: var(--ink-secondary);
+    background: var(--bg);
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+  }
+  .rail a:hover .rail-label{ opacity: 1; }
+
+  a:focus-visible,
+  .rail a:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .deck{ position: relative; z-index: 1; }
+
+  section.slide{
+    min-height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    align-items: center;
+    padding: 120px clamp(24px, 8vw, 96px) 96px;
+    border-bottom: 1px solid var(--border);
+  }
+  section.slide.alt{ background: var(--bg-alt); }
+
+  .slide-inner{
+    max-width: 880px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .kicker{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 18px;
+  }
+  .kicker::before{
+    content: "";
+    width: 18px;
+    height: 1px;
+    background: var(--accent);
+    display: inline-block;
+  }
+
+  h1,h2,h3{
+    font-family: var(--font-display);
+    color: var(--ink);
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  h2{
+    font-size: clamp(28px, 3.6vw, 40px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  .lede{
+    font-size: 19px;
+    line-height: 1.6;
+    color: var(--ink-secondary);
+    max-width: 62ch;
+    margin: 22px 0 0;
+  }
+
+  p{ line-height: 1.65; color: var(--ink-secondary); }
+  p.body-text{ font-size: 16.5px; max-width: 66ch; }
+
+  strong.term{
+    color: var(--ink);
+    font-weight: 600;
+    background: linear-gradient(to bottom, transparent 62%, var(--accent-tint) 62%);
+    padding: 0 1px;
+  }
+
+  em.term-accent{
+    font-style: normal;
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+
+  .section-body{ margin-top: 36px; }
+  .section-body > * + *{ margin-top: 20px; }
+
+  .callout{
+    border-left: 2px solid var(--accent);
+    padding: 4px 0 4px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .callout .callout-label{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .callout p{ margin: 0; color: var(--ink); font-size: 16px; }
+
+  .pull-quote{
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 600;
+    color: var(--accent-dark);
+    line-height: 1.5;
+    max-width: 48ch;
+    margin: 0;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    text-wrap: balance;
+  }
+
+  .divider-row{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 34px 0 22px;
+  }
+  .divider-row::after{
+    content:"";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .divider-row .divider-label{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    white-space: nowrap;
+  }
+
+  .code-card{
+    border: 1px solid var(--code-border);
+    background: var(--code-bg);
+    overflow: hidden;
+  }
+  .code-card .code-bar{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--code-border);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+  }
+  .code-card .code-bar .lang-tag{
+    color: var(--accent-dark);
+    font-weight: 500;
+  }
+  .code-card pre{
+    margin: 0;
+    padding: 18px 20px 20px;
+    overflow-x: auto;
+  }
+  .code-card code{
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--code-ink);
+    white-space: pre;
+  }
+  .code-card .cm{ color: var(--code-comment); font-style: italic; }
+  .code-card .kw{ color: var(--accent-dark); font-weight: 600; }
+  .code-card .st{ color: var(--code-string); }
+  .code-card .fn{ color: var(--accent); }
+
+  .code-card.compact pre{ padding: 14px 18px 16px; }
+  .code-card.compact code{ font-size: 13.5px; }
+
+  .code-result{
+    margin-top: 10px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink-secondary);
+  }
+  .code-result .result-tag{
+    color: var(--ink-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 11px;
+  }
+  .code-result .result-val{ color: var(--accent-dark); font-weight: 500; }
+
+  .blocks-grid{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 8px;
+  }
+  .blocks-grid.cols-3{ grid-template-columns: repeat(3, 1fr); }
+  .block-card{
+    background: var(--bg);
+    padding: 26px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .block-card .block-letter{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+  .block-card h3{
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .block-card p{ font-size: 14.5px; margin: 0; }
+  .block-card .block-example{
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+    font-size: 13px;
+    color: var(--ink-tertiary);
+    font-style: italic;
+  }
+
+  .progression{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 26px;
+  }
+  .progression .chip{
+    border: 1px solid var(--border);
+    background: var(--bg);
+    padding: 8px 14px;
+    font-size: 13px;
+    color: var(--ink-secondary);
+    font-family: var(--font-mono);
+  }
+  .progression .chip strong{ color: var(--ink); font-weight: 600; }
+  .progression .arrow{ color: var(--ink-tertiary); font-family: var(--font-mono); }
+
+  .locker-row{
+    display: flex;
+    gap: 18px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+  .locker{
+    border: 1px solid var(--border);
+    background: var(--bg);
+    width: 160px;
+    padding: 0;
+    overflow: hidden;
+  }
+  .locker .locker-label{
+    background: var(--ink);
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 7px 10px;
+  }
+  .locker .locker-value{
+    padding: 18px 10px;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--accent-dark);
+  }
+  .locker .locker-when{
+    padding: 6px 10px 10px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--ink-tertiary);
+  }
+  .locker-arrow{
+    align-self: center;
+    color: var(--ink-tertiary);
+    font-size: 20px;
+  }
+
+  .obj-list{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .obj-list li{
+    display: flex;
+    gap: 20px;
+    padding: 18px 0;
+    border-top: 1px solid var(--border);
+  }
+  .obj-list li:last-child{ border-bottom: 1px solid var(--border); }
+  .obj-list .obj-num{
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-size: 14px;
+    padding-top: 2px;
+    flex-shrink: 0;
+    width: 24px;
+  }
+  .obj-list p{ margin: 0; color: var(--ink); font-size: 16px; }
+
+  .two-col{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  @media (max-width: 760px){
+    .two-col{ grid-template-columns: 1fr; }
+    .blocks-grid{ grid-template-columns: 1fr; }
+    .blocks-grid.cols-3{ grid-template-columns: 1fr; }
+    section.slide{ padding-top: 96px; }
+    .type-table{ font-size: 13px; }
+  }
+
+  .qa-list{
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .qa-item{
+    padding: 18px 0;
+    border-top: 1px solid var(--border);
+  }
+  .qa-item:last-child{ border-bottom: 1px solid var(--border); }
+  .qa-item .q{
+    display: flex;
+    gap: 14px;
+    font-size: 15.5px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .qa-item .q .q-num{
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .qa-item .a{
+    margin: 8px 0 0 34px;
+    font-size: 14.5px;
+    color: var(--ink-secondary);
+  }
+  .qa-item .a .a-tag{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    margin-right: 8px;
+  }
+
+  .status-row{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--accent-dark);
+    background: var(--accent-tint);
+    border: 1px solid #DADFF6;
+    padding: 10px 16px;
+    width: fit-content;
+  }
+  .status-row .status-dot{
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .meta-list{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    margin-top: 8px;
+  }
+  .meta-list div{ font-size: 14px; color: var(--ink-secondary); }
+  .meta-list dt{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-tertiary);
+    margin: 0 0 3px;
+  }
+  .meta-list dd{ margin: 0; color: var(--ink); font-weight: 500; }
+
+  /* type table */
+  .type-table{
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 14.5px;
+  }
+  .type-table th, .type-table td{
+    text-align: left;
+    padding: 12px 14px;
+    border-top: 1px solid var(--border);
+  }
+  .type-table thead th{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    border-top: none;
+    padding-top: 0;
+  }
+  .type-table tbody tr:last-child td{ border-bottom: 1px solid var(--border); }
+  .type-table td.type-name{
+    font-family: var(--font-mono);
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+  .type-table td.type-ex{ font-family: var(--font-mono); color: var(--ink); }
+
+  .cover{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 0 clamp(24px, 8vw, 96px);
+  }
+  .cover-eyebrow{
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .cover-eyebrow::before{
+    content:"";
+    width: 34px;
+    height: 1px;
+    background: var(--accent);
+  }
+  .cover h1{
+    font-size: clamp(40px, 6.4vw, 76px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    max-width: 14ch;
+    margin-top: 26px;
+  }
+  .cover h1 em{
+    font-style: normal;
+    color: var(--accent);
+  }
+  .cover .cover-sub{
+    font-size: clamp(17px, 2vw, 20px);
+    color: var(--ink-secondary);
+    max-width: 56ch;
+    margin-top: 22px;
+    line-height: 1.6;
+  }
+  .cover-footer{
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    margin-top: 56px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .cover-footer .fmeta dt{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-tertiary);
+    margin: 0 0 4px;
+  }
+  .cover-footer .fmeta dd{
+    margin: 0;
+    font-size: 14.5px;
+    color: var(--ink);
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+  .scroll-cue{
+    position: absolute;
+    bottom: 40px;
+    left: clamp(24px, 8vw, 96px);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .scroll-cue .chevron{
+    display: inline-block;
+    animation: bob 1.8s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce){ .scroll-cue .chevron{ animation: none; } }
+  @keyframes bob{
+    0%,100%{ transform: translateY(0); }
+    50%{ transform: translateY(4px); }
+  }
+
+  footer.end{
+    padding: 64px clamp(24px, 8vw, 96px) 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-tertiary);
+    position: relative;
+    z-index: 1;
+  }
+</style>
+
+<div class="grid-field" aria-hidden="true"></div>
+
+<div class="brand-mark">
+  <strong>Aprende con Gutyy IA</strong><span class="dot">·</span><span>Semana 3</span>
+</div>
+<div class="slide-counter"><strong id="counter-current">01</strong> / 19</div>
+
+<nav class="rail" aria-label="Navegación de diapositivas">
+  <a href="#s01" data-label="Portada" class="active"><span class="rail-label">Portada</span></a>
+  <a href="#s02" data-label="Objetivos"><span class="rail-label">Objetivos</span></a>
+  <a href="#s03" data-label="and, or, not"><span class="rail-label">and, or, not</span></a>
+  <a href="#s04" data-label="Condicionales anidados"><span class="rail-label">Condicionales anidados</span></a>
+  <a href="#s05" data-label="range()"><span class="rail-label">range()</span></a>
+  <a href="#s06" data-label="break y continue"><span class="rail-label">break y continue</span></a>
+  <a href="#s07" data-label="Por qué funciones"><span class="rail-label">Por qué funciones</span></a>
+  <a href="#s08" data-label="Anatomía de una función"><span class="rail-label">Anatomía de una función</span></a>
+  <a href="#s09" data-label="Valores por defecto"><span class="rail-label">Valores por defecto</span></a>
+  <a href="#s10" data-label="Scope local y global"><span class="rail-label">Scope local y global</span></a>
+  <a href="#s11" data-label="Por qué importa para IA"><span class="rail-label">Por qué importa para IA</span></a>
+  <a href="#s12" data-label="Contraseñas: pseudocódigo"><span class="rail-label">Contraseñas: pseudocódigo</span></a>
+  <a href="#s13" data-label="Contraseñas: Python"><span class="rail-label">Contraseñas: Python</span></a>
+  <a href="#s14" data-label="Refactor: promedio"><span class="rail-label">Refactor: promedio</span></a>
+  <a href="#s15" data-label="Vigencia técnica"><span class="rail-label">Vigencia técnica</span></a>
+  <a href="#s16" data-label="Errores comunes"><span class="rail-label">Errores comunes</span></a>
+  <a href="#s17" data-label="Ejercicio propuesto"><span class="rail-label">Ejercicio propuesto</span></a>
+  <a href="#s18" data-label="Autoevaluación I"><span class="rail-label">Autoevaluación I</span></a>
+  <a href="#s19" data-label="Autoevaluación II"><span class="rail-label">Autoevaluación II</span></a>
+</nav>
+
+<main class="deck">
+
+  <!-- 01 — COVER -->
+  <section class="slide" id="s01">
+    <div class="cover">
+      <p class="cover-eyebrow">Aprende con Gutyy IA — Academia de programación, IA y Machine Learning</p>
+      <h1>Estructuras de <em>control</em> y funciones</h1>
+      <p class="cover-sub">Semana 3 del roadmap — condiciones compuestas, control fino de bucles, y el paso de copiar y pegar código a encapsularlo en funciones reutilizables.</p>
+      <div class="cover-footer">
+        <dl class="fmeta"><dt>Nivel</dt><dd>Básico</dd></dl>
+        <dl class="fmeta"><dt>Prerrequisitos</dt><dd>Semanas 1–2</dd></dl>
+        <dl class="fmeta"><dt>Versión</dt><dd>v1.0</dd></dl>
+        <dl class="fmeta"><dt>Fecha</dt><dd>2026-09-07</dd></dl>
+      </div>
+    </div>
+    <div class="scroll-cue"><span>Desplázate</span><span class="chevron">↓</span></div>
+  </section>
+
+  <!-- 02 — OBJETIVOS -->
+  <section class="slide alt" id="s02">
+    <div class="slide-inner">
+      <p class="kicker">Objetivos de aprendizaje</p>
+      <h2>Al terminar esta semana, vas a poder…</h2>
+      <ol class="obj-list section-body" style="margin-top:36px;">
+        <li><span class="obj-num">01</span><p>Combinar condiciones con <em class="term-accent">and</em>, <em class="term-accent">or</em> y <em class="term-accent">not</em> para expresar decisiones compuestas, y anidar condicionales cuando haga falta.</p></li>
+        <li><span class="obj-num">02</span><p>Usar <strong class="term">range()</strong> con <strong class="term">for</strong> y controlar el flujo de un bucle con <strong class="term">break</strong> y <strong class="term">continue</strong>.</p></li>
+        <li><span class="obj-num">03</span><p>Definir funciones propias con <strong class="term">def</strong>, parámetros con valores por defecto, y <strong class="term">return</strong>, para encapsular lógica reutilizable.</p></li>
+        <li><span class="obj-num">04</span><p>Distinguir el alcance (<em>scope</em>) local de una función del alcance global del programa, y explicar por qué esa separación evita errores.</p></li>
+        <li><span class="obj-num">05</span><p>Refactorizar código repetido de semanas anteriores en funciones reutilizables, aplicando el principio DRY.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 03 — AND, OR, NOT -->
+  <section class="slide" id="s03">
+    <div class="slide-inner">
+      <p class="kicker">01 · Decisiones compuestas</p>
+      <h2>Combinar condiciones: <code style="font-family:var(--font-mono); color:inherit;">and</code>, <code style="font-family:var(--font-mono); color:inherit;">or</code>, <code style="font-family:var(--font-mono); color:inherit;">not</code></h2>
+      <p class="lede">La regla de una alberca pública: "puedes entrar si sabes nadar Y tienes más de 8 años, O si vienes acompañado de un adulto." Eso es exactamente lógica compuesta.</p>
+
+      <table class="type-table section-body" style="margin-top:24px;">
+        <thead>
+          <tr><th>Operador</th><th>Se cumple cuando…</th><th>Analogía</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="type-name">and</td><td>ambas condiciones son verdaderas</td><td>Llave Y código para una caja fuerte de doble seguridad.</td></tr>
+          <tr><td class="type-name">or</td><td>al menos una condición es verdadera</td><td>Pagar con tarjeta O efectivo: cualquiera sirve.</td></tr>
+          <tr><td class="type-name">not</td><td>invierte el valor de una condición</td><td>Un interruptor que voltea True a False.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="section-body">
+        <div class="code-card compact">
+          <div class="code-bar"><span>alberca.py</span><span class="lang-tag">python</span></div>
+          <pre><code>sabe_nadar = <span class="kw">True</span>
+edad = 6
+acompanado_de_adulto = <span class="kw">True</span>
+
+puede_entrar = (sabe_nadar <span class="kw">and</span> edad &gt; 8) <span class="kw">or</span> acompanado_de_adulto
+<span class="fn">print</span>(puede_entrar)   <span class="cm"># True — va acompañado, aunque tenga 6 años</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 — CONDICIONALES ANIDADOS -->
+  <section class="slide alt" id="s04">
+    <div class="slide-inner">
+      <p class="kicker">Precedencia y anidamiento</p>
+      <h2>Paréntesis explícitos y condicionales anidados</h2>
+      <p class="lede"><code style="font-family:var(--font-mono); color:var(--accent-dark);">and</code> se evalúa antes que <code style="font-family:var(--font-mono); color:var(--accent-dark);">or</code>, igual que <code style="font-family:var(--font-mono); color:var(--accent-dark);">*</code> antes que <code style="font-family:var(--font-mono); color:var(--accent-dark);">+</code>. Usar paréntesis no es opcional cuando la regla combina ambos.</p>
+
+      <div class="section-body">
+        <div class="code-card compact">
+          <div class="code-bar"><span>retiro.py</span><span class="lang-tag">python</span></div>
+          <pre><code><span class="kw">if</span> tiene_cuenta:
+    <span class="kw">if</span> saldo &gt;= 100:
+        <span class="fn">print</span>(<span class="st">"Retiro autorizado"</span>)
+    <span class="kw">else</span>:
+        <span class="fn">print</span>(<span class="st">"Saldo insuficiente"</span>)
+<span class="kw">else</span>:
+    <span class="fn">print</span>(<span class="st">"Primero debes abrir una cuenta"</span>)</code></pre>
+        </div>
+        <div class="callout">
+          <span class="callout-label">Cuándo anidar en vez de usar and</span>
+          <p>Cuando cada nivel necesita <strong class="term">su propia</strong> rama de "si no" — aquí "sin cuenta" y "con cuenta pero saldo insuficiente" son mensajes distintos, no uno solo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 — RANGE() -->
+  <section class="slide" id="s05">
+    <div class="slide-inner">
+      <p class="kicker">02 · Repetición sin lista previa</p>
+      <h2><code style="font-family:var(--font-mono); color:inherit;">range()</code>: generar una secuencia de números</h2>
+      <p class="lede">La Semana 1 recorría listas ya existentes. Cuando solo hace falta repetir N veces, <code style="font-family:var(--font-mono); color:var(--accent-dark);">range()</code> genera la secuencia sin escribirla a mano.</p>
+
+      <div class="section-body">
+        <div class="code-card compact">
+          <div class="code-bar"><span>range_ejemplos.py</span><span class="lang-tag">python</span></div>
+          <pre><code><span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(5):        <span class="cm"># 0, 1, 2, 3, 4</span>
+    <span class="fn">print</span>(i)
+
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(1, 6):     <span class="cm"># 1, 2, 3, 4, 5 (sin incluir el 6)</span>
+    <span class="fn">print</span>(i)
+
+<span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(0, 10, 2):  <span class="cm"># 0, 2, 4, 6, 8 (de 2 en 2)</span>
+    <span class="fn">print</span>(i)</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 — BREAK Y CONTINUE -->
+  <section class="slide alt" id="s06">
+    <div class="slide-inner">
+      <p class="kicker">Control fino del bucle</p>
+      <h2><code style="font-family:var(--font-mono); color:inherit;">break</code> y <code style="font-family:var(--font-mono); color:inherit;">continue</code></h2>
+
+      <div class="blocks-grid cols-3" style="margin-top:8px;">
+        <div class="block-card">
+          <span class="block-letter">break</span>
+          <h3 style="font-size:16px;">Corta el bucle por completo</h3>
+          <p>Como salir de una fila antes de tiempo porque ya encontraste lo que buscabas.</p>
+        </div>
+        <div class="block-card">
+          <span class="block-letter">continue</span>
+          <h3 style="font-size:16px;">Salta solo la vuelta actual</h3>
+          <p>Como saltarte un plato que no te gusta en un bufet, sin dejar de recorrer el resto.</p>
+        </div>
+        <div class="block-card">
+          <span class="block-letter">Válido en ambos</span>
+          <h3 style="font-size:16px;">for y while</h3>
+          <p>No son exclusivos de un tipo de bucle; funcionan igual en los dos.</p>
+        </div>
+      </div>
+
+      <div class="section-body">
+        <div class="code-card compact">
+          <div class="code-bar"><span>break_continue.py</span><span class="lang-tag">python</span></div>
+          <pre><code>numeros = [4, 8, -3, 10, -7]
+
+<span class="cm"># break: buscar el primer número negativo</span>
+<span class="kw">for</span> n <span class="kw">in</span> numeros:
+    <span class="kw">if</span> n &lt; 0:
+        <span class="fn">print</span>(f<span class="st">"Encontrado: {n}"</span>)
+        <span class="kw">break</span>
+
+<span class="cm"># continue: sumar solo los positivos, sin if/else</span>
+suma = 0
+<span class="kw">for</span> n <span class="kw">in</span> numeros:
+    <span class="kw">if</span> n &lt; 0:
+        <span class="kw">continue</span>
+    suma = suma + n
+<span class="fn">print</span>(f<span class="st">"Suma de positivos: {suma}"</span>)   <span class="cm"># 22</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 — POR QUE FUNCIONES -->
+  <section class="slide" id="s07">
+    <div class="slide-inner">
+      <p class="kicker">03 · Funciones</p>
+      <h2>Dejar de copiar y pegar código</h2>
+      <p class="lede">Si quisieras el IMC de tres personas, copiarías la fórmula tres veces. Una función evita exactamente esa repetición.</p>
+
+      <div class="section-body">
+        <div class="callout">
+          <span class="callout-label">Analogía · la receta con nombre propio</span>
+          <p>En vez de reescribir "pelar, cortar y licuar" cada vez, el menú dice "Jugo de mango". Llamar a una función es pedir "Jugo de mango"; la función es la receta completa detrás del nombre.</p>
+        </div>
+        <p class="pull-quote">"Encapsular una tarea repetida en un solo lugar, con un nombre — la razón número uno de ingeniería de software para crear una función."</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 — ANATOMIA DE UNA FUNCION -->
+  <section class="slide alt" id="s08">
+    <div class="slide-inner">
+      <p class="kicker">def, parámetros, return</p>
+      <h2>Anatomía de una función</h2>
+
+      <div class="section-body">
+        <div class="code-card">
+          <div class="code-bar"><span>imc.py</span><span class="lang-tag">python</span></div>
+          <pre><code><span class="kw">def</span> <span class="fn">calcular_imc</span>(peso, estatura):
+    <span class="st">"""Calcula el IMC a partir del peso (kg) y la estatura (m)."""</span>
+    imc = peso / (estatura ** 2)
+    <span class="kw">return</span> imc
+
+imc_ana = <span class="fn">calcular_imc</span>(68, 1.72)
+imc_luis = <span class="fn">calcular_imc</span>(90, 1.80)
+
+<span class="fn">print</span>(f<span class="st">"IMC de Ana: {imc_ana:.1f}"</span>)
+<span class="fn">print</span>(f<span class="st">"IMC de Luis: {imc_luis:.1f}"</span>)</code></pre>
+        </div>
+
+        <div class="two-col" style="margin-top:8px;">
+          <div class="callout">
+            <span class="callout-label">Parámetro vs. argumento</span>
+            <p><em>Parámetro</em>: el nombre dentro de la función (<code style="font-family:var(--font-mono);">peso</code>). <em>Argumento</em>: el valor real al llamarla (<code style="font-family:var(--font-mono);">68</code>).</p>
+          </div>
+          <div class="callout" style="border-color:var(--border);">
+            <span class="callout-label" style="color:var(--ink-tertiary);">Sin return</span>
+            <p>Si una función no tiene <code style="font-family:var(--font-mono);">return</code>, devuelve <code style="font-family:var(--font-mono); color:var(--accent-dark);">None</code>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 09 — VALORES POR DEFECTO -->
+  <section class="slide" id="s09">
+    <div class="slide-inner">
+      <p class="kicker">Parámetros flexibles</p>
+      <h2>Valores por defecto</h2>
+      <p class="lede">Un parámetro puede tener un valor de respaldo, para cuando quien llama la función no quiere especificarlo cada vez.</p>
+
+      <div class="section-body">
+        <div class="code-card compact">
+          <div class="code-bar"><span>saludo.py</span><span class="lang-tag">python</span></div>
+          <pre><code><span class="kw">def</span> <span class="fn">saludar</span>(nombre, idioma=<span class="st">"español"</span>):
+    <span class="kw">if</span> idioma == <span class="st">"español"</span>:
+        <span class="fn">print</span>(f<span class="st">"Hola, {nombre}"</span>)
+    <span class="kw">elif</span> idioma == <span class="st">"inglés"</span>:
+        <span class="fn">print</span>(f<span class="st">"Hello, {nombre}"</span>)
+
+<span class="fn">saludar</span>(<span class="st">"Ana"</span>)                <span class="cm"># Hola, Ana (usa el valor por defecto)</span>
+<span class="fn">saludar</span>(<span class="st">"John"</span>, <span class="st">"inglés"</span>)     <span class="cm"># Hello, John (lo sobrescribe)</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 — SCOPE LOCAL Y GLOBAL -->
+  <section class="slide alt" id="s10">
+    <div class="slide-inner">
+      <p class="kicker">04 · Alcance (scope)</p>
+      <h2>Qué variables existen dónde</h2>
+      <p class="lede">Una variable creada dentro de una función es <em class="term-accent">local</em>: desaparece al terminar. Una creada fuera es <em class="term-accent">global</em>: visible en todo el programa.</p>
+
+      <div class="section-body">
+        <div class="code-card compact">
+          <div class="code-bar"><span>scope.py</span><span class="lang-tag">python</span></div>
+          <pre><code>contador_global = 0    <span class="cm"># variable global</span>
+
+<span class="kw">def</span> <span class="fn">procesar_pedido</span>():
+    total_local = 100   <span class="cm"># variable local</span>
+    <span class="fn">print</span>(total_local)
+
+<span class="fn">procesar_pedido</span>()       <span class="cm"># imprime 100</span>
+<span class="fn">print</span>(contador_global)  <span class="cm"># funciona: 0</span>
+<span class="fn">print</span>(total_local)      <span class="cm"># ERROR: NameError</span></code></pre>
+        </div>
+
+        <div class="callout">
+          <span class="callout-label">Analogía · el casillero, con reglas de acceso</span>
+          <p>Local es un casillero en un vestidor privado: solo esa función lo ve. Global es un casillero en el pasillo principal: todos lo ven. Esto es <strong class="term">encapsulamiento</strong>: cada función es una caja cerrada que solo se comunica por sus parámetros y su <code style="font-family:var(--font-mono);">return</code>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 — POR QUE IMPORTA PARA IA/ML -->
+  <section class="slide" id="s11">
+    <div class="slide-inner">
+      <p class="kicker">Mirando adelante · IA y Machine Learning</p>
+      <h2>Por qué esto importa para IA/ML</h2>
+      <p class="lede">Cada biblioteca de ML —pandas, scikit-learn, PyTorch— es, en el fondo, un enorme conjunto de funciones ya escritas.</p>
+
+      <div class="section-body">
+        <div class="callout">
+          <span class="callout-label">modelo.fit(datos) es exactamente esto</span>
+          <p>Le pasas argumentos, ejecuta una lógica interna que no reescribes, y te devuelve un resultado con <code style="font-family:var(--font-mono);">return</code> — igual que <code style="font-family:var(--font-mono);">calcular_imc(68, 1.72)</code> de hoy.</p>
+        </div>
+
+        <p class="body-text">Los operadores lógicos también reaparecen tal cual: un sistema de recomendación filtra candidatos con reglas como <code style="font-family:var(--font-mono); color:var(--accent-dark);">precio &lt; presupuesto and categoria == preferida</code>, la misma estructura del ejemplo de la alberca.</p>
+
+        <p class="pull-quote">"Entender parámetros, return y scope hoy es lo que te permite leer código ajeno de IA sin sentir que es magia."</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 — CONTRASEÑAS: PSEUDOCODIGO -->
+  <section class="slide alt" id="s12">
+    <div class="slide-inner">
+      <p class="kicker">05 · Ejemplo práctico</p>
+      <h2>Validador de contraseñas</h2>
+      <p class="lede">Al menos 8 caracteres, al menos un número, y que no sea "12345678".</p>
+
+      <div class="section-body">
+        <div class="code-card">
+          <div class="code-bar"><span>es_valida(contraseña)</span><span class="lang-tag">pseudocódigo</span></div>
+          <pre><code><span class="kw">FUNCION</span> es_valida(contraseña)
+  <span class="kw">SI</span> longitud de contraseña es menor a 8 <span class="kw">ENTONCES</span>
+      devolver falso
+  <span class="kw">SI</span> contraseña es igual a <span class="st">"12345678"</span> <span class="kw">ENTONCES</span>
+      devolver falso
+  tiene_numero = falso
+  <span class="kw">PARA CADA</span> caracter <span class="kw">EN</span> contraseña <span class="kw">HACER</span>
+      <span class="kw">SI</span> caracter es un dígito <span class="kw">ENTONCES</span>
+          tiene_numero = verdadero
+          <span class="kw">DETENER</span> el bucle
+  devolver tiene_numero
+<span class="kw">FIN FUNCION</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 — CONTRASEÑAS: PYTHON -->
+  <section class="slide" id="s13">
+    <div class="slide-inner">
+      <p class="kicker">05 · Ejemplo práctico</p>
+      <h2>Del pseudocódigo al código real</h2>
+
+      <div class="section-body">
+        <div class="code-card">
+          <div class="code-bar"><span>validador.py</span><span class="lang-tag">python</span></div>
+          <pre><code><span class="kw">def</span> <span class="fn">es_valida</span>(contrasena):
+    <span class="st">"""Devuelve True si cumple las reglas mínimas de seguridad."""</span>
+    <span class="kw">if</span> <span class="fn">len</span>(contrasena) &lt; 8:
+        <span class="kw">return</span> <span class="kw">False</span>
+    <span class="kw">if</span> contrasena == <span class="st">"12345678"</span>:
+        <span class="kw">return</span> <span class="kw">False</span>
+
+    tiene_numero = <span class="kw">False</span>
+    <span class="kw">for</span> caracter <span class="kw">in</span> contrasena:
+        <span class="kw">if</span> caracter.isdigit():
+            tiene_numero = <span class="kw">True</span>
+            <span class="kw">break</span>   <span class="cm"># ya encontramos un número</span>
+
+    <span class="kw">return</span> tiene_numero</code></pre>
+          <div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">contrasena9 → válida · 12345678 → inválida</span></div>
+        </div>
+
+        <div class="callout">
+          <span class="callout-label">Punto de confusión clásico</span>
+          <p>Un <code style="font-family:var(--font-mono);">return True</code> dentro del <code style="font-family:var(--font-mono);">for</code> terminaría la función entera, no solo el bucle. Se usó <code style="font-family:var(--font-mono);">break</code> a propósito porque después seguía faltando <code style="font-family:var(--font-mono);">return tiene_numero</code>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 — REFACTOR: PROMEDIO -->
+  <section class="slide alt" id="s14">
+    <div class="slide-inner">
+      <p class="kicker">06 · Segundo ejemplo</p>
+      <h2>Refactorizar el promedio de notas (Semana 2)</h2>
+      <p class="lede">Antes había que copiar el bloque if/else por cada estudiante. Ahora, un solo llamado por estudiante.</p>
+
+      <div class="section-body">
+        <div class="code-card">
+          <div class="code-bar"><span>evaluar_promedio.py</span><span class="lang-tag">python</span></div>
+          <pre><code><span class="kw">def</span> <span class="fn">evaluar_promedio</span>(notas):
+    <span class="st">"""Recibe una lista de notas y devuelve el promedio y si aprobó."""</span>
+    promedio = <span class="fn">sum</span>(notas) / <span class="fn">len</span>(notas)
+    aprobado = promedio &gt;= 6.0
+    <span class="kw">return</span> promedio, aprobado   <span class="cm"># una función puede devolver más de un valor</span>
+
+<span class="kw">for</span> nombre, notas <span class="kw">in</span> [(<span class="st">"Ana"</span>, [8.5, 7.0, 9.0]), (<span class="st">"Luis"</span>, [4.0, 5.5, 5.0])]:
+    promedio, aprobado = <span class="fn">evaluar_promedio</span>(notas)
+    estado = <span class="st">"Aprobado"</span> <span class="kw">if</span> aprobado <span class="kw">else</span> <span class="st">"Reprobado"</span>
+    <span class="fn">print</span>(f<span class="st">"{nombre}: promedio {promedio:.2f} — {estado}"</span>)</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15 — VIGENCIA TECNICA -->
+  <section class="slide" id="s15">
+    <div class="slide-inner">
+      <p class="kicker">Nota de vigencia técnica · 2026</p>
+      <h2>Núcleo estable del lenguaje, sin partes desactualizadas</h2>
+      <div class="section-body">
+        <p class="body-text"><code style="font-family:var(--font-mono);">def</code>, <code style="font-family:var(--font-mono);">return</code>, valores por defecto, <code style="font-family:var(--font-mono);">range()</code>, <code style="font-family:var(--font-mono);">break</code>/<code style="font-family:var(--font-mono);">continue</code> y el modelo de scope son estables desde hace más de una década.</p>
+        <div class="status-row">
+          <span class="status-dot"></span>
+          <span>Buena práctica moderna: documentar funciones con docstrings ("""texto""")</span>
+        </div>
+        <p class="body-text" style="max-width:60ch;">Es la convención dominante en proyectos reales de IA/ML, y las herramientas de autocompletado e IA la usan para entender tu código.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 16 — ERRORES COMUNES -->
+  <section class="slide alt" id="s16">
+    <div class="slide-inner">
+      <p class="kicker">Antes de seguir</p>
+      <h2>Errores comunes de principiante</h2>
+      <ol class="obj-list section-body" style="margin-top:36px;">
+        <li><span class="obj-num">01</span><p>Olvidar el <code style="font-family:var(--font-mono);">return</code> y esperar que la función "devuelva algo" sola — sin él, el resultado es <code style="font-family:var(--font-mono);">None</code>.</p></li>
+        <li><span class="obj-num">02</span><p>Confundir <code style="font-family:var(--font-mono);">break</code> (corta el bucle entero) con <code style="font-family:var(--font-mono);">continue</code> (salta solo esta vuelta).</p></li>
+        <li><span class="obj-num">03</span><p>Usar <code style="font-family:var(--font-mono);">or</code> cuando la intención lógica era <code style="font-family:var(--font-mono);">and</code>, o viceversa.</p></li>
+        <li><span class="obj-num">04</span><p>Intentar usar fuera de una función una variable creada dentro de ella (confundir local con global).</p></li>
+        <li><span class="obj-num">05</span><p>Escribir <code style="font-family:var(--font-mono);">range(5)</code> esperando que incluya el 5 — siempre se detiene un número antes.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 17 — EJERCICIO PROPUESTO -->
+  <section class="slide" id="s17">
+    <div class="slide-inner">
+      <p class="kicker">Practica lo aprendido</p>
+      <h2>Ejercicio propuesto: clasificar un triángulo</h2>
+      <div class="section-body">
+        <p class="body-text">Escribe <code style="font-family:var(--font-mono);">clasificar_triangulo(lado1, lado2, lado3)</code> que devuelva "Equilátero", "Isósceles" o "Escaleno" según los tres lados. Luego, con un <code style="font-family:var(--font-mono);">for</code>, pruébala con al menos cuatro conjuntos distintos de lados.</p>
+
+        <div class="callout">
+          <span class="callout-label">Pista</span>
+          <p>Vas a necesitar comparaciones, <code style="font-family:var(--font-mono);">and</code>/<code style="font-family:var(--font-mono);">or</code>, condicionales anidados o encadenados, y <code style="font-family:var(--font-mono);">return</code> — no imprimas dentro de la función, solo devuelve el texto.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 18 — AUTOEVALUACION I -->
+  <section class="slide alt" id="s18">
+    <div class="slide-inner">
+      <p class="kicker">Cierre · Parte 1 de 2</p>
+      <h2>Autoevaluación</h2>
+      <div class="qa-list section-body" style="margin-top:30px;">
+        <div class="qa-item">
+          <p class="q"><span class="q-num">01</span><span>¿Cuál es la diferencia entre <code style="font-family:var(--font-mono);">and</code> y <code style="font-family:var(--font-mono);">or</code>?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span><code style="font-family:var(--font-mono);">and</code> exige que ambas condiciones sean verdaderas; <code style="font-family:var(--font-mono);">or</code> solo exige que al menos una lo sea.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">02</span><span>¿Qué imprime <code style="font-family:var(--font-mono);">range(2, 9, 3)</code> recorrido con un <code style="font-family:var(--font-mono);">for</code>?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>2, 5, 8 — empieza en 2, suma de 3 en 3, se detiene antes de llegar o pasar 9.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">03</span><span>¿Cuál es la diferencia entre <code style="font-family:var(--font-mono);">break</code> y <code style="font-family:var(--font-mono);">continue</code>?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span><code style="font-family:var(--font-mono);">break</code> termina el bucle por completo de inmediato; <code style="font-family:var(--font-mono);">continue</code> solo se salta la vuelta actual.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">04</span><span>¿Qué es un parámetro y qué es un argumento?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>Parámetro: nombre declarado dentro de la función (<code style="font-family:var(--font-mono);">def f(x):</code>). Argumento: valor real al llamarla (<code style="font-family:var(--font-mono);">f(5)</code>, aquí 5).</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">05</span><span>¿Qué devuelve una función sin ningún <code style="font-family:var(--font-mono);">return</code>?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span><code style="font-family:var(--font-mono);">None</code>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 19 — AUTOEVALUACION II -->
+  <section class="slide" id="s19">
+    <div class="slide-inner">
+      <p class="kicker">Cierre · Parte 2 de 2</p>
+      <h2>Autoevaluación (continuación)</h2>
+      <div class="qa-list section-body" style="margin-top:30px;">
+        <div class="qa-item">
+          <p class="q"><span class="q-num">06</span><span>V/F: "Una variable creada dentro de una función puede usarse libremente fuera de ella."</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>Falso: es local, solo existe mientras la función se ejecuta; usarla afuera produce <code style="font-family:var(--font-mono);">NameError</code>.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">07</span><span>En el validador de contraseñas, ¿por qué se usó <code style="font-family:var(--font-mono);">break</code> y no <code style="font-family:var(--font-mono);">return True</code> dentro del <code style="font-family:var(--font-mono);">for</code>?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span><code style="font-family:var(--font-mono);">return</code> termina la función entera de inmediato; después del bucle todavía faltaba <code style="font-family:var(--font-mono);">return tiene_numero</code>.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">08</span><span>Reescribe con and/or: "Puedes viajar si tienes pasaporte vigente y (visa o eres ciudadano del país destino)."</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span><code style="font-family:var(--font-mono);">tiene_pasaporte_vigente and (tiene_visa or es_ciudadano)</code>.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">09</span><span>¿Por qué entender parámetros y return prepara para usar bibliotecas de ML, sin jerga de programación?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>Porque esas bibliotecas son funciones ya escritas: les pasas datos como argumentos y devuelven un resultado con <code style="font-family:var(--font-mono);">return</code>, igual que <code style="font-family:var(--font-mono);">calcular_imc(68, 1.72)</code>.</p>
+        </div>
+      </div>
+
+      <div class="divider-row" style="margin-top:40px;"><span class="divider-label">Verificación de dependencias</span></div>
+      <p class="body-text">Depende de las Semanas 1 y 2: los operadores lógicos extienden los condicionales ya vistos, <code style="font-family:var(--font-mono);">range()</code>/<code style="font-family:var(--font-mono);">break</code>/<code style="font-family:var(--font-mono);">continue</code> refinan la repetición, y las funciones reutilizan ejemplos ya resueltos (IMC, promedio). Es prerrequisito directo de la Semana 4 (estructuras de datos fundamentales).</p>
+    </div>
+  </section>
+
+  <footer class="end">
+    <span>Aprende con Gutyy IA — Semana 3 · v1.0</span>
+    <span>2026-09-07</span>
+  </footer>
+
+</main>
+
+<script>
+  (function(){
+    var sections = Array.prototype.slice.call(document.querySelectorAll('section.slide'));
+    var dots = Array.prototype.slice.call(document.querySelectorAll('.rail a'));
+    var counter = document.getElementById('counter-current');
+
+    if (!('IntersectionObserver' in window)) return;
+
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting){
+          var idx = sections.indexOf(entry.target);
+          dots.forEach(function(d){ d.classList.remove('active'); });
+          if (dots[idx]) dots[idx].classList.add('active');
+          if (counter) counter.textContent = String(idx + 1).padStart(2, '0');
+        }
+      });
+    }, { threshold: 0.55 });
+
+    sections.forEach(function(s){ io.observe(s); });
+  })();
+</script>
