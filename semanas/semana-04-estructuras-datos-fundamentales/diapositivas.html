@@ -1,0 +1,1209 @@
+<title>Estructuras de Datos Fundamentales</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  /* =========================================================
+     Aprende con Gutyy IA — Semana 4 (v1.0)
+     Identidad: académico-editorial, claro, un acento, mucho aire.
+     Misma guía de marca fijada en la Semana 1 — sin cambios de
+     identidad, solo aplicada al contenido nuevo.
+     ========================================================= */
+
+  :root{
+    --bg:            #FFFFFF;
+    --bg-alt:        #F5F6FA;
+    --ink:           #171A24;
+    --ink-secondary: #4B4F5E;
+    --ink-tertiary:  #8A8FA3;
+    --accent:        #3548C4;
+    --accent-dark:   #24308C;
+    --accent-tint:   #EAEDFB;
+    --border:        #E2E4EC;
+    --code-bg:       #F3F4F8;
+    --code-border:   #E3E5EE;
+    --code-ink:      #23262F;
+    --code-comment:  #9297A8;
+    --code-string:   #5B5F70;
+
+    --font-display: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-body:    "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-mono:    "IBM Plex Mono", ui-monospace, "Consolas", monospace;
+
+    color-scheme: light;
+  }
+
+  *,*::before,*::after{ box-sizing: border-box; }
+
+  html{
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+  }
+
+  body{
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior: auto; }
+    *{ animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  .grid-field{
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      linear-gradient(to right, rgba(53,72,196,0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(53,72,196,0.05) 1px, transparent 1px);
+    background-size: 48px 48px;
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent 75%);
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent 75%);
+  }
+
+  .brand-mark{
+    position: fixed;
+    top: 28px;
+    left: clamp(24px, 5vw, 64px);
+    z-index: 20;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    pointer-events: none;
+  }
+  .brand-mark strong{
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .brand-mark .dot{ color: var(--accent); }
+
+  .slide-counter{
+    position: fixed;
+    top: 28px;
+    right: clamp(24px, 5vw, 64px);
+    z-index: 20;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--ink-tertiary);
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+  .slide-counter strong{ color: var(--ink); font-weight: 600; }
+
+  .rail{
+    position: fixed;
+    right: clamp(14px, 3vw, 30px);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .rail a{
+    position: relative;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    border: 1px solid var(--border);
+    display: block;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .rail a:hover{ transform: scale(1.3); }
+  .rail a.active{
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .rail a .rail-label{
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    color: var(--ink-secondary);
+    background: var(--bg);
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+  }
+  .rail a:hover .rail-label{ opacity: 1; }
+
+  a:focus-visible,
+  .rail a:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .deck{ position: relative; z-index: 1; }
+
+  section.slide{
+    min-height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    align-items: center;
+    padding: 120px clamp(24px, 8vw, 96px) 96px;
+    border-bottom: 1px solid var(--border);
+  }
+  section.slide.alt{ background: var(--bg-alt); }
+
+  .slide-inner{
+    max-width: 880px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .kicker{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 18px;
+  }
+  .kicker::before{
+    content: "";
+    width: 18px;
+    height: 1px;
+    background: var(--accent);
+    display: inline-block;
+  }
+
+  h1,h2,h3{
+    font-family: var(--font-display);
+    color: var(--ink);
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  h2{
+    font-size: clamp(28px, 3.6vw, 40px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  .lede{
+    font-size: 19px;
+    line-height: 1.6;
+    color: var(--ink-secondary);
+    max-width: 62ch;
+    margin: 22px 0 0;
+  }
+
+  p{ line-height: 1.65; color: var(--ink-secondary); }
+  p.body-text{ font-size: 16.5px; max-width: 66ch; }
+
+  strong.term{
+    color: var(--ink);
+    font-weight: 600;
+    background: linear-gradient(to bottom, transparent 62%, var(--accent-tint) 62%);
+    padding: 0 1px;
+  }
+
+  em.term-accent{
+    font-style: normal;
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+
+  .section-body{ margin-top: 36px; }
+  .section-body > * + *{ margin-top: 20px; }
+
+  .callout{
+    border-left: 2px solid var(--accent);
+    padding: 4px 0 4px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .callout .callout-label{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .callout p{ margin: 0; color: var(--ink); font-size: 16px; }
+
+  .pull-quote{
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 600;
+    color: var(--accent-dark);
+    line-height: 1.5;
+    max-width: 48ch;
+    margin: 0;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    text-wrap: balance;
+  }
+
+  .divider-row{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 34px 0 22px;
+  }
+  .divider-row::after{
+    content:"";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .divider-row .divider-label{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    white-space: nowrap;
+  }
+
+  .code-card{
+    border: 1px solid var(--code-border);
+    background: var(--code-bg);
+    overflow: hidden;
+  }
+  .code-card .code-bar{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--code-border);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+  }
+  .code-card .code-bar .lang-tag{
+    color: var(--accent-dark);
+    font-weight: 500;
+  }
+  .code-card pre{
+    margin: 0;
+    padding: 18px 20px 20px;
+    overflow-x: auto;
+  }
+  .code-card code{
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--code-ink);
+    white-space: pre;
+  }
+  .code-card .cm{ color: var(--code-comment); font-style: italic; }
+  .code-card .kw{ color: var(--accent-dark); font-weight: 600; }
+  .code-card .st{ color: var(--code-string); }
+  .code-card .fn{ color: var(--accent); }
+
+  .code-card.compact pre{ padding: 14px 18px 16px; }
+  .code-card.compact code{ font-size: 13.5px; }
+
+  .code-result{
+    margin-top: 10px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink-secondary);
+  }
+  .code-result .result-tag{
+    color: var(--ink-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 11px;
+  }
+  .code-result .result-val{ color: var(--accent-dark); font-weight: 500; }
+
+  .blocks-grid{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 8px;
+  }
+  .blocks-grid.cols-3{ grid-template-columns: repeat(3, 1fr); }
+  .block-card{
+    background: var(--bg);
+    padding: 26px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .block-card .block-letter{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+  .block-card h3{
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .block-card p{ font-size: 14.5px; margin: 0; }
+  .block-card .block-example{
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+    font-size: 13px;
+    color: var(--ink-tertiary);
+    font-style: italic;
+  }
+
+  .progression{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 26px;
+  }
+  .progression .chip{
+    border: 1px solid var(--border);
+    background: var(--bg);
+    padding: 8px 14px;
+    font-size: 13px;
+    color: var(--ink-secondary);
+    font-family: var(--font-mono);
+  }
+  .progression .chip strong{ color: var(--ink); font-weight: 600; }
+  .progression .arrow{ color: var(--ink-tertiary); font-family: var(--font-mono); }
+
+  .obj-list{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .obj-list li{
+    display: flex;
+    gap: 20px;
+    padding: 18px 0;
+    border-top: 1px solid var(--border);
+  }
+  .obj-list li:last-child{ border-bottom: 1px solid var(--border); }
+  .obj-list .obj-num{
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-size: 14px;
+    padding-top: 2px;
+    flex-shrink: 0;
+    width: 24px;
+  }
+  .obj-list p{ margin: 0; color: var(--ink); font-size: 16px; }
+
+  .two-col{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  @media (max-width: 760px){
+    .two-col{ grid-template-columns: 1fr; }
+    .blocks-grid{ grid-template-columns: 1fr; }
+    .blocks-grid.cols-3{ grid-template-columns: 1fr; }
+    section.slide{ padding-top: 96px; }
+    .type-table{ font-size: 13px; }
+  }
+
+  .qa-list{
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .qa-item{
+    padding: 18px 0;
+    border-top: 1px solid var(--border);
+  }
+  .qa-item:last-child{ border-bottom: 1px solid var(--border); }
+  .qa-item .q{
+    display: flex;
+    gap: 14px;
+    font-size: 15.5px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .qa-item .q .q-num{
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .qa-item .a{
+    margin: 8px 0 0 34px;
+    font-size: 14.5px;
+    color: var(--ink-secondary);
+  }
+  .qa-item .a .a-tag{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    margin-right: 8px;
+  }
+
+  .status-row{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--accent-dark);
+    background: var(--accent-tint);
+    border: 1px solid #DADFF6;
+    padding: 10px 16px;
+    width: fit-content;
+  }
+  .status-row .status-dot{
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .meta-list{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    margin-top: 8px;
+  }
+  .meta-list div{ font-size: 14px; color: var(--ink-secondary); }
+  .meta-list dt{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-tertiary);
+    margin: 0 0 3px;
+  }
+  .meta-list dd{ margin: 0; color: var(--ink); font-weight: 500; }
+
+  /* type table */
+  .type-table{
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 14.5px;
+  }
+  .type-table th, .type-table td{
+    text-align: left;
+    padding: 12px 14px;
+    border-top: 1px solid var(--border);
+  }
+  .type-table thead th{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    border-top: none;
+    padding-top: 0;
+  }
+  .type-table tbody tr:last-child td{ border-bottom: 1px solid var(--border); }
+  .type-table td.type-name{
+    font-family: var(--font-mono);
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+  .type-table td.type-ex{ font-family: var(--font-mono); color: var(--ink); }
+
+  .cover{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 0 clamp(24px, 8vw, 96px);
+  }
+  .cover-eyebrow{
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .cover-eyebrow::before{
+    content:"";
+    width: 34px;
+    height: 1px;
+    background: var(--accent);
+  }
+  .cover h1{
+    font-size: clamp(40px, 6.4vw, 76px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    max-width: 14ch;
+    margin-top: 26px;
+  }
+  .cover h1 em{
+    font-style: normal;
+    color: var(--accent);
+  }
+  .cover .cover-sub{
+    font-size: clamp(17px, 2vw, 20px);
+    color: var(--ink-secondary);
+    max-width: 56ch;
+    margin-top: 22px;
+    line-height: 1.6;
+  }
+  .cover-footer{
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    margin-top: 56px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .cover-footer .fmeta dt{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-tertiary);
+    margin: 0 0 4px;
+  }
+  .cover-footer .fmeta dd{
+    margin: 0;
+    font-size: 14.5px;
+    color: var(--ink);
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+  .scroll-cue{
+    position: absolute;
+    bottom: 40px;
+    left: clamp(24px, 8vw, 96px);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .scroll-cue .chevron{
+    display: inline-block;
+    animation: bob 1.8s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce){ .scroll-cue .chevron{ animation: none; } }
+  @keyframes bob{
+    0%,100%{ transform: translateY(0); }
+    50%{ transform: translateY(4px); }
+  }
+
+  footer.end{
+    padding: 64px clamp(24px, 8vw, 96px) 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-tertiary);
+    position: relative;
+    z-index: 1;
+  }
+</style>
+
+<div class="grid-field" aria-hidden="true"></div>
+
+<div class="brand-mark">
+  <strong>Aprende con Gutyy IA</strong><span class="dot">·</span><span>Semana 4</span>
+</div>
+<div class="slide-counter"><strong id="counter-current">01</strong> / 21</div>
+
+<nav class="rail" aria-label="Navegación de diapositivas">
+  <a href="#s01" data-label="Portada" class="active"><span class="rail-label">Portada</span></a>
+  <a href="#s02" data-label="Objetivos"><span class="rail-label">Objetivos</span></a>
+  <a href="#s03" data-label="Listas: índices y slicing"><span class="rail-label">Listas: índices y slicing</span></a>
+  <a href="#s04" data-label="Métodos de listas"><span class="rail-label">Métodos de listas</span></a>
+  <a href="#s05" data-label="List comprehensions"><span class="rail-label">List comprehensions</span></a>
+  <a href="#s06" data-label="Diccionarios"><span class="rail-label">Diccionarios</span></a>
+  <a href="#s07" data-label="get() e items()"><span class="rail-label">get() e items()</span></a>
+  <a href="#s08" data-label="Tuplas: inmutabilidad"><span class="rail-label">Tuplas: inmutabilidad</span></a>
+  <a href="#s09" data-label="Tuple unpacking"><span class="rail-label">Tuple unpacking</span></a>
+  <a href="#s10" data-label="Conjuntos"><span class="rail-label">Conjuntos</span></a>
+  <a href="#s11" data-label="Operaciones de conjuntos"><span class="rail-label">Operaciones de conjuntos</span></a>
+  <a href="#s12" data-label="Elegir la estructura"><span class="rail-label">Elegir la estructura</span></a>
+  <a href="#s13" data-label="Por qué importa para IA"><span class="rail-label">Por qué importa para IA</span></a>
+  <a href="#s14" data-label="Carrito: pseudocódigo"><span class="rail-label">Carrito: pseudocódigo</span></a>
+  <a href="#s15" data-label="Carrito: Python"><span class="rail-label">Carrito: Python</span></a>
+  <a href="#s16" data-label="Agenda de contactos"><span class="rail-label">Agenda de contactos</span></a>
+  <a href="#s17" data-label="Vigencia técnica"><span class="rail-label">Vigencia técnica</span></a>
+  <a href="#s18" data-label="Errores comunes"><span class="rail-label">Errores comunes</span></a>
+  <a href="#s19" data-label="Ejercicio propuesto"><span class="rail-label">Ejercicio propuesto</span></a>
+  <a href="#s20" data-label="Autoevaluación I"><span class="rail-label">Autoevaluación I</span></a>
+  <a href="#s21" data-label="Autoevaluación II"><span class="rail-label">Autoevaluación II</span></a>
+</nav>
+
+<main class="deck">
+
+  <!-- 01 — COVER -->
+  <section class="slide" id="s01">
+    <div class="cover">
+      <p class="cover-eyebrow">Aprende con Gutyy IA — Academia de programación, IA y Machine Learning</p>
+      <h1>Estructuras de <em>datos</em> fundamentales</h1>
+      <p class="cover-sub">Semana 4 del roadmap — listas, diccionarios, tuplas y conjuntos: las cuatro formas de organizar datos que vas a usar el resto del curso.</p>
+      <div class="cover-footer">
+        <dl class="fmeta"><dt>Nivel</dt><dd>Básico</dd></dl>
+        <dl class="fmeta"><dt>Prerrequisitos</dt><dd>Semanas 1–3</dd></dl>
+        <dl class="fmeta"><dt>Versión</dt><dd>v1.0</dd></dl>
+        <dl class="fmeta"><dt>Fecha</dt><dd>2026-09-14</dd></dl>
+      </div>
+    </div>
+    <div class="scroll-cue"><span>Desplázate</span><span class="chevron">↓</span></div>
+  </section>
+
+  <!-- 02 — OBJETIVOS -->
+  <section class="slide alt" id="s02">
+    <div class="slide-inner">
+      <p class="kicker">Objetivos de aprendizaje</p>
+      <h2>Al terminar esta semana, vas a poder…</h2>
+      <ol class="obj-list section-body" style="margin-top:36px;">
+        <li><span class="obj-num">01</span><p>Crear, indexar y modificar <strong class="term">listas</strong>, con índices positivos/negativos, <em class="term-accent">slicing</em> y métodos como <strong class="term">append()</strong> y <strong class="term">sort()</strong>.</p></li>
+        <li><span class="obj-num">02</span><p>Crear y recorrer <strong class="term">diccionarios</strong> como pares clave-valor, usando <strong class="term">get()</strong> para evitar errores.</p></li>
+        <li><span class="obj-num">03</span><p>Explicar por qué las <strong class="term">tuplas</strong> son inmutables, y usar el desempaquetado (<em class="term-accent">tuple unpacking</em>).</p></li>
+        <li><span class="obj-num">04</span><p>Crear <strong class="term">conjuntos</strong> para eliminar duplicados y aplicar unión, intersección y diferencia.</p></li>
+        <li><span class="obj-num">05</span><p>Elegir la estructura de datos correcta según orden, duplicados, mutabilidad y tipo de acceso.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 03 — LISTAS: INDICES Y SLICING -->
+  <section class="slide" id="s03">
+    <div class="slide-inner">
+      <p class="kicker">01 · Listas</p>
+      <h2>La estructura que ya usabas, ahora a fondo</h2>
+      <p class="lede">Una lista es una fila numerada de casilleros: cada valor tiene una posición (<em class="term-accent">índice</em>), empezando en 0.</p>
+
+      <div class="section-body">
+        <div class="code-card compact">
+          <div class="code-bar"><span>indices.py</span><span class="lang-tag">python</span></div>
+          <pre><code>frutas = [<span class="st">"manzana"</span>, <span class="st">"pera"</span>, <span class="st">"uva"</span>]
+
+<span class="fn">print</span>(frutas[0])    <span class="cm"># manzana — índice 0</span>
+<span class="fn">print</span>(frutas[-1])   <span class="cm"># uva — último elemento</span>
+<span class="fn">print</span>(frutas[1:3])  <span class="cm"># ['pera', 'uva'] — slicing</span></code></pre>
+        </div>
+        <div class="callout">
+          <span class="callout-label">Analogía · el tren con vagones numerados</span>
+          <p>Cada vagón tiene un número desde la locomotora (<code style="font-family:var(--font-mono);">0, 1, 2…</code>), pero también se cuenta desde el final (<code style="font-family:var(--font-mono);">-1</code> es el último). El slicing es "del vagón 1 al 2, sin incluir el 3" — igual que <code style="font-family:var(--font-mono);">range()</code> de la Semana 3.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 — METODOS DE LISTAS -->
+  <section class="slide alt" id="s04">
+    <div class="slide-inner">
+      <p class="kicker">Modificar una lista</p>
+      <h2>Los métodos más usados</h2>
+
+      <table class="type-table section-body" style="margin-top:24px;">
+        <thead>
+          <tr><th>Método</th><th>Qué hace</th><th>Analogía</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="type-name">.append(x)</td><td>agrega x al final</td><td>Subir un vagón nuevo al final del tren.</td></tr>
+          <tr><td class="type-name">.insert(i, x)</td><td>inserta x en la posición i</td><td>Meter un vagón entre dos existentes.</td></tr>
+          <tr><td class="type-name">.remove(x)</td><td>quita la primera aparición de x</td><td>Desenganchar el primer vagón con ese nombre.</td></tr>
+          <tr><td class="type-name">.pop(i)</td><td>quita y devuelve el elemento en i</td><td>Desenganchar un vagón y quedarte con él.</td></tr>
+          <tr><td class="type-name">.sort()</td><td>reordena de menor a mayor, in-place</td><td>Reordenar los vagones por tamaño.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="section-body">
+        <div class="callout">
+          <span class="callout-label">Punto de confusión clásico</span>
+          <p><code style="font-family:var(--font-mono);">.sort()</code> modifica la lista original y devuelve <code style="font-family:var(--font-mono); color:var(--accent-dark);">None</code>. Para conservar el original y obtener una lista nueva ordenada, se usa <code style="font-family:var(--font-mono);">sorted(lista)</code>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 — LIST COMPREHENSIONS -->
+  <section class="slide" id="s05">
+    <div class="slide-inner">
+      <p class="kicker">Construir listas en una línea</p>
+      <h2>List comprehensions</h2>
+      <p class="lede">El mismo <code style="font-family:var(--font-mono); color:var(--accent-dark);">for</code> + <code style="font-family:var(--font-mono); color:var(--accent-dark);">if</code> de siempre, expresado en una sola línea.</p>
+
+      <div class="section-body">
+        <div class="code-card">
+          <div class="code-bar"><span>comprehension.py</span><span class="lang-tag">python</span></div>
+          <pre><code>numeros = [4, 8, -3, 10, -7]
+
+<span class="cm"># Con for tradicional (Semana 3):</span>
+positivos = []
+<span class="kw">for</span> n <span class="kw">in</span> numeros:
+    <span class="kw">if</span> n &gt; 0:
+        positivos.append(n)
+
+<span class="cm"># La misma idea como list comprehension:</span>
+positivos = [n <span class="kw">for</span> n <span class="kw">in</span> numeros <span class="kw">if</span> n &gt; 0]
+<span class="fn">print</span>(positivos)   <span class="cm"># [4, 8, 10]</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 — DICCIONARIOS -->
+  <section class="slide alt" id="s06">
+    <div class="slide-inner">
+      <p class="kicker">02 · Diccionarios</p>
+      <h2>Buscar por nombre, no por posición</h2>
+      <p class="lede">Un diccionario es una colección de pares <em class="term-accent">clave: valor</em> — se busca por nombre, no por posición.</p>
+
+      <div class="section-body">
+        <div class="callout">
+          <span class="callout-label">Analogía · la agenda de contactos</span>
+          <p>No buscas a alguien por "la persona número 47" — buscas por su nombre (la clave) y el teléfono aparece (el valor).</p>
+        </div>
+        <div class="code-card compact">
+          <div class="code-bar"><span>estudiante.py</span><span class="lang-tag">python</span></div>
+          <pre><code>estudiante = {
+    <span class="st">"nombre"</span>: <span class="st">"Ana"</span>,
+    <span class="st">"edad"</span>: 21,
+    <span class="st">"ciudad"</span>: <span class="st">"Bogotá"</span>,
+}
+
+<span class="fn">print</span>(estudiante[<span class="st">"nombre"</span>])   <span class="cm"># Ana</span>
+estudiante[<span class="st">"edad"</span>] = 22        <span class="cm"># actualiza un valor existente</span>
+estudiante[<span class="st">"carrera"</span>] = <span class="st">"Ingeniería"</span>   <span class="cm"># agrega una clave nueva</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 — GET() E ITEMS() -->
+  <section class="slide" id="s07">
+    <div class="slide-inner">
+      <p class="kicker">Acceso seguro y recorrido</p>
+      <h2><code style="font-family:var(--font-mono); color:inherit;">.get()</code>, <code style="font-family:var(--font-mono); color:inherit;">.items()</code>, <code style="font-family:var(--font-mono); color:inherit;">.keys()</code></h2>
+      <p class="lede">Acceder con <code style="font-family:var(--font-mono); color:var(--accent-dark);">[]</code> a una clave inexistente produce <code style="font-family:var(--font-mono); color:var(--accent-dark);">KeyError</code>. <code style="font-family:var(--font-mono); color:var(--accent-dark);">.get()</code> nunca falla.</p>
+
+      <div class="section-body">
+        <div class="code-card compact">
+          <div class="code-bar"><span>get_items.py</span><span class="lang-tag">python</span></div>
+          <pre><code><span class="fn">print</span>(estudiante.get(<span class="st">"telefono"</span>))              <span class="cm"># None — no existe, no falla</span>
+<span class="fn">print</span>(estudiante.get(<span class="st">"telefono"</span>, <span class="st">"sin dato"</span>))  <span class="cm"># "sin dato"</span>
+
+<span class="kw">for</span> clave, valor <span class="kw">in</span> estudiante.items():
+    <span class="fn">print</span>(f<span class="st">"{clave}: {valor}"</span>)</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 — TUPLAS: INMUTABILIDAD -->
+  <section class="slide alt" id="s08">
+    <div class="slide-inner">
+      <p class="kicker">03 · Tuplas</p>
+      <h2>Cuando los datos no deben cambiar</h2>
+      <p class="lede">Se escriben con <code style="font-family:var(--font-mono); color:var(--accent-dark);">()</code> en vez de <code style="font-family:var(--font-mono); color:var(--accent-dark);">[]</code>, y son <em class="term-accent">inmutables</em>: una vez creadas, no cambian.</p>
+
+      <div class="section-body">
+        <div class="code-card compact">
+          <div class="code-bar"><span>tupla.py</span><span class="lang-tag">python</span></div>
+          <pre><code>coordenada = (4.7110, -74.0721)   <span class="cm"># latitud, longitud</span>
+<span class="fn">print</span>(coordenada[0])               <span class="cm"># 4.711</span>
+
+coordenada[0] = 0   <span class="cm"># ERROR: TypeError — no se puede modificar</span></code></pre>
+        </div>
+        <div class="callout">
+          <span class="callout-label">Analogía · la fecha de nacimiento</span>
+          <p>Una lista es una lista de tareas: se espera que cambie. Una tupla es como una fecha de nacimiento: un dato que, por naturaleza, no debería cambiar nunca.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 09 — TUPLE UNPACKING -->
+  <section class="slide" id="s09">
+    <div class="slide-inner">
+      <p class="kicker">Conectando con la Semana 3</p>
+      <h2>Tuple unpacking: ya lo usabas sin saberlo</h2>
+      <p class="lede"><code style="font-family:var(--font-mono); color:var(--accent-dark);">return promedio, aprobado</code> de la Semana 3 construye literalmente una tupla.</p>
+
+      <div class="section-body">
+        <div class="code-card">
+          <div class="code-bar"><span>unpacking.py</span><span class="lang-tag">python</span></div>
+          <pre><code><span class="kw">def</span> <span class="fn">evaluar_promedio</span>(notas):
+    promedio = <span class="fn">sum</span>(notas) / <span class="fn">len</span>(notas)
+    aprobado = promedio &gt;= 6.0
+    <span class="kw">return</span> promedio, aprobado   <span class="cm"># construye la tupla</span>
+
+resultado = <span class="fn">evaluar_promedio</span>([8.5, 7.0, 9.0])
+<span class="fn">print</span>(<span class="fn">type</span>(resultado))    <span class="cm"># &lt;class 'tuple'&gt;</span>
+
+promedio, aprobado = resultado   <span class="cm"># desempaquetado</span>
+
+a, b = 1, 2
+a, b = b, a       <span class="cm"># intercambio directo, sin variable auxiliar</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 — CONJUNTOS -->
+  <section class="slide alt" id="s10">
+    <div class="slide-inner">
+      <p class="kicker">04 · Conjuntos</p>
+      <h2>Sin duplicados, sin orden garantizado</h2>
+      <p class="lede">Un <em class="term-accent">set</em> guarda valores únicos — agregar un valor repetido simplemente no hace nada.</p>
+
+      <div class="section-body">
+        <div class="callout">
+          <span class="callout-label">Analogía · la lista de invitados</span>
+          <p>Si alguien anota el mismo nombre dos veces, en la lista real esa persona cuenta una sola vez. Un conjunto hace esa limpieza automáticamente.</p>
+        </div>
+        <div class="code-card compact">
+          <div class="code-bar"><span>duplicados.py</span><span class="lang-tag">python</span></div>
+          <pre><code>colores = [<span class="st">"rojo"</span>, <span class="st">"azul"</span>, <span class="st">"rojo"</span>, <span class="st">"verde"</span>, <span class="st">"azul"</span>]
+unicos = <span class="fn">set</span>(colores)
+<span class="fn">print</span>(unicos)          <span class="cm"># {'rojo', 'azul', 'verde'}</span>
+<span class="fn">print</span>(<span class="fn">len</span>(unicos))     <span class="cm"># 3</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 — OPERACIONES DE CONJUNTOS -->
+  <section class="slide" id="s11">
+    <div class="slide-inner">
+      <p class="kicker">Unión, intersección, diferencia</p>
+      <h2>Operaciones de conjuntos</h2>
+
+      <div class="blocks-grid cols-3" style="margin-top:8px;">
+        <div class="block-card">
+          <span class="block-letter">|</span>
+          <h3 style="font-size:16px;">Unión</h3>
+          <p>Todos los elementos de ambos conjuntos, sin repetir.</p>
+        </div>
+        <div class="block-card">
+          <span class="block-letter">&amp;</span>
+          <h3 style="font-size:16px;">Intersección</h3>
+          <p>Solo los elementos que están en ambos a la vez.</p>
+        </div>
+        <div class="block-card">
+          <span class="block-letter">-</span>
+          <h3 style="font-size:16px;">Diferencia</h3>
+          <p>Elementos que están en uno pero no en el otro.</p>
+        </div>
+      </div>
+
+      <div class="section-body">
+        <div class="code-card compact">
+          <div class="code-bar"><span>conjuntos.py</span><span class="lang-tag">python</span></div>
+          <pre><code>salon_a = {<span class="st">"Ana"</span>, <span class="st">"Luis"</span>, <span class="st">"Marta"</span>}
+salon_b = {<span class="st">"Marta"</span>, <span class="st">"Pedro"</span>, <span class="st">"Ana"</span>}
+
+<span class="fn">print</span>(salon_a | salon_b)   <span class="cm"># unión: todos, sin repetir</span>
+<span class="fn">print</span>(salon_a &amp; salon_b)   <span class="cm"># intersección: {'Ana', 'Marta'}</span>
+<span class="fn">print</span>(salon_a - salon_b)   <span class="cm"># diferencia: {'Luis'}</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 — ELEGIR LA ESTRUCTURA -->
+  <section class="slide alt" id="s12">
+    <div class="slide-inner">
+      <p class="kicker">05 · Decidir con criterio</p>
+      <h2>Elegir la estructura correcta</h2>
+
+      <table class="type-table section-body" style="margin-top:24px;">
+        <thead>
+          <tr><th>Estructura</th><th>¿Ordenada?</th><th>¿Duplicados?</th><th>¿Mutable?</th><th>Acceso por…</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="type-name">list</td><td>Sí</td><td>Sí</td><td>Sí</td><td>posición</td></tr>
+          <tr><td class="type-name">dict</td><td>Sí (inserción)</td><td>Claves no</td><td>Sí</td><td>clave</td></tr>
+          <tr><td class="type-name">tuple</td><td>Sí</td><td>Sí</td><td>No</td><td>posición</td></tr>
+          <tr><td class="type-name">set</td><td>No</td><td>No</td><td>Sí</td><td>pertenencia</td></tr>
+        </tbody>
+      </table>
+
+      <p class="pull-quote section-body">"¿Buscas por clave? dict. ¿Orden y repeticiones que pueden cambiar? list. ¿Datos que van juntos y no cambian? tuple. ¿Solo presencia, sin repetidos? set."</p>
+    </div>
+  </section>
+
+  <!-- 13 — POR QUE IMPORTA PARA IA/ML -->
+  <section class="slide" id="s13">
+    <div class="slide-inner">
+      <p class="kicker">Mirando adelante · IA y Machine Learning</p>
+      <h2>Por qué esto importa para IA/ML</h2>
+
+      <div class="section-body">
+        <div class="callout">
+          <span class="callout-label">Un DataFrame de pandas es esto</span>
+          <p>Conceptualmente, un diccionario donde cada clave es una columna y cada valor es la lista de datos de esa columna: <code style="font-family:var(--font-mono);">{"nombre": [...], "edad": [...]}</code>.</p>
+        </div>
+        <p class="body-text">Un <em class="term-accent">batch</em> de entrenamiento suele ser una lista de tuplas <code style="font-family:var(--font-mono); color:var(--accent-dark);">(entrada, etiqueta)</code>. El vocabulario de un modelo de lenguaje se construye pasando el texto por un <code style="font-family:var(--font-mono); color:var(--accent-dark);">set</code> para quedarse solo con palabras únicas. Las coordenadas de un embedding se manejan como posiciones fijas, nunca como algo que se reordena a mitad de un cálculo.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 — CARRITO: PSEUDOCODIGO -->
+  <section class="slide alt" id="s14">
+    <div class="slide-inner">
+      <p class="kicker">06 · Ejemplo práctico</p>
+      <h2>Analizador de un carrito de compras</h2>
+      <p class="lede">Total a pagar, producto más caro, y categorías distintas presentes en la compra.</p>
+
+      <div class="section-body">
+        <div class="code-card">
+          <div class="code-bar"><span>carrito</span><span class="lang-tag">pseudocódigo</span></div>
+          <pre><code>carrito = lista de tuplas (nombre, precio, categoria)
+
+total = 0
+<span class="kw">PARA CADA</span> producto <span class="kw">EN</span> carrito <span class="kw">HACER</span>
+    total = total + precio del producto
+
+producto_mas_caro = el producto con el precio máximo del carrito
+
+categorias = conjunto vacío
+<span class="kw">PARA CADA</span> producto <span class="kw">EN</span> carrito <span class="kw">HACER</span>
+    agregar categoria del producto al conjunto de categorias
+
+<span class="kw">MOSTRAR</span> total, producto_mas_caro, categorias</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15 — CARRITO: PYTHON -->
+  <section class="slide" id="s15">
+    <div class="slide-inner">
+      <p class="kicker">06 · Ejemplo práctico</p>
+      <h2>Del pseudocódigo al código real</h2>
+
+      <div class="section-body">
+        <div class="code-card">
+          <div class="code-bar"><span>carrito.py</span><span class="lang-tag">python</span></div>
+          <pre><code>carrito = [
+    (<span class="st">"laptop"</span>, 3200000, <span class="st">"tecnología"</span>),
+    (<span class="st">"mouse"</span>, 45000, <span class="st">"tecnología"</span>),
+    (<span class="st">"cuaderno"</span>, 8000, <span class="st">"papelería"</span>),
+    (<span class="st">"audífonos"</span>, 120000, <span class="st">"tecnología"</span>),
+]
+
+total = 0
+<span class="kw">for</span> nombre, precio, categoria <span class="kw">in</span> carrito:   <span class="cm"># tuple unpacking</span>
+    total = total + precio
+
+producto_mas_caro = <span class="fn">max</span>(carrito, key=<span class="kw">lambda</span> p: p[1])
+categorias = {categoria <span class="kw">for</span> _, _, categoria <span class="kw">in</span> carrito}
+
+<span class="fn">print</span>(f<span class="st">"Total: ${total:,}"</span>)
+<span class="fn">print</span>(f<span class="st">"Más caro: {producto_mas_caro[0]}"</span>)</code></pre>
+          <div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">Total: $3,373,000 · Más caro: laptop</span></div>
+        </div>
+
+        <div class="callout">
+          <span class="callout-label">Punto de confusión clásico</span>
+          <p><code style="font-family:var(--font-mono);">_</code> no es magia especial — es solo una variable normal, usada por convención cuando su valor no se va a usar.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 16 — AGENDA DE CONTACTOS -->
+  <section class="slide alt" id="s16">
+    <div class="slide-inner">
+      <p class="kicker">07 · Segundo ejemplo</p>
+      <h2>Agenda de contactos: diccionario de diccionarios</h2>
+
+      <div class="section-body">
+        <div class="code-card">
+          <div class="code-bar"><span>agenda.py</span><span class="lang-tag">python</span></div>
+          <pre><code>agenda = {
+    <span class="st">"Ana"</span>: {<span class="st">"telefono"</span>: <span class="st">"3001112233"</span>, <span class="st">"ciudad"</span>: <span class="st">"Bogotá"</span>},
+    <span class="st">"Luis"</span>: {<span class="st">"telefono"</span>: <span class="st">"3004445566"</span>, <span class="st">"ciudad"</span>: <span class="st">"Medellín"</span>},
+}
+agenda[<span class="st">"Marta"</span>] = {<span class="st">"telefono"</span>: <span class="st">"3007778899"</span>, <span class="st">"ciudad"</span>: <span class="st">"Cali"</span>}
+
+contacto = agenda.get(<span class="st">"Pedro"</span>)
+<span class="kw">if</span> contacto <span class="kw">is</span> <span class="kw">None</span>:
+    <span class="fn">print</span>(<span class="st">"Pedro no está en la agenda"</span>)
+
+<span class="kw">for</span> nombre, datos <span class="kw">in</span> agenda.items():
+    <span class="fn">print</span>(f<span class="st">"{nombre} vive en {datos['ciudad']}"</span>)</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 17 — VIGENCIA TECNICA -->
+  <section class="slide" id="s17">
+    <div class="slide-inner">
+      <p class="kicker">Nota de vigencia técnica · 2026</p>
+      <h2>Núcleo estable, con dos detalles modernos</h2>
+      <div class="section-body">
+        <p class="body-text"><code style="font-family:var(--font-mono);">list</code>, <code style="font-family:var(--font-mono);">dict</code>, <code style="font-family:var(--font-mono);">tuple</code> y <code style="font-family:var(--font-mono);">set</code> son parte del núcleo del lenguaje desde siempre.</p>
+        <div class="status-row">
+          <span class="status-dot"></span>
+          <span>Desde Python 3.7, los diccionarios garantizan el orden de inserción</span>
+        </div>
+        <div class="status-row">
+          <span class="status-dot"></span>
+          <span>Desde Python 3.9, se escribe list[int] en vez de List[int] de typing</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 18 — ERRORES COMUNES -->
+  <section class="slide alt" id="s18">
+    <div class="slide-inner">
+      <p class="kicker">Antes de seguir</p>
+      <h2>Errores comunes de principiante</h2>
+      <ol class="obj-list section-body" style="margin-top:36px;">
+        <li><span class="obj-num">01</span><p>Confundir el <em>índice</em> (la posición) con el <em>valor</em> guardado en esa posición.</p></li>
+        <li><span class="obj-num">02</span><p>Intentar modificar una tupla y no entender por qué falla — es su comportamiento esperado.</p></li>
+        <li><span class="obj-num">03</span><p>Usar <code style="font-family:var(--font-mono);">diccionario["clave"]</code> sin estar seguro de que exista, y terminar con <code style="font-family:var(--font-mono);">KeyError</code>.</p></li>
+        <li><span class="obj-num">04</span><p>Esperar que un <code style="font-family:var(--font-mono);">set</code> mantenga el orden de inserción — no lo garantiza.</p></li>
+        <li><span class="obj-num">05</span><p>Olvidar que <code style="font-family:var(--font-mono);">.sort()</code> modifica la lista original, en vez de usar <code style="font-family:var(--font-mono);">sorted()</code>.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 19 — EJERCICIO PROPUESTO -->
+  <section class="slide" id="s19">
+    <div class="slide-inner">
+      <p class="kicker">Practica lo aprendido</p>
+      <h2>Ejercicio propuesto: resumen de inventario</h2>
+      <div class="section-body">
+        <p class="body-text">Escribe <code style="font-family:var(--font-mono);">resumen_inventario(productos)</code>, que reciba tuplas <code style="font-family:var(--font-mono);">(nombre, cantidad, precio_unitario)</code> y devuelva un diccionario con <code style="font-family:var(--font-mono);">valor_total</code>, <code style="font-family:var(--font-mono);">producto_mayor_stock</code> y <code style="font-family:var(--font-mono);">categorias_bajo_stock</code> (cantidad &lt; 5).</p>
+
+        <div class="callout">
+          <span class="callout-label">Pista</span>
+          <p>Vas a necesitar un acumulador, <code style="font-family:var(--font-mono);">max()</code> con <code style="font-family:var(--font-mono);">key</code>, una list comprehension con <code style="font-family:var(--font-mono);">if</code>, y construir el diccionario de salida al final.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 20 — AUTOEVALUACION I -->
+  <section class="slide alt" id="s20">
+    <div class="slide-inner">
+      <p class="kicker">Cierre · Parte 1 de 2</p>
+      <h2>Autoevaluación</h2>
+      <div class="qa-list section-body" style="margin-top:30px;">
+        <div class="qa-item">
+          <p class="q"><span class="q-num">01</span><span>¿Qué diferencia hay entre <code style="font-family:var(--font-mono);">frutas[1]</code> y <code style="font-family:var(--font-mono);">frutas[1:3]</code>?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span><code style="font-family:var(--font-mono);">frutas[1]</code> devuelve un elemento; <code style="font-family:var(--font-mono);">frutas[1:3]</code> devuelve una lista nueva (slicing) desde el índice 1 hasta antes del 3.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">02</span><span>¿Qué hace <code style="font-family:var(--font-mono);">.pop()</code> que no hace <code style="font-family:var(--font-mono);">.remove()</code>?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span><code style="font-family:var(--font-mono);">.pop()</code> quita por posición y devuelve el valor; <code style="font-family:var(--font-mono);">.remove()</code> quita por valor y no devuelve nada útil.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">03</span><span>¿Por qué <code style="font-family:var(--font-mono);">.get()</code> es más seguro que <code style="font-family:var(--font-mono);">[]</code>?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>Si la clave no existe, <code style="font-family:var(--font-mono);">.get()</code> devuelve <code style="font-family:var(--font-mono);">None</code> (o un valor por defecto) en vez de lanzar <code style="font-family:var(--font-mono);">KeyError</code>.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">04</span><span>¿Qué significa que una tupla sea inmutable?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>Que una vez creada, no se puede agregar, quitar ni reemplazar ninguno de sus elementos.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">05</span><span>¿Qué tipo de dato devuelve realmente <code style="font-family:var(--font-mono);">evaluar_promedio</code> con <code style="font-family:var(--font-mono);">return promedio, aprobado</code>?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>Una tupla de dos valores, que luego se desempaqueta en dos variables.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 21 — AUTOEVALUACION II -->
+  <section class="slide" id="s21">
+    <div class="slide-inner">
+      <p class="kicker">Cierre · Parte 2 de 2</p>
+      <h2>Autoevaluación (continuación)</h2>
+      <div class="qa-list section-body" style="margin-top:30px;">
+        <div class="qa-item">
+          <p class="q"><span class="q-num">06</span><span>¿Qué imprime <code style="font-family:var(--font-mono);">{1, 2, 2, 3, 3, 3}</code>?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span><code style="font-family:var(--font-mono);">{1, 2, 3}</code> — un conjunto elimina automáticamente los duplicados.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">07</span><span>¿Qué operación de conjuntos usarías para saber qué estudiantes están en dos cursos a la vez?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>La intersección (<code style="font-family:var(--font-mono);">&amp;</code>).</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">08</span><span>V/F: "Los diccionarios garantizan el orden de inserción desde Python 3.7."</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>Verdadero.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">09</span><span>¿Cómo se relaciona un diccionario con un DataFrame de pandas, sin jerga de programación?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>Un DataFrame se puede pensar como un diccionario donde cada clave es una columna y su valor es la lista de datos de esa columna.</p>
+        </div>
+      </div>
+
+      <div class="divider-row" style="margin-top:40px;"><span class="divider-label">Verificación de dependencias</span></div>
+      <p class="body-text">Depende directamente de la Semana 3 (funciones con <code style="font-family:var(--font-mono);">return</code>, aquí reconocido como tupla; <code style="font-family:var(--font-mono);">for</code>/<code style="font-family:var(--font-mono);">range()</code>) y, por extensión, de las Semanas 1 y 2. Es prerrequisito directo de la Semana 5 (algoritmos y complejidad básica), que procesa listas y diccionarios como las estructuras aquí introducidas.</p>
+    </div>
+  </section>
+
+  <footer class="end">
+    <span>Aprende con Gutyy IA — Semana 4 · v1.0</span>
+    <span>2026-09-14</span>
+  </footer>
+
+</main>
+
+<script>
+  (function(){
+    var sections = Array.prototype.slice.call(document.querySelectorAll('section.slide'));
+    var dots = Array.prototype.slice.call(document.querySelectorAll('.rail a'));
+    var counter = document.getElementById('counter-current');
+
+    if (!('IntersectionObserver' in window)) return;
+
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting){
+          var idx = sections.indexOf(entry.target);
+          dots.forEach(function(d){ d.classList.remove('active'); });
+          if (dots[idx]) dots[idx].classList.add('active');
+          if (counter) counter.textContent = String(idx + 1).padStart(2, '0');
+        }
+      });
+    }, { threshold: 0.55 });
+
+    sections.forEach(function(s){ io.observe(s); });
+  })();
+</script>

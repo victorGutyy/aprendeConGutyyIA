@@ -2,6 +2,13 @@
 
 Registro de cambios semana a semana. Cada clase mantiene su propio número de versión (`vX.Y`) independiente del historial de Git.
 
+## Semana 4 — Estructuras de datos fundamentales: listas, diccionarios, tuplas, conjuntos
+
+### v1.0 — 2026-09-14
+- Primera publicación: listas (indexación positiva/negativa, *slicing*, métodos `.append()`, `.insert()`, `.remove()`, `.pop()`, `.sort()` vs. `sorted()`), *list comprehensions*, diccionarios (pares clave-valor, `.get()` para evitar `KeyError`, `.keys()`/`.values()`/`.items()`), tuplas (inmutabilidad y por qué importa) y su conexión directa con el `return` de múltiples valores de la Semana 3, *tuple unpacking* (incluyendo el intercambio de variables sin auxiliar), conjuntos (eliminación automática de duplicados, operaciones de unión/intersección/diferencia), tabla comparativa para elegir la estructura correcta, sección "Por qué esto importa para IA/ML" (DataFrames de pandas como diccionarios de listas, *batches* como listas de tuplas, vocabularios como sets), ejemplo práctico de un analizador de carrito de compras (pseudocódigo + Python con *tuple unpacking*, `max()` con `key`, *set comprehension*), segundo ejemplo (agenda de contactos con diccionario de diccionarios), notas de vigencia técnica (orden garantizado de diccionarios desde Python 3.7, `list[int]` desde Python 3.9), errores comunes de principiante, ejercicio propuesto (resumen de inventario, sin resolver), autoevaluación de 9 preguntas, verificación de dependencias.
+- Diapositivas: 21, mismo diseño y guía de marca fijada en la Semana 1.
+- PDF generado a partir de un documento HTML con la misma guía de marca, vía Python + weasyprint.
+
 ## Semana 3 — Estructuras de control y funciones
 
 ### v1.0 — 2026-09-07
