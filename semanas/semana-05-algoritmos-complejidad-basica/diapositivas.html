@@ -1,0 +1,1106 @@
+<title>Algoritmos y Complejidad Básica</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  /* =========================================================
+     Aprende con Gutyy IA — Semana 5 (v1.0)
+     Identidad: académico-editorial, claro, un acento, mucho aire.
+     Misma guía de marca fijada en la Semana 1 — sin cambios de
+     identidad, solo aplicada al contenido nuevo.
+     ========================================================= */
+
+  :root{
+    --bg:            #FFFFFF;
+    --bg-alt:        #F5F6FA;
+    --ink:           #171A24;
+    --ink-secondary: #4B4F5E;
+    --ink-tertiary:  #8A8FA3;
+    --accent:        #3548C4;
+    --accent-dark:   #24308C;
+    --accent-tint:   #EAEDFB;
+    --border:        #E2E4EC;
+    --code-bg:       #F3F4F8;
+    --code-border:   #E3E5EE;
+    --code-ink:      #23262F;
+    --code-comment:  #9297A8;
+    --code-string:   #5B5F70;
+
+    --font-display: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-body:    "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-mono:    "IBM Plex Mono", ui-monospace, "Consolas", monospace;
+
+    color-scheme: light;
+  }
+
+  *,*::before,*::after{ box-sizing: border-box; }
+
+  html{
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+  }
+
+  body{
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior: auto; }
+    *{ animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  .grid-field{
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      linear-gradient(to right, rgba(53,72,196,0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(53,72,196,0.05) 1px, transparent 1px);
+    background-size: 48px 48px;
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent 75%);
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent 75%);
+  }
+
+  .brand-mark{
+    position: fixed;
+    top: 28px;
+    left: clamp(24px, 5vw, 64px);
+    z-index: 20;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    pointer-events: none;
+  }
+  .brand-mark strong{
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .brand-mark .dot{ color: var(--accent); }
+
+  .slide-counter{
+    position: fixed;
+    top: 28px;
+    right: clamp(24px, 5vw, 64px);
+    z-index: 20;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--ink-tertiary);
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+  .slide-counter strong{ color: var(--ink); font-weight: 600; }
+
+  .rail{
+    position: fixed;
+    right: clamp(14px, 3vw, 30px);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .rail a{
+    position: relative;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    border: 1px solid var(--border);
+    display: block;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .rail a:hover{ transform: scale(1.3); }
+  .rail a.active{
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .rail a .rail-label{
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    color: var(--ink-secondary);
+    background: var(--bg);
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+  }
+  .rail a:hover .rail-label{ opacity: 1; }
+
+  a:focus-visible,
+  .rail a:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .deck{ position: relative; z-index: 1; }
+
+  section.slide{
+    min-height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    align-items: center;
+    padding: 120px clamp(24px, 8vw, 96px) 96px;
+    border-bottom: 1px solid var(--border);
+  }
+  section.slide.alt{ background: var(--bg-alt); }
+
+  .slide-inner{
+    max-width: 880px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .kicker{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 18px;
+  }
+  .kicker::before{
+    content: "";
+    width: 18px;
+    height: 1px;
+    background: var(--accent);
+    display: inline-block;
+  }
+
+  h1,h2,h3{
+    font-family: var(--font-display);
+    color: var(--ink);
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  h2{
+    font-size: clamp(28px, 3.6vw, 40px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  .lede{
+    font-size: 19px;
+    line-height: 1.6;
+    color: var(--ink-secondary);
+    max-width: 62ch;
+    margin: 22px 0 0;
+  }
+
+  p{ line-height: 1.65; color: var(--ink-secondary); }
+  p.body-text{ font-size: 16.5px; max-width: 66ch; }
+
+  strong.term{
+    color: var(--ink);
+    font-weight: 600;
+    background: linear-gradient(to bottom, transparent 62%, var(--accent-tint) 62%);
+    padding: 0 1px;
+  }
+
+  em.term-accent{
+    font-style: normal;
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+
+  .section-body{ margin-top: 36px; }
+  .section-body > * + *{ margin-top: 20px; }
+
+  .callout{
+    border-left: 2px solid var(--accent);
+    padding: 4px 0 4px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .callout .callout-label{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .callout p{ margin: 0; color: var(--ink); font-size: 16px; }
+
+  .pull-quote{
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 600;
+    color: var(--accent-dark);
+    line-height: 1.5;
+    max-width: 48ch;
+    margin: 0;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    text-wrap: balance;
+  }
+
+  .divider-row{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 34px 0 22px;
+  }
+  .divider-row::after{
+    content:"";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .divider-row .divider-label{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    white-space: nowrap;
+  }
+
+  .code-card{
+    border: 1px solid var(--code-border);
+    background: var(--code-bg);
+    overflow: hidden;
+  }
+  .code-card .code-bar{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--code-border);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+  }
+  .code-card .code-bar .lang-tag{
+    color: var(--accent-dark);
+    font-weight: 500;
+  }
+  .code-card pre{
+    margin: 0;
+    padding: 18px 20px 20px;
+    overflow-x: auto;
+  }
+  .code-card code{
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--code-ink);
+    white-space: pre;
+  }
+  .code-card .cm{ color: var(--code-comment); font-style: italic; }
+  .code-card .kw{ color: var(--accent-dark); font-weight: 600; }
+  .code-card .st{ color: var(--code-string); }
+  .code-card .fn{ color: var(--accent); }
+
+  .code-card.compact pre{ padding: 14px 18px 16px; }
+  .code-card.compact code{ font-size: 13.5px; }
+
+  .code-result{
+    margin-top: 10px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink-secondary);
+  }
+  .code-result .result-tag{
+    color: var(--ink-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 11px;
+  }
+  .code-result .result-val{ color: var(--accent-dark); font-weight: 500; }
+
+  .blocks-grid{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 8px;
+  }
+  .blocks-grid.cols-3{ grid-template-columns: repeat(3, 1fr); }
+  .blocks-grid.cols-5{ grid-template-columns: repeat(5, 1fr); }
+  .block-card{
+    background: var(--bg);
+    padding: 26px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .block-card .block-letter{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+  .block-card h3{
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .block-card p{ font-size: 14.5px; margin: 0; }
+  .block-card .block-example{
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+    font-size: 13px;
+    color: var(--ink-tertiary);
+    font-style: italic;
+  }
+
+  .progression{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 26px;
+  }
+  .progression .chip{
+    border: 1px solid var(--border);
+    background: var(--bg);
+    padding: 8px 14px;
+    font-size: 13px;
+    color: var(--ink-secondary);
+    font-family: var(--font-mono);
+  }
+  .progression .chip strong{ color: var(--ink); font-weight: 600; }
+  .progression .arrow{ color: var(--ink-tertiary); font-family: var(--font-mono); }
+
+  .obj-list{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .obj-list li{
+    display: flex;
+    gap: 20px;
+    padding: 18px 0;
+    border-top: 1px solid var(--border);
+  }
+  .obj-list li:last-child{ border-bottom: 1px solid var(--border); }
+  .obj-list .obj-num{
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-size: 14px;
+    padding-top: 2px;
+    flex-shrink: 0;
+    width: 24px;
+  }
+  .obj-list p{ margin: 0; color: var(--ink); font-size: 16px; }
+
+  .two-col{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  @media (max-width: 760px){
+    .two-col{ grid-template-columns: 1fr; }
+    .blocks-grid{ grid-template-columns: 1fr; }
+    .blocks-grid.cols-3{ grid-template-columns: 1fr; }
+    .blocks-grid.cols-5{ grid-template-columns: 1fr; }
+    section.slide{ padding-top: 96px; }
+    .type-table{ font-size: 13px; }
+  }
+
+  .qa-list{
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .qa-item{
+    padding: 18px 0;
+    border-top: 1px solid var(--border);
+  }
+  .qa-item:last-child{ border-bottom: 1px solid var(--border); }
+  .qa-item .q{
+    display: flex;
+    gap: 14px;
+    font-size: 15.5px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .qa-item .q .q-num{
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .qa-item .a{
+    margin: 8px 0 0 34px;
+    font-size: 14.5px;
+    color: var(--ink-secondary);
+  }
+  .qa-item .a .a-tag{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    margin-right: 8px;
+  }
+
+  .status-row{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--accent-dark);
+    background: var(--accent-tint);
+    border: 1px solid #DADFF6;
+    padding: 10px 16px;
+    width: fit-content;
+  }
+  .status-row .status-dot{
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .meta-list{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    margin-top: 8px;
+  }
+  .meta-list div{ font-size: 14px; color: var(--ink-secondary); }
+  .meta-list dt{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-tertiary);
+    margin: 0 0 3px;
+  }
+  .meta-list dd{ margin: 0; color: var(--ink); font-weight: 500; }
+
+  /* type table */
+  .type-table{
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 14.5px;
+  }
+  .type-table th, .type-table td{
+    text-align: left;
+    padding: 12px 14px;
+    border-top: 1px solid var(--border);
+  }
+  .type-table thead th{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    border-top: none;
+    padding-top: 0;
+  }
+  .type-table tbody tr:last-child td{ border-bottom: 1px solid var(--border); }
+  .type-table td.type-name{
+    font-family: var(--font-mono);
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+  .type-table td.type-ex{ font-family: var(--font-mono); color: var(--ink); }
+
+  .cover{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 0 clamp(24px, 8vw, 96px);
+  }
+  .cover-eyebrow{
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .cover-eyebrow::before{
+    content:"";
+    width: 34px;
+    height: 1px;
+    background: var(--accent);
+  }
+  .cover h1{
+    font-size: clamp(40px, 6.4vw, 76px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    max-width: 14ch;
+    margin-top: 26px;
+  }
+  .cover h1 em{
+    font-style: normal;
+    color: var(--accent);
+  }
+  .cover .cover-sub{
+    font-size: clamp(17px, 2vw, 20px);
+    color: var(--ink-secondary);
+    max-width: 56ch;
+    margin-top: 22px;
+    line-height: 1.6;
+  }
+  .cover-footer{
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    margin-top: 56px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .cover-footer .fmeta dt{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-tertiary);
+    margin: 0 0 4px;
+  }
+  .cover-footer .fmeta dd{
+    margin: 0;
+    font-size: 14.5px;
+    color: var(--ink);
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+  .scroll-cue{
+    position: absolute;
+    bottom: 40px;
+    left: clamp(24px, 8vw, 96px);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .scroll-cue .chevron{
+    display: inline-block;
+    animation: bob 1.8s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce){ .scroll-cue .chevron{ animation: none; } }
+  @keyframes bob{
+    0%,100%{ transform: translateY(0); }
+    50%{ transform: translateY(4px); }
+  }
+
+  footer.end{
+    padding: 64px clamp(24px, 8vw, 96px) 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-tertiary);
+    position: relative;
+    z-index: 1;
+  }
+</style>
+
+<div class="grid-field" aria-hidden="true"></div>
+
+<div class="brand-mark">
+  <strong>Aprende con Gutyy IA</strong><span class="dot">·</span><span>Semana 5</span>
+</div>
+<div class="slide-counter"><strong id="counter-current">01</strong> / 19</div>
+
+<nav class="rail" aria-label="Navegación de diapositivas">
+  <a href="#s01" data-label="Portada" class="active"><span class="rail-label">Portada</span></a>
+  <a href="#s02" data-label="Objetivos"><span class="rail-label">Objetivos</span></a>
+  <a href="#s03" data-label="¿Qué es la complejidad?"><span class="rail-label">¿Qué es la complejidad?</span></a>
+  <a href="#s04" data-label="Búsqueda lineal"><span class="rail-label">Búsqueda lineal</span></a>
+  <a href="#s05" data-label="Búsqueda binaria"><span class="rail-label">Búsqueda binaria</span></a>
+  <a href="#s06" data-label="Tabla de Big O"><span class="rail-label">Tabla de Big O</span></a>
+  <a href="#s07" data-label="Big O: las cajas"><span class="rail-label">Big O: las cajas</span></a>
+  <a href="#s08" data-label="Bubble sort"><span class="rail-label">Bubble sort</span></a>
+  <a href="#s09" data-label="Por qué es O(n²)"><span class="rail-label">Por qué es O(n²)</span></a>
+  <a href="#s10" data-label="Por qué importa para IA"><span class="rail-label">Por qué importa para IA</span></a>
+  <a href="#s11" data-label="Ejemplo: pseudocódigo"><span class="rail-label">Ejemplo: pseudocódigo</span></a>
+  <a href="#s12" data-label="Ejemplo: Python"><span class="rail-label">Ejemplo: Python</span></a>
+  <a href="#s13" data-label="Bubble sort vs sorted()"><span class="rail-label">Bubble sort vs sorted()</span></a>
+  <a href="#s14" data-label="Vigencia técnica"><span class="rail-label">Vigencia técnica</span></a>
+  <a href="#s15" data-label="Errores comunes"><span class="rail-label">Errores comunes</span></a>
+  <a href="#s16" data-label="Ejercicio propuesto"><span class="rail-label">Ejercicio propuesto</span></a>
+  <a href="#s17" data-label="Autoevaluación I"><span class="rail-label">Autoevaluación I</span></a>
+  <a href="#s18" data-label="Autoevaluación II"><span class="rail-label">Autoevaluación II</span></a>
+  <a href="#s19" data-label="Dependencias"><span class="rail-label">Dependencias</span></a>
+</nav>
+
+<main class="deck">
+
+  <!-- 01 — COVER -->
+  <section class="slide" id="s01">
+    <div class="cover">
+      <p class="cover-eyebrow">Aprende con Gutyy IA — Academia de programación, IA y Machine Learning</p>
+      <h1>Algoritmos y <em>complejidad</em> básica</h1>
+      <p class="cover-sub">Semana 5 del roadmap — búsqueda lineal y binaria, ordenamiento, y la notación Big O para comparar algoritmos sin necesidad de ejecutarlos.</p>
+      <div class="cover-footer">
+        <dl class="fmeta"><dt>Nivel</dt><dd>Básico</dd></dl>
+        <dl class="fmeta"><dt>Prerrequisitos</dt><dd>Semanas 1, 3–4</dd></dl>
+        <dl class="fmeta"><dt>Versión</dt><dd>v1.0</dd></dl>
+        <dl class="fmeta"><dt>Fecha</dt><dd>2026-09-21</dd></dl>
+      </div>
+    </div>
+    <div class="scroll-cue"><span>Desplázate</span><span class="chevron">↓</span></div>
+  </section>
+
+  <!-- 02 — OBJETIVOS -->
+  <section class="slide alt" id="s02">
+    <div class="slide-inner">
+      <p class="kicker">Objetivos de aprendizaje</p>
+      <h2>Al terminar esta semana, vas a poder…</h2>
+      <ol class="obj-list section-body" style="margin-top:36px;">
+        <li><span class="obj-num">01</span><p>Explicar qué es la complejidad algorítmica y usar <strong class="term">Big O</strong> para comparar algoritmos sin ejecutarlos.</p></li>
+        <li><span class="obj-num">02</span><p>Implementar <strong class="term">búsqueda lineal</strong> y <strong class="term">búsqueda binaria</strong>, y explicar por qué la binaria necesita datos ordenados.</p></li>
+        <li><span class="obj-num">03</span><p>Implementar <strong class="term">bubble sort</strong> y explicar por qué se prefiere <em class="term-accent">sorted()</em> en código real.</p></li>
+        <li><span class="obj-num">04</span><p>Reconocer y comparar <strong class="term">O(1)</strong>, <strong class="term">O(log n)</strong>, <strong class="term">O(n)</strong>, <strong class="term">O(n log n)</strong> y <strong class="term">O(n²)</strong>.</p></li>
+        <li><span class="obj-num">05</span><p>Elegir búsqueda lineal vs. binaria según el tamaño de los datos y cuántas veces se va a buscar.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 03 — QUE ES LA COMPLEJIDAD -->
+  <section class="slide" id="s03">
+    <div class="slide-inner">
+      <p class="kicker">01 · Complejidad algorítmica</p>
+      <h2>¿Qué tan rápido es "rápido"?</h2>
+      <p class="lede">Un programa que tarda un segundo con 100 elementos puede tardar horas con 10 millones — y esa diferencia casi nunca se nota probando con datos pequeños.</p>
+
+      <div class="section-body">
+        <div class="callout">
+          <span class="callout-label">Analogía · el diccionario de papel</span>
+          <p>Buscar "casa" página por página desde la A tarda más mientras más grueso sea el libro. Pero si el diccionario está ordenado, puedes abrirlo por la mitad y descartar media mitad del libro en cada paso — esa diferencia es la de esta semana.</p>
+        </div>
+        <p class="body-text">La complejidad mide cómo <em class="term-accent">crece</em> el trabajo de un algoritmo cuando crece el tamaño de la entrada (<code style="font-family:var(--font-mono); color:var(--accent-dark);">n</code>) — no mide segundos de reloj, mide la forma en que ese trabajo escala.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 — BUSQUEDA LINEAL -->
+  <section class="slide alt" id="s04">
+    <div class="slide-inner">
+      <p class="kicker">02 · Búsqueda</p>
+      <h2>Búsqueda lineal: revisar todo, en orden</h2>
+      <p class="lede">La estrategia obvia: recorrer la lista elemento por elemento. No necesita que esté ordenada.</p>
+
+      <div class="section-body">
+        <div class="code-card">
+          <div class="code-bar"><span>lineal.py</span><span class="lang-tag">python</span></div>
+          <pre><code><span class="kw">def</span> <span class="fn">busqueda_lineal</span>(lista, objetivo):
+    <span class="kw">for</span> indice, valor <span class="kw">in</span> <span class="fn">enumerate</span>(lista):
+        <span class="kw">if</span> valor == objetivo:
+            <span class="kw">return</span> indice   <span class="cm"># lo encontramos aquí</span>
+    <span class="kw">return</span> -1                <span class="cm"># no está en la lista</span></code></pre>
+        </div>
+        <div class="callout">
+          <span class="callout-label">Peor caso</span>
+          <p>Si el elemento está al final, o no está, se revisan los <code style="font-family:var(--font-mono);">n</code> elementos. Complejidad <strong class="term">O(n)</strong>: el doble de datos, el doble de trabajo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 — BUSQUEDA BINARIA -->
+  <section class="slide" id="s05">
+    <div class="slide-inner">
+      <p class="kicker">02 · Búsqueda</p>
+      <h2>Búsqueda binaria: descartar la mitad</h2>
+      <p class="lede">Si la lista está <em class="term-accent">ordenada</em>, comparar con el medio permite descartar la mitad de los datos en cada paso.</p>
+
+      <div class="section-body">
+        <div class="code-card compact">
+          <div class="code-bar"><span>binaria.py</span><span class="lang-tag">python</span></div>
+          <pre><code><span class="kw">def</span> <span class="fn">busqueda_binaria</span>(lista_ordenada, objetivo):
+    izquierda, derecha = 0, <span class="fn">len</span>(lista_ordenada) - 1
+    <span class="kw">while</span> izquierda &lt;= derecha:
+        medio = (izquierda + derecha) // 2
+        <span class="kw">if</span> lista_ordenada[medio] == objetivo:
+            <span class="kw">return</span> medio
+        <span class="kw">elif</span> lista_ordenada[medio] &lt; objetivo:
+            izquierda = medio + 1   <span class="cm"># descarta la mitad izq.</span>
+        <span class="kw">else</span>:
+            derecha = medio - 1     <span class="cm"># descarta la mitad der.</span>
+    <span class="kw">return</span> -1</code></pre>
+        </div>
+        <div class="callout">
+          <span class="callout-label">log₂(n) vueltas</span>
+          <p>Cada vuelta descarta la mitad de lo que quedaba. Con 1.000 elementos alcanzan ~10 comparaciones; con 1.000.000, ~20. Complejidad <strong class="term">O(log n)</strong>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 — TABLA DE BIG O -->
+  <section class="slide alt" id="s06">
+    <div class="slide-inner">
+      <p class="kicker">03 · Notación Big O</p>
+      <h2>Comparar algoritmos sin ejecutarlos</h2>
+      <p class="lede">Describe cómo crece el trabajo en el peor caso, ignorando constantes y detalles de la máquina.</p>
+
+      <table class="type-table section-body" style="margin-top:24px;">
+        <thead>
+          <tr><th>Notación</th><th>Nombre</th><th>Ejemplo de esta semana</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="type-name">O(1)</td><td>Constante</td><td class="type-ex">diccionario["clave"]</td></tr>
+          <tr><td class="type-name">O(log n)</td><td>Logarítmica</td><td class="type-ex">busqueda_binaria()</td></tr>
+          <tr><td class="type-name">O(n)</td><td>Lineal</td><td class="type-ex">busqueda_lineal()</td></tr>
+          <tr><td class="type-name">O(n log n)</td><td>Cuasi-lineal</td><td class="type-ex">sorted() / .sort()</td></tr>
+          <tr><td class="type-name">O(n²)</td><td>Cuadrática</td><td class="type-ex">bubble sort</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 07 — BIG O: LAS CAJAS -->
+  <section class="slide" id="s07">
+    <div class="slide-inner">
+      <p class="kicker">Intuición</p>
+      <h2>Analogía: contratar gente para mudar cajas</h2>
+
+      <div class="blocks-grid cols-3" style="margin-top:8px;">
+        <div class="block-card">
+          <span class="block-letter">O(1)</span>
+          <h3 style="font-size:16px;">Una mirada</h3>
+          <p>"¿Está la caja azul en la puerta?" — sin importar cuántas cajas haya en total.</p>
+        </div>
+        <div class="block-card">
+          <span class="block-letter">O(n)</span>
+          <h3 style="font-size:16px;">Caja por caja</h3>
+          <p>Revisar una por una hasta encontrar la azul.</p>
+        </div>
+        <div class="block-card">
+          <span class="block-letter">O(n²)</span>
+          <h3 style="font-size:16px;">Comparar contra todas</h3>
+          <p>Por cada caja, comparar su peso contra el de todas las demás — el doble de cajas <em>cuadruplica</em> el trabajo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 — BUBBLE SORT -->
+  <section class="slide alt" id="s08">
+    <div class="slide-inner">
+      <p class="kicker">04 · Ordenamiento</p>
+      <h2>Bubble sort: comparar e intercambiar</h2>
+      <p class="lede">Compara elementos adyacentes y los intercambia si están en el orden incorrecto — repite hasta que no queden intercambios.</p>
+
+      <div class="section-body">
+        <div class="code-card">
+          <div class="code-bar"><span>bubble_sort.py</span><span class="lang-tag">python</span></div>
+          <pre><code><span class="kw">def</span> <span class="fn">bubble_sort</span>(lista):
+    n = <span class="fn">len</span>(lista)
+    <span class="kw">for</span> pasada <span class="kw">in</span> <span class="fn">range</span>(n - 1):
+        <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n - 1 - pasada):
+            <span class="kw">if</span> lista[i] &gt; lista[i + 1]:
+                lista[i], lista[i + 1] = lista[i + 1], lista[i]
+    <span class="kw">return</span> lista
+
+<span class="fn">print</span>(<span class="fn">bubble_sort</span>([5, 2, 9, 1, 5, 6]))</code></pre>
+          <div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">[1, 2, 5, 5, 6, 9]</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 09 — POR QUE ES O(n^2) -->
+  <section class="slide" id="s09">
+    <div class="slide-inner">
+      <p class="kicker">Analizando bubble sort</p>
+      <h2>Un ciclo dentro de otro ciclo</h2>
+      <div class="section-body">
+        <p class="body-text">El ciclo externo recorre la lista <code style="font-family:var(--font-mono);">n</code> veces, y por cada vuelta el ciclo interno vuelve a recorrer casi toda la lista comparando pares — el patrón "por cada elemento, comparar contra los demás".</p>
+        <div class="callout">
+          <span class="callout-label">Punto de confusión clásico</span>
+          <p>Que bubble sort sea <strong class="term">O(n²)</strong> no es un error de código: con 100 elementos hace ~10.000 comparaciones; con 100.000, ~10.000.000.000. Por eso en producción siempre se usa <code style="font-family:var(--font-mono);">sorted()</code>/<code style="font-family:var(--font-mono);">.sort()</code>, nunca una implementación manual.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 — POR QUE IMPORTA PARA IA/ML -->
+  <section class="slide alt" id="s10">
+    <div class="slide-inner">
+      <p class="kicker">Mirando adelante · IA y Machine Learning</p>
+      <h2>Por qué esto importa para IA/ML</h2>
+
+      <div class="section-body">
+        <div class="callout">
+          <span class="callout-label">Búsqueda vectorial en RAG</span>
+          <p>Comparar contra cada vector uno por uno es <code style="font-family:var(--font-mono);">O(n)</code> y se vuelve lento con millones de vectores — por eso existen índices especializados que se acercan a <code style="font-family:var(--font-mono);">O(log n)</code>, igual que la búsqueda binaria.</p>
+        </div>
+        <p class="body-text">Entrenar con 10.000 filas vs. 10.000.000 no escala solo por el tamaño: la complejidad del algoritmo de entrenamiento decide si ese crecimiento es manejable o impráctico. Y NumPy/Pandas (Semana 9) son rápidos por la misma razón por la que <code style="font-family:var(--font-mono); color:var(--accent-dark);">sorted()</code> le gana a un bucle manual: algoritmos eficientes, implementados en C.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 — EJEMPLO: PSEUDOCODIGO -->
+  <section class="slide" id="s11">
+    <div class="slide-inner">
+      <p class="kicker">05 · Ejemplo práctico</p>
+      <h2>Comparar búsqueda lineal vs. binaria</h2>
+      <p class="lede">Contar cuántas comparaciones necesita cada estrategia para encontrar un valor.</p>
+
+      <div class="section-body">
+        <div class="code-card compact">
+          <div class="code-bar"><span>comparacion</span><span class="lang-tag">pseudocódigo</span></div>
+          <pre><code><span class="kw">FUNCION</span> busqueda_binaria_contada(lista_ordenada, objetivo)
+    izquierda, derecha = 0, longitud(lista_ordenada) - 1
+    comparaciones = 0
+    <span class="kw">MIENTRAS</span> izquierda &lt;= derecha <span class="kw">HACER</span>
+        comparaciones = comparaciones + 1
+        medio = (izquierda + derecha) // 2
+        <span class="kw">SI</span> lista_ordenada[medio] == objetivo <span class="kw">ENTONCES</span>
+            <span class="kw">DEVOLVER</span> comparaciones
+        <span class="kw">SINO SI</span> lista_ordenada[medio] &lt; objetivo <span class="kw">ENTONCES</span>
+            izquierda = medio + 1
+        <span class="kw">SINO</span>
+            derecha = medio - 1
+    <span class="kw">DEVOLVER</span> comparaciones</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 — EJEMPLO: PYTHON -->
+  <section class="slide alt" id="s12">
+    <div class="slide-inner">
+      <p class="kicker">05 · Ejemplo práctico</p>
+      <h2>Del pseudocódigo al código real</h2>
+
+      <div class="section-body">
+        <div class="code-card">
+          <div class="code-bar"><span>comparacion.py</span><span class="lang-tag">python</span></div>
+          <pre><code><span class="cm"># Lista ordenada de 1000 números: 0, 2, 4, ..., 1998</span>
+numeros = [n * 2 <span class="kw">for</span> n <span class="kw">in</span> <span class="fn">range</span>(1000)]
+objetivo = 1996   <span class="cm"># casi al final de la lista</span>
+
+<span class="fn">print</span>(<span class="fn">busqueda_lineal_contada</span>(numeros, objetivo))
+<span class="fn">print</span>(<span class="fn">busqueda_binaria_contada</span>(numeros, objetivo))</code></pre>
+          <div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">Lineal: 999 · Binaria: 9</span></div>
+        </div>
+        <p class="body-text">Con 1.000 elementos, la lineal recorrió casi toda la lista (su peor caso); la binaria lo encontró en 9 pasos — confirma en la práctica la diferencia entre <code style="font-family:var(--font-mono); color:var(--accent-dark);">O(n)</code> y <code style="font-family:var(--font-mono); color:var(--accent-dark);">O(log n)</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 — BUBBLE SORT VS SORTED() -->
+  <section class="slide" id="s13">
+    <div class="slide-inner">
+      <p class="kicker">06 · Segundo ejemplo</p>
+      <h2>Bubble sort vs. sorted(): mismo resultado, distinta idea</h2>
+
+      <div class="section-body">
+        <div class="code-card">
+          <div class="code-bar"><span>comparacion_orden.py</span><span class="lang-tag">python</span></div>
+          <pre><code>desordenado = [64, 25, 12, 22, 11]
+
+<span class="cm"># bubble sort: escrito a mano, O(n²), modifica la copia</span>
+copia = desordenado.copy()
+resultado_manual = <span class="fn">bubble_sort</span>(copia)
+
+<span class="cm"># sorted(): función nativa, O(n log n), lista nueva</span>
+resultado_nativo = <span class="fn">sorted</span>(desordenado)
+
+<span class="fn">print</span>(resultado_manual == resultado_nativo)   <span class="cm"># True</span></code></pre>
+        </div>
+        <div class="callout">
+          <span class="callout-label">.copy() evita modificar el original</span>
+          <p><code style="font-family:var(--font-mono);">bubble_sort()</code> modifica la lista que recibe; se le pasa una copia para poder comparar contra <code style="font-family:var(--font-mono);">sorted(desordenado)</code> sin haberlo alterado antes.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 — VIGENCIA TECNICA -->
+  <section class="slide alt" id="s14">
+    <div class="slide-inner">
+      <p class="kicker">Nota de vigencia técnica · 2026</p>
+      <h2>Big O no cambia; la implementación sí</h2>
+      <div class="section-body">
+        <p class="body-text">Big O es matemática de ciencias de la computación y no cambia con las versiones del lenguaje. Lo que sí conviene tener actualizado es qué algoritmo implementa Python por debajo.</p>
+        <div class="status-row">
+          <span class="status-dot"></span>
+          <span>sorted() / .sort() usan Timsort: híbrido merge + insertion sort, O(n log n)</span>
+        </div>
+        <div class="status-row">
+          <span class="status-dot"></span>
+          <span>Timsort es estable: conserva el orden relativo de elementos "iguales"</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15 — ERRORES COMUNES -->
+  <section class="slide" id="s15">
+    <div class="slide-inner">
+      <p class="kicker">Antes de seguir</p>
+      <h2>Errores comunes de principiante</h2>
+      <ol class="obj-list section-body" style="margin-top:36px;">
+        <li><span class="obj-num">01</span><p>Usar búsqueda binaria sobre una lista <strong>no ordenada</strong> — no lanza error, puede devolver un resultado incorrecto.</p></li>
+        <li><span class="obj-num">02</span><p>Confundir Big O con "segundos de reloj" — mide cómo <em>crece</em> el trabajo, no cuánto tarda con datos pequeños.</p></li>
+        <li><span class="obj-num">03</span><p>Reescribir un algoritmo de ordenamiento "desde cero" en producción en vez de usar <code style="font-family:var(--font-mono);">sorted()</code>.</p></li>
+        <li><span class="obj-num">04</span><p>Olvidar que <code style="font-family:var(--font-mono);">bubble_sort()</code> modifica la lista original — usar <code style="font-family:var(--font-mono);">.copy()</code> si se necesita conservarla.</p></li>
+        <li><span class="obj-num">05</span><p>Calcular el punto medio con <code style="font-family:var(--font-mono);">/</code> en vez de <code style="font-family:var(--font-mono);">//</code> — produce un <code style="font-family:var(--font-mono);">float</code>, y una lista no se indexa con eso.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 16 — EJERCICIO PROPUESTO -->
+  <section class="slide alt" id="s16">
+    <div class="slide-inner">
+      <p class="kicker">Practica lo aprendido</p>
+      <h2>Ejercicio propuesto: búsqueda binaria recursiva</h2>
+      <div class="section-body">
+        <p class="body-text">Escribe <code style="font-family:var(--font-mono);">busqueda_binaria_recursiva(lista_ordenada, objetivo)</code>, que resuelva el mismo problema pero llamándose a sí misma sobre la mitad izquierda o derecha, en vez de usar un <code style="font-family:var(--font-mono);">while</code>.</p>
+
+        <div class="callout">
+          <span class="callout-label">Pista</span>
+          <p>Vas a necesitar un caso base (lista vacía o elemento del medio encontrado, Semana 3) y un caso recursivo que use <em>slicing</em> (Semana 4) para pasar solo la porción que corresponde seguir revisando.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 17 — AUTOEVALUACION I -->
+  <section class="slide" id="s17">
+    <div class="slide-inner">
+      <p class="kicker">Cierre · Parte 1 de 2</p>
+      <h2>Autoevaluación</h2>
+      <div class="qa-list section-body" style="margin-top:30px;">
+        <div class="qa-item">
+          <p class="q"><span class="q-num">01</span><span>¿Qué mide Big O: segundos de reloj o cómo crece el trabajo?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>Cómo crece el trabajo a medida que crece <code style="font-family:var(--font-mono);">n</code>; no mide segundos de reloj.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">02</span><span>¿Por qué la búsqueda binaria necesita la lista ordenada y la lineal no?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>La binaria decide qué mitad descartar comparando con el medio, válido solo si los datos están ordenados; la lineal revisa uno por uno sin depender del orden.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">03</span><span>Con 1.000.000 de elementos, ¿cuántas comparaciones necesita la búsqueda binaria en el peor caso?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>Aproximadamente 20 (<code style="font-family:var(--font-mono);">log₂(1.000.000) ≈ 20</code>), frente al 1.000.000 de la lineal.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">04</span><span>Ordena de más a menos eficiente: O(n²), O(1), O(n log n), O(log n), O(n).</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span><code style="font-family:var(--font-mono);">O(1) &lt; O(log n) &lt; O(n) &lt; O(n log n) &lt; O(n²)</code>.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">05</span><span>¿Por qué bubble sort es O(n²)?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>Por cada uno de los <code style="font-family:var(--font-mono);">n</code> elementos, vuelve a recorrer casi toda la lista comparando pares adyacentes.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 18 — AUTOEVALUACION II -->
+  <section class="slide alt" id="s18">
+    <div class="slide-inner">
+      <p class="kicker">Cierre · Parte 2 de 2</p>
+      <h2>Autoevaluación (continuación)</h2>
+      <div class="qa-list section-body" style="margin-top:30px;">
+        <div class="qa-item">
+          <p class="q"><span class="q-num">06</span><span>V/F: "En proyectos reales conviene escribir tu propia función de ordenamiento."</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>Falso; <code style="font-family:var(--font-mono);">sorted()</code>/<code style="font-family:var(--font-mono);">.sort()</code> usan Timsort (O(n log n)), en C, más eficiente y confiable.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">07</span><span>¿Qué hace distinto <code style="font-family:var(--font-mono);">enumerate(lista)</code> de un <code style="font-family:var(--font-mono);">for</code> normal?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>Entrega el par <code style="font-family:var(--font-mono);">(índice, valor)</code> en cada vuelta, sin llevar un contador manual con <code style="font-family:var(--font-mono);">range(len(lista))</code>.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">08</span><span>¿Qué error se comete al usar <code style="font-family:var(--font-mono);">/</code> en vez de <code style="font-family:var(--font-mono);">//</code> para el punto medio?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span><code style="font-family:var(--font-mono);">/</code> produce un <code style="font-family:var(--font-mono);">float</code> (ej. <code style="font-family:var(--font-mono);">2.5</code>), y una lista no puede indexarse con un <code style="font-family:var(--font-mono);">float</code>.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">09</span><span>Sin jerga técnica: ¿por qué una base vectorial con millones de registros necesita algo mejor que "comparar uno por uno"?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>Comparar contra cada registro (O(n)) se vuelve muy lento con millones de datos; se usan índices especializados que descartan partes grandes en cada paso, como la búsqueda binaria.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 19 — DEPENDENCIAS -->
+  <section class="slide" id="s19">
+    <div class="slide-inner">
+      <p class="kicker">Cierre</p>
+      <h2>Verificación de dependencias</h2>
+      <div class="section-body">
+        <p class="body-text">Depende directamente de la Semana 4 (listas y su recorrido, indexación y <em>slicing</em>, tuple unpacking usado en el intercambio de <code style="font-family:var(--font-mono);">bubble_sort()</code>, list comprehensions) y de la Semana 3 (funciones, <code style="font-family:var(--font-mono);">for</code>/<code style="font-family:var(--font-mono);">range()</code>, <code style="font-family:var(--font-mono);">while</code>, condición de parada retomada como caso base de la recursión del ejercicio). <code style="font-family:var(--font-mono);">log₂</code> se explica solo como "cuántas veces se puede partir a la mitad", sin exigir cálculo previo.</p>
+        <p class="body-text">Es prerrequisito directo de la Semana 6 (buenas prácticas de ingeniería: POO introductoria, Git, testing básico), que asume que ya se sabe razonar sobre la corrección y eficiencia de una función antes de organizarla dentro de una clase o cubrirla con pruebas automatizadas.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="end">
+    <span>Aprende con Gutyy IA — Semana 5 · v1.0</span>
+    <span>2026-09-21</span>
+  </footer>
+
+</main>
+
+<script>
+  (function(){
+    var sections = Array.prototype.slice.call(document.querySelectorAll('section.slide'));
+    var dots = Array.prototype.slice.call(document.querySelectorAll('.rail a'));
+    var counter = document.getElementById('counter-current');
+
+    if (!('IntersectionObserver' in window)) return;
+
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting){
+          var idx = sections.indexOf(entry.target);
+          dots.forEach(function(d){ d.classList.remove('active'); });
+          if (dots[idx]) dots[idx].classList.add('active');
+          if (counter) counter.textContent = String(idx + 1).padStart(2, '0');
+        }
+      });
+    }, { threshold: 0.55 });
+
+    sections.forEach(function(s){ io.observe(s); });
+  })();
+</script>

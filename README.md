@@ -35,6 +35,7 @@ Cada clase queda versionada (`vX.Y`) con fecha, y el [CHANGELOG.md](CHANGELOG.md
 | 2 | Sintaxis de Python básica: variables, tipos de datos, entrada/salida | v1.0 | [clase.md](semanas/semana-02-sintaxis-python-basica/clase.md) · [diapositivas.html](semanas/semana-02-sintaxis-python-basica/diapositivas.html) · [clase.pdf](semanas/semana-02-sintaxis-python-basica/clase.pdf) |
 | 3 | Estructuras de control y funciones | v1.0 | [clase.md](semanas/semana-03-estructuras-control-funciones/clase.md) · [diapositivas.html](semanas/semana-03-estructuras-control-funciones/diapositivas.html) · [clase.pdf](semanas/semana-03-estructuras-control-funciones/clase.pdf) |
 | 4 | Estructuras de datos fundamentales: listas, diccionarios, tuplas, conjuntos | v1.0 | [clase.md](semanas/semana-04-estructuras-datos-fundamentales/clase.md) · [diapositivas.html](semanas/semana-04-estructuras-datos-fundamentales/diapositivas.html) · [clase.pdf](semanas/semana-04-estructuras-datos-fundamentales/clase.pdf) |
+| 5 | Algoritmos y complejidad básica: búsqueda, ordenamiento, Big O | v1.0 | [clase.md](semanas/semana-05-algoritmos-complejidad-basica/clase.md) · [diapositivas.html](semanas/semana-05-algoritmos-complejidad-basica/diapositivas.html) · [clase.pdf](semanas/semana-05-algoritmos-complejidad-basica/clase.pdf) |
 
 ## Guía de marca
 

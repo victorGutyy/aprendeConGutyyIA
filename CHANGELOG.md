@@ -2,6 +2,13 @@
 
 Registro de cambios semana a semana. Cada clase mantiene su propio número de versión (`vX.Y`) independiente del historial de Git.
 
+## Semana 5 — Algoritmos y complejidad básica: búsqueda, ordenamiento, Big O
+
+### v1.0 — 2026-09-21
+- Primera publicación: qué es la complejidad algorítmica (analogía del diccionario de papel), búsqueda lineal (`O(n)`, con `enumerate()`), búsqueda binaria (`O(log n)`, y por qué requiere una lista ordenada), notación Big O con tabla comparativa (`O(1)`, `O(log n)`, `O(n)`, `O(n log n)`, `O(n²)`) y analogía de las cajas, bubble sort (`O(n²)`, con el intercambio por tuple unpacking de la Semana 4) y por qué no se reimplementa en producción, sección "Por qué esto importa para IA/ML" (escalabilidad del entrenamiento, búsqueda vectorial en sistemas RAG, por qué NumPy/Pandas son rápidos), ejemplo práctico comparando el número de comparaciones de búsqueda lineal vs. binaria sobre 1.000 elementos (pseudocódigo + Python, verificado por ejecución: 999 vs. 9 comparaciones), segundo ejemplo (bubble sort vs. `sorted()` con `.copy()` para no alterar la lista original), notas de vigencia técnica (Timsort, híbrido merge/insertion sort, estable), errores comunes de principiante, ejercicio propuesto (búsqueda binaria recursiva, sin resolver), autoevaluación de 9 preguntas, verificación de dependencias.
+- Diapositivas: 19, mismo diseño y guía de marca fijada en la Semana 1.
+- PDF generado a partir de un documento HTML con la misma guía de marca, vía Python + weasyprint.
+
 ## Semana 4 — Estructuras de datos fundamentales: listas, diccionarios, tuplas, conjuntos
 
 ### v1.0 — 2026-09-14
