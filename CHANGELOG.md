@@ -2,6 +2,13 @@
 
 Registro de cambios semana a semana. Cada clase mantiene su propio número de versión (`vX.Y`) independiente del historial de Git.
 
+## Semana 6 — Buenas prácticas de ingeniería: POO introductoria, Git, testing básico
+
+### v1.0 — 2026-09-28
+- Primera publicación: de funciones sueltas a objetos (analogía del auto), clases y objetos en Python (`class`, `__init__`, `self`), atributos de instancia vs. atributos de clase (con el error clásico de usar una lista mutable como atributo de clase compartido), control de versiones con Git (analogía de los puntos de guardado de un videojuego, comandos `init`/`add`/`commit`/`status`/`log`, `.gitignore`), testing automatizado (`assert`, y luego `pytest` con descubrimiento automático de `test_*`), sección "Por qué esto importa para IA/ML" (el patrón `.fit()`/`.predict()` de scikit-learn como POO, reproducibilidad de modelos entrenados con Git, pruebas sobre pipelines de datos), ejemplo práctico de una clase `CuentaBancaria` con depósitos/retiros validados (pseudocódigo + Python), sus pruebas con `pytest.raises`, y el flujo completo integrando Git + pytest, notas de vigencia técnica (pytest como estándar de facto sobre `unittest`, `@dataclass` como simplificación para clases de solo-datos), errores comunes de principiante, ejercicio propuesto (clase `Rectangulo` versionada y probada, sin resolver), autoevaluación de 9 preguntas, verificación de dependencias.
+- Diapositivas: 20, mismo diseño y guía de marca fijada en la Semana 1.
+- PDF generado a partir de un documento HTML con la misma guía de marca, vía Python + weasyprint.
+
 ## Semana 5 — Algoritmos y complejidad básica: búsqueda, ordenamiento, Big O
 
 ### v1.0 — 2026-09-21

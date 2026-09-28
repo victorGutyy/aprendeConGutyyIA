@@ -1,0 +1,1127 @@
+<title>Buenas Prácticas de Ingeniería: POO, Git y Testing</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  /* =========================================================
+     Aprende con Gutyy IA — Semana 6 (v1.0)
+     Identidad: académico-editorial, claro, un acento, mucho aire.
+     Misma guía de marca fijada en la Semana 1 — sin cambios de
+     identidad, solo aplicada al contenido nuevo.
+     ========================================================= */
+
+  :root{
+    --bg:            #FFFFFF;
+    --bg-alt:        #F5F6FA;
+    --ink:           #171A24;
+    --ink-secondary: #4B4F5E;
+    --ink-tertiary:  #8A8FA3;
+    --accent:        #3548C4;
+    --accent-dark:   #24308C;
+    --accent-tint:   #EAEDFB;
+    --border:        #E2E4EC;
+    --code-bg:       #F3F4F8;
+    --code-border:   #E3E5EE;
+    --code-ink:      #23262F;
+    --code-comment:  #9297A8;
+    --code-string:   #5B5F70;
+
+    --font-display: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-body:    "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-mono:    "IBM Plex Mono", ui-monospace, "Consolas", monospace;
+
+    color-scheme: light;
+  }
+
+  *,*::before,*::after{ box-sizing: border-box; }
+
+  html{
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+  }
+
+  body{
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior: auto; }
+    *{ animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  .grid-field{
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      linear-gradient(to right, rgba(53,72,196,0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(53,72,196,0.05) 1px, transparent 1px);
+    background-size: 48px 48px;
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent 75%);
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent 75%);
+  }
+
+  .brand-mark{
+    position: fixed;
+    top: 28px;
+    left: clamp(24px, 5vw, 64px);
+    z-index: 20;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    pointer-events: none;
+  }
+  .brand-mark strong{
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .brand-mark .dot{ color: var(--accent); }
+
+  .slide-counter{
+    position: fixed;
+    top: 28px;
+    right: clamp(24px, 5vw, 64px);
+    z-index: 20;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--ink-tertiary);
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+  .slide-counter strong{ color: var(--ink); font-weight: 600; }
+
+  .rail{
+    position: fixed;
+    right: clamp(14px, 3vw, 30px);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .rail a{
+    position: relative;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    border: 1px solid var(--border);
+    display: block;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .rail a:hover{ transform: scale(1.3); }
+  .rail a.active{
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .rail a .rail-label{
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    color: var(--ink-secondary);
+    background: var(--bg);
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+  }
+  .rail a:hover .rail-label{ opacity: 1; }
+
+  a:focus-visible,
+  .rail a:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .deck{ position: relative; z-index: 1; }
+
+  section.slide{
+    min-height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    align-items: center;
+    padding: 120px clamp(24px, 8vw, 96px) 96px;
+    border-bottom: 1px solid var(--border);
+  }
+  section.slide.alt{ background: var(--bg-alt); }
+
+  .slide-inner{
+    max-width: 880px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .kicker{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 18px;
+  }
+  .kicker::before{
+    content: "";
+    width: 18px;
+    height: 1px;
+    background: var(--accent);
+    display: inline-block;
+  }
+
+  h1,h2,h3{
+    font-family: var(--font-display);
+    color: var(--ink);
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  h2{
+    font-size: clamp(28px, 3.6vw, 40px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  .lede{
+    font-size: 19px;
+    line-height: 1.6;
+    color: var(--ink-secondary);
+    max-width: 62ch;
+    margin: 22px 0 0;
+  }
+
+  p{ line-height: 1.65; color: var(--ink-secondary); }
+  p.body-text{ font-size: 16.5px; max-width: 66ch; }
+
+  strong.term{
+    color: var(--ink);
+    font-weight: 600;
+    background: linear-gradient(to bottom, transparent 62%, var(--accent-tint) 62%);
+    padding: 0 1px;
+  }
+
+  em.term-accent{
+    font-style: normal;
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+
+  .section-body{ margin-top: 36px; }
+  .section-body > * + *{ margin-top: 20px; }
+
+  .callout{
+    border-left: 2px solid var(--accent);
+    padding: 4px 0 4px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .callout .callout-label{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .callout p{ margin: 0; color: var(--ink); font-size: 16px; }
+
+  .pull-quote{
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 600;
+    color: var(--accent-dark);
+    line-height: 1.5;
+    max-width: 48ch;
+    margin: 0;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    text-wrap: balance;
+  }
+
+  .divider-row{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 34px 0 22px;
+  }
+  .divider-row::after{
+    content:"";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .divider-row .divider-label{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    white-space: nowrap;
+  }
+
+  .code-card{
+    border: 1px solid var(--code-border);
+    background: var(--code-bg);
+    overflow: hidden;
+  }
+  .code-card .code-bar{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--code-border);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+  }
+  .code-card .code-bar .lang-tag{
+    color: var(--accent-dark);
+    font-weight: 500;
+  }
+  .code-card pre{
+    margin: 0;
+    padding: 18px 20px 20px;
+    overflow-x: auto;
+  }
+  .code-card code{
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--code-ink);
+    white-space: pre;
+  }
+  .code-card .cm{ color: var(--code-comment); font-style: italic; }
+  .code-card .kw{ color: var(--accent-dark); font-weight: 600; }
+  .code-card .st{ color: var(--code-string); }
+  .code-card .fn{ color: var(--accent); }
+
+  .code-card.compact pre{ padding: 14px 18px 16px; }
+  .code-card.compact code{ font-size: 13.5px; }
+
+  .code-result{
+    margin-top: 10px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink-secondary);
+  }
+  .code-result .result-tag{
+    color: var(--ink-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 11px;
+  }
+  .code-result .result-val{ color: var(--accent-dark); font-weight: 500; }
+
+  .blocks-grid{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 8px;
+  }
+  .blocks-grid.cols-3{ grid-template-columns: repeat(3, 1fr); }
+  .blocks-grid.cols-5{ grid-template-columns: repeat(5, 1fr); }
+  .block-card{
+    background: var(--bg);
+    padding: 26px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .block-card .block-letter{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+  .block-card h3{
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .block-card p{ font-size: 14.5px; margin: 0; }
+  .block-card .block-example{
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+    font-size: 13px;
+    color: var(--ink-tertiary);
+    font-style: italic;
+  }
+
+  .progression{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 26px;
+  }
+  .progression .chip{
+    border: 1px solid var(--border);
+    background: var(--bg);
+    padding: 8px 14px;
+    font-size: 13px;
+    color: var(--ink-secondary);
+    font-family: var(--font-mono);
+  }
+  .progression .chip strong{ color: var(--ink); font-weight: 600; }
+  .progression .arrow{ color: var(--ink-tertiary); font-family: var(--font-mono); }
+
+  .obj-list{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .obj-list li{
+    display: flex;
+    gap: 20px;
+    padding: 18px 0;
+    border-top: 1px solid var(--border);
+  }
+  .obj-list li:last-child{ border-bottom: 1px solid var(--border); }
+  .obj-list .obj-num{
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-size: 14px;
+    padding-top: 2px;
+    flex-shrink: 0;
+    width: 24px;
+  }
+  .obj-list p{ margin: 0; color: var(--ink); font-size: 16px; }
+
+  .two-col{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  @media (max-width: 760px){
+    .two-col{ grid-template-columns: 1fr; }
+    .blocks-grid{ grid-template-columns: 1fr; }
+    .blocks-grid.cols-3{ grid-template-columns: 1fr; }
+    .blocks-grid.cols-5{ grid-template-columns: 1fr; }
+    section.slide{ padding-top: 96px; }
+    .type-table{ font-size: 13px; }
+  }
+
+  .qa-list{
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .qa-item{
+    padding: 18px 0;
+    border-top: 1px solid var(--border);
+  }
+  .qa-item:last-child{ border-bottom: 1px solid var(--border); }
+  .qa-item .q{
+    display: flex;
+    gap: 14px;
+    font-size: 15.5px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .qa-item .q .q-num{
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .qa-item .a{
+    margin: 8px 0 0 34px;
+    font-size: 14.5px;
+    color: var(--ink-secondary);
+  }
+  .qa-item .a .a-tag{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    margin-right: 8px;
+  }
+
+  .status-row{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--accent-dark);
+    background: var(--accent-tint);
+    border: 1px solid #DADFF6;
+    padding: 10px 16px;
+    width: fit-content;
+  }
+  .status-row .status-dot{
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .meta-list{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    margin-top: 8px;
+  }
+  .meta-list div{ font-size: 14px; color: var(--ink-secondary); }
+  .meta-list dt{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-tertiary);
+    margin: 0 0 3px;
+  }
+  .meta-list dd{ margin: 0; color: var(--ink); font-weight: 500; }
+
+  /* type table */
+  .type-table{
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 14.5px;
+  }
+  .type-table th, .type-table td{
+    text-align: left;
+    padding: 12px 14px;
+    border-top: 1px solid var(--border);
+  }
+  .type-table thead th{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    border-top: none;
+    padding-top: 0;
+  }
+  .type-table tbody tr:last-child td{ border-bottom: 1px solid var(--border); }
+  .type-table td.type-name{
+    font-family: var(--font-mono);
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+  .type-table td.type-ex{ font-family: var(--font-mono); color: var(--ink); }
+
+  .cover{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 0 clamp(24px, 8vw, 96px);
+  }
+  .cover-eyebrow{
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .cover-eyebrow::before{
+    content:"";
+    width: 34px;
+    height: 1px;
+    background: var(--accent);
+  }
+  .cover h1{
+    font-size: clamp(40px, 6.4vw, 76px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    max-width: 14ch;
+    margin-top: 26px;
+  }
+  .cover h1 em{
+    font-style: normal;
+    color: var(--accent);
+  }
+  .cover .cover-sub{
+    font-size: clamp(17px, 2vw, 20px);
+    color: var(--ink-secondary);
+    max-width: 56ch;
+    margin-top: 22px;
+    line-height: 1.6;
+  }
+  .cover-footer{
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    margin-top: 56px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .cover-footer .fmeta dt{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-tertiary);
+    margin: 0 0 4px;
+  }
+  .cover-footer .fmeta dd{
+    margin: 0;
+    font-size: 14.5px;
+    color: var(--ink);
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+  .scroll-cue{
+    position: absolute;
+    bottom: 40px;
+    left: clamp(24px, 8vw, 96px);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .scroll-cue .chevron{
+    display: inline-block;
+    animation: bob 1.8s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce){ .scroll-cue .chevron{ animation: none; } }
+  @keyframes bob{
+    0%,100%{ transform: translateY(0); }
+    50%{ transform: translateY(4px); }
+  }
+
+  footer.end{
+    padding: 64px clamp(24px, 8vw, 96px) 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-tertiary);
+    position: relative;
+    z-index: 1;
+  }
+</style>
+
+<div class="grid-field" aria-hidden="true"></div>
+
+<div class="brand-mark">
+  <strong>Aprende con Gutyy IA</strong><span class="dot">·</span><span>Semana 6</span>
+</div>
+<div class="slide-counter"><strong id="counter-current">01</strong> / 20</div>
+
+<nav class="rail" aria-label="Navegación de diapositivas">
+  <a href="#s01" data-label="Portada" class="active"><span class="rail-label">Portada</span></a>
+  <a href="#s02" data-label="Objetivos"><span class="rail-label">Objetivos</span></a>
+  <a href="#s03" data-label="De funciones a objetos"><span class="rail-label">De funciones a objetos</span></a>
+  <a href="#s04" data-label="Clases y objetos"><span class="rail-label">Clases y objetos</span></a>
+  <a href="#s05" data-label="Instancia vs. clase"><span class="rail-label">Instancia vs. clase</span></a>
+  <a href="#s06" data-label="Git: por qué"><span class="rail-label">Git: por qué</span></a>
+  <a href="#s07" data-label="Git: comandos"><span class="rail-label">Git: comandos</span></a>
+  <a href="#s08" data-label="Testing: assert"><span class="rail-label">Testing: assert</span></a>
+  <a href="#s09" data-label="Testing: pytest"><span class="rail-label">Testing: pytest</span></a>
+  <a href="#s10" data-label="Por qué importa para IA"><span class="rail-label">Por qué importa para IA</span></a>
+  <a href="#s11" data-label="Ejemplo: pseudocódigo"><span class="rail-label">Ejemplo: pseudocódigo</span></a>
+  <a href="#s12" data-label="Ejemplo: la clase"><span class="rail-label">Ejemplo: la clase</span></a>
+  <a href="#s13" data-label="Ejemplo: las pruebas"><span class="rail-label">Ejemplo: las pruebas</span></a>
+  <a href="#s14" data-label="Flujo completo"><span class="rail-label">Flujo completo</span></a>
+  <a href="#s15" data-label="Vigencia técnica"><span class="rail-label">Vigencia técnica</span></a>
+  <a href="#s16" data-label="Errores comunes"><span class="rail-label">Errores comunes</span></a>
+  <a href="#s17" data-label="Ejercicio propuesto"><span class="rail-label">Ejercicio propuesto</span></a>
+  <a href="#s18" data-label="Autoevaluación I"><span class="rail-label">Autoevaluación I</span></a>
+  <a href="#s19" data-label="Autoevaluación II"><span class="rail-label">Autoevaluación II</span></a>
+  <a href="#s20" data-label="Dependencias"><span class="rail-label">Dependencias</span></a>
+</nav>
+
+<main class="deck">
+
+  <!-- 01 — COVER -->
+  <section class="slide" id="s01">
+    <div class="cover">
+      <p class="cover-eyebrow">Aprende con Gutyy IA — Academia de programación, IA y Machine Learning</p>
+      <h1>Buenas prácticas de <em>ingeniería</em></h1>
+      <p class="cover-sub">Semana 6 del roadmap — POO introductoria (clases, atributos, métodos), control de versiones con Git, y pruebas automatizadas con pytest.</p>
+      <div class="cover-footer">
+        <dl class="fmeta"><dt>Nivel</dt><dd>Básico-Intermedio</dd></dl>
+        <dl class="fmeta"><dt>Prerrequisitos</dt><dd>Semanas 3–5</dd></dl>
+        <dl class="fmeta"><dt>Versión</dt><dd>v1.0</dd></dl>
+        <dl class="fmeta"><dt>Fecha</dt><dd>2026-09-28</dd></dl>
+      </div>
+    </div>
+    <div class="scroll-cue"><span>Desplázate</span><span class="chevron">↓</span></div>
+  </section>
+
+  <!-- 02 — OBJETIVOS -->
+  <section class="slide alt" id="s02">
+    <div class="slide-inner">
+      <p class="kicker">Objetivos de aprendizaje</p>
+      <h2>Al terminar esta semana, vas a poder…</h2>
+      <ol class="obj-list section-body" style="margin-top:36px;">
+        <li><span class="obj-num">01</span><p>Explicar qué es la <strong class="term">POO</strong> y crear clases básicas con <em class="term-accent">class</em>, <em class="term-accent">__init__</em> y <em class="term-accent">self</em>.</p></li>
+        <li><span class="obj-num">02</span><p>Diferenciar <strong class="term">atributos de instancia</strong> de <strong class="term">atributos de clase</strong>.</p></li>
+        <li><span class="obj-num">03</span><p>Usar los comandos esenciales de <strong class="term">Git</strong> (init, add, commit, status, log) y un .gitignore.</p></li>
+        <li><span class="obj-num">04</span><p>Escribir <strong class="term">pruebas automatizadas</strong> básicas con <em class="term-accent">pytest</em>.</p></li>
+        <li><span class="obj-num">05</span><p>Combinar las tres prácticas en un mismo proyecto pequeño: una clase, versionada y probada.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 03 — DE FUNCIONES A OBJETOS -->
+  <section class="slide" id="s03">
+    <div class="slide-inner">
+      <p class="kicker">01 · Por qué organizar el código</p>
+      <h2>De funciones sueltas a objetos</h2>
+      <p class="lede">Los datos y las funciones que los manipulan han vivido separados hasta ahora. A medida que un programa crece, esa separación empieza a pesar.</p>
+
+      <div class="section-body">
+        <div class="callout">
+          <span class="callout-label">Analogía · un auto</span>
+          <p>Un auto tiene datos propios (color, velocidad, combustible) y comportamientos que actúan sobre ellos (acelerar, frenar, cargar). Nadie los piensa por separado — son del <em class="term-accent">mismo</em> auto.</p>
+        </div>
+        <p class="body-text">La <strong class="term">POO</strong> agrupa datos (<em class="term-accent">atributos</em>) y las funciones que operan sobre ellos (<em class="term-accent">métodos</em>) en una sola unidad: el <strong class="term">objeto</strong>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 — CLASES Y OBJETOS -->
+  <section class="slide alt" id="s04">
+    <div class="slide-inner">
+      <p class="kicker">02 · Clases y objetos</p>
+      <h2>class, __init__ y self</h2>
+      <p class="lede">Una clase es el molde; un objeto es el resultado concreto de usarlo.</p>
+
+      <div class="section-body">
+        <div class="code-card">
+          <div class="code-bar"><span>estudiante.py</span><span class="lang-tag">python</span></div>
+          <pre><code><span class="kw">class</span> <span class="fn">Estudiante</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, nombre, notas):
+        self.nombre = nombre   <span class="cm"># atributo de instancia</span>
+        self.notas = notas     <span class="cm"># atributo de instancia</span>
+
+    <span class="kw">def</span> <span class="fn">promedio</span>(self):
+        <span class="kw">return</span> <span class="fn">sum</span>(self.notas) / <span class="fn">len</span>(self.notas)
+
+ana = <span class="fn">Estudiante</span>(<span class="st">"Ana"</span>, [6.5, 7.0, 5.8])
+<span class="fn">print</span>(ana.promedio())</code></pre>
+          <div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">6.433333333333334</span></div>
+        </div>
+        <div class="callout">
+          <span class="callout-label">self</span>
+          <p>Representa "el objeto sobre el que se trabaja ahora". Python lo pasa automáticamente al llamar <code style="font-family:var(--font-mono);">ana.promedio()</code> — nunca se pasa a mano.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 — INSTANCIA VS CLASE -->
+  <section class="slide" id="s05">
+    <div class="slide-inner">
+      <p class="kicker">03 · Atributos</p>
+      <h2>Atributos de instancia vs. de clase</h2>
+      <p class="lede">Uno pertenece a un objeto en particular; el otro es compartido por todas las instancias.</p>
+
+      <div class="section-body">
+        <div class="code-card compact">
+          <div class="code-bar"><span>estudiante.py</span><span class="lang-tag">python</span></div>
+          <pre><code><span class="kw">class</span> <span class="fn">Estudiante</span>:
+    total_estudiantes = 0   <span class="cm"># atributo de clase: compartido</span>
+
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, nombre, notas):
+        self.nombre = nombre   <span class="cm"># atributo de instancia: propio</span>
+        Estudiante.total_estudiantes += 1</code></pre>
+        </div>
+        <div class="callout">
+          <span class="callout-label">Punto de confusión clásico</span>
+          <p>Usar una <strong class="term">lista mutable</strong> como atributo de clase hace que todos los objetos compartan (y modifiquen) la misma lista. Los datos propios de cada objeto van en <code style="font-family:var(--font-mono);">__init__</code>, con <code style="font-family:var(--font-mono);">self.</code></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 — GIT: POR QUE -->
+  <section class="slide alt" id="s06">
+    <div class="slide-inner">
+      <p class="kicker">04 · Control de versiones</p>
+      <h2>Git: puntos de guardado del código</h2>
+      <p class="lede">Si un archivo se rompe o se borra por accidente, sin historial la única salida es tener una copia guardada a mano.</p>
+
+      <div class="section-body">
+        <div class="callout">
+          <span class="callout-label">Analogía · puntos de guardado de un videojuego</span>
+          <p>Si algo sale mal, se vuelve al último punto guardado en vez de empezar de nuevo. Un <em class="term-accent">commit</em> es exactamente eso: una fotografía del proyecto completo, con un mensaje que describe qué cambió.</p>
+        </div>
+        <p class="body-text">A diferencia de "Ctrl+Z", el historial de Git no se pierde al cerrar el editor — y funciona igual de bien en un proyecto de una persona que en uno de cien.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 — GIT: COMANDOS -->
+  <section class="slide" id="s07">
+    <div class="slide-inner">
+      <p class="kicker">04 · Control de versiones</p>
+      <h2>Comandos esenciales</h2>
+
+      <div class="section-body">
+        <div class="code-card">
+          <div class="code-bar"><span>terminal</span><span class="lang-tag">bash</span></div>
+          <pre><code><span class="cm"># convierte la carpeta en un repositorio (una sola vez)</span>
+git init
+
+<span class="cm"># marca cambios para el próximo commit</span>
+git add cuenta.py
+
+<span class="cm"># guarda el punto de guardado, con mensaje</span>
+git commit -m <span class="st">"Agrega clase Estudiante"</span>
+
+<span class="cm"># muestra el historial de commits</span>
+git log</code></pre>
+        </div>
+        <div class="callout">
+          <span class="callout-label">.gitignore</span>
+          <p>Le dice a Git qué archivos generados automáticamente (como <code style="font-family:var(--font-mono);">__pycache__/</code>) nunca debe rastrear, porque se regeneran solos.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 — TESTING: ASSERT -->
+  <section class="slide alt" id="s08">
+    <div class="slide-inner">
+      <p class="kicker">05 · Testing automatizado</p>
+      <h2>Probar el código con código</h2>
+      <p class="lede">Probar a mano con print() funciona una vez — pero hay que repetirlo cada vez que el código cambia, y es fácil olvidar un caso.</p>
+
+      <div class="section-body">
+        <div class="code-card compact">
+          <div class="code-bar"><span>assert.py</span><span class="lang-tag">python</span></div>
+          <pre><code><span class="kw">def</span> <span class="fn">promedio</span>(notas):
+    <span class="kw">return</span> <span class="fn">sum</span>(notas) / <span class="fn">len</span>(notas)
+
+<span class="kw">assert</span> <span class="fn">promedio</span>([6.0, 8.0]) == 7.0   <span class="cm"># pasa en silencio</span></code></pre>
+        </div>
+        <p class="body-text">Si la condición de <code style="font-family:var(--font-mono);">assert</code> es verdadera, no pasa nada; si es falsa, Python lanza un error de inmediato.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 09 — TESTING: PYTEST -->
+  <section class="slide" id="s09">
+    <div class="slide-inner">
+      <p class="kicker">05 · Testing automatizado</p>
+      <h2>pytest: el estándar de la industria</h2>
+
+      <div class="section-body">
+        <div class="code-card">
+          <div class="code-bar"><span>test_promedio.py</span><span class="lang-tag">python</span></div>
+          <pre><code><span class="kw">from</span> calculadora <span class="kw">import</span> promedio
+
+<span class="kw">def</span> <span class="fn">test_promedio_de_dos_numeros</span>():
+    <span class="kw">assert</span> <span class="fn">promedio</span>([6.0, 8.0]) == 7.0
+
+<span class="kw">def</span> <span class="fn">test_promedio_con_un_solo_numero</span>():
+    <span class="kw">assert</span> <span class="fn">promedio</span>([5.0]) == 5.0</code></pre>
+        </div>
+        <div class="callout">
+          <span class="callout-label">Descubrimiento automático</span>
+          <p>Cualquier función <code style="font-family:var(--font-mono);">test_*</code> dentro de un archivo <code style="font-family:var(--font-mono);">test_*.py</code> es reconocida por el comando <code style="font-family:var(--font-mono);">pytest</code> sin configuración extra.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 — POR QUE IMPORTA PARA IA/ML -->
+  <section class="slide alt" id="s10">
+    <div class="slide-inner">
+      <p class="kicker">Mirando adelante · IA y Machine Learning</p>
+      <h2>Por qué esto importa para IA/ML</h2>
+
+      <div class="section-body">
+        <div class="callout">
+          <span class="callout-label">scikit-learn usa el mismo patrón de POO</span>
+          <p>Cada modelo es un objeto con métodos <code style="font-family:var(--font-mono);">.fit()</code> y <code style="font-family:var(--font-mono);">.predict()</code> (Módulo 10) — entender clases y <code style="font-family:var(--font-mono);">self</code> hoy es entender esas herramientas más adelante.</p>
+        </div>
+        <p class="body-text">Un modelo entrenado sin Git es casi imposible de reproducir. Y un pipeline de datos sin pruebas puede fallar en silencio: una función de limpieza mal escrita puede arruinar un entrenamiento completo sin lanzar ningún error visible.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 — EJEMPLO: PSEUDOCODIGO -->
+  <section class="slide" id="s11">
+    <div class="slide-inner">
+      <p class="kicker">06 · Ejemplo práctico</p>
+      <h2>CuentaBancaria: modelar, versionar, probar</h2>
+      <p class="lede">Depósitos y retiros, evitando que un retiro deje el saldo negativo.</p>
+
+      <div class="section-body">
+        <div class="code-card compact">
+          <div class="code-bar"><span>cuenta</span><span class="lang-tag">pseudocódigo</span></div>
+          <pre><code><span class="kw">CLASE</span> CuentaBancaria
+    <span class="kw">METODO</span> retirar(monto)
+        <span class="kw">SI</span> monto &gt; self.saldo <span class="kw">ENTONCES</span>
+            <span class="kw">LANZAR ERROR</span> <span class="st">"fondos insuficientes"</span>
+        self.saldo = self.saldo - monto</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 — EJEMPLO: LA CLASE -->
+  <section class="slide alt" id="s12">
+    <div class="slide-inner">
+      <p class="kicker">06 · Ejemplo práctico</p>
+      <h2>Del pseudocódigo al código real</h2>
+
+      <div class="section-body">
+        <div class="code-card">
+          <div class="code-bar"><span>cuenta.py</span><span class="lang-tag">python</span></div>
+          <pre><code><span class="kw">class</span> <span class="fn">CuentaBancaria</span>:
+    banco = <span class="st">"Banco Gutyy"</span>   <span class="cm"># atributo de clase</span>
+
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, titular, saldo_inicial=0):
+        self.titular = titular
+        self.saldo = saldo_inicial
+
+    <span class="kw">def</span> <span class="fn">retirar</span>(self, monto):
+        <span class="kw">if</span> monto &gt; self.saldo:
+            <span class="kw">raise</span> <span class="fn">ValueError</span>(<span class="st">"fondos insuficientes"</span>)
+        self.saldo -= monto</code></pre>
+        </div>
+        <p class="body-text"><code style="font-family:var(--font-mono);">raise ValueError(...)</code> interrumpe la ejecución con un mensaje, en vez de dejar que el saldo quede negativo.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 — EJEMPLO: LAS PRUEBAS -->
+  <section class="slide" id="s13">
+    <div class="slide-inner">
+      <p class="kicker">06 · Ejemplo práctico</p>
+      <h2>Pruebas con pytest</h2>
+
+      <div class="section-body">
+        <div class="code-card">
+          <div class="code-bar"><span>test_cuenta.py</span><span class="lang-tag">python</span></div>
+          <pre><code><span class="kw">import</span> pytest
+<span class="kw">from</span> cuenta <span class="kw">import</span> CuentaBancaria
+
+<span class="kw">def</span> <span class="fn">test_retiro_sin_fondos_lanza_error</span>():
+    cuenta = <span class="fn">CuentaBancaria</span>(<span class="st">"Ana"</span>, saldo_inicial=100)
+    <span class="kw">with</span> pytest.raises(ValueError):
+        cuenta.retirar(500)   <span class="cm"># debe fallar</span></code></pre>
+        </div>
+        <div class="callout">
+          <span class="callout-label">pytest.raises(ValueError)</span>
+          <p>Espera que el código de adentro lance ese error. Si lo lanza, la prueba pasa; si termina sin lanzarlo, la prueba falla.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 — FLUJO COMPLETO -->
+  <section class="slide alt" id="s14">
+    <div class="slide-inner">
+      <p class="kicker">06 · Integrando todo</p>
+      <h2>El flujo de trabajo completo</h2>
+
+      <div class="section-body">
+        <div class="code-card">
+          <div class="code-bar"><span>terminal</span><span class="lang-tag">bash</span></div>
+          <pre><code>git init
+git add cuenta.py test_cuenta.py
+git commit -m <span class="st">"Agrega CuentaBancaria con sus pruebas"</span>
+pytest</code></pre>
+          <div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">3 passed</span></div>
+        </div>
+        <p class="body-text">Un cambio de comportamiento sin su prueba correspondiente, o una prueba sin el código que la haga pasar, es un commit incompleto.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15 — VIGENCIA TECNICA -->
+  <section class="slide" id="s15">
+    <div class="slide-inner">
+      <p class="kicker">Nota de vigencia técnica · 2026</p>
+      <h2>Qué se mantiene y qué evoluciona</h2>
+      <div class="section-body">
+        <div class="status-row">
+          <span class="status-dot"></span>
+          <span>pytest es hoy el estándar de facto de testing en Python, sobre unittest (stdlib)</span>
+        </div>
+        <div class="status-row">
+          <span class="status-dot"></span>
+          <span>Los comandos base de Git no han cambiado desde su creación en 2005</span>
+        </div>
+        <div class="status-row">
+          <span class="status-dot"></span>
+          <span>@dataclass (Python 3.7+) genera __init__ automáticamente para clases de solo-datos</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 16 — ERRORES COMUNES -->
+  <section class="slide alt" id="s16">
+    <div class="slide-inner">
+      <p class="kicker">Antes de seguir</p>
+      <h2>Errores comunes de principiante</h2>
+      <ol class="obj-list section-body" style="margin-top:36px;">
+        <li><span class="obj-num">01</span><p>Olvidar <code style="font-family:var(--font-mono);">self</code> como primer parámetro de un método.</p></li>
+        <li><span class="obj-num">02</span><p>Usar una lista como <strong>atributo de clase</strong> cuando se necesita un atributo de instancia.</p></li>
+        <li><span class="obj-num">03</span><p>Hacer <code style="font-family:var(--font-mono);">git commit</code> sin <code style="font-family:var(--font-mono);">git add</code> del archivo nuevo.</p></li>
+        <li><span class="obj-num">04</span><p>Un único commit gigante con mensaje <em>"cambios"</em>, en vez de commits pequeños y descriptivos.</p></li>
+        <li><span class="obj-num">05</span><p>Pruebas que no verifican nada real, como <code style="font-family:var(--font-mono);">assert True</code>.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 17 — EJERCICIO PROPUESTO -->
+  <section class="slide" id="s17">
+    <div class="slide-inner">
+      <p class="kicker">Practica lo aprendido</p>
+      <h2>Ejercicio propuesto: clase Rectangulo</h2>
+      <div class="section-body">
+        <p class="body-text">Crea una clase <code style="font-family:var(--font-mono);">Rectangulo</code> con atributos <code style="font-family:var(--font-mono);">ancho</code>/<code style="font-family:var(--font-mono);">alto</code>, un atributo de clase <code style="font-family:var(--font-mono);">figuras_creadas</code>, y métodos <code style="font-family:var(--font-mono);">area()</code> y <code style="font-family:var(--font-mono);">perimetro()</code>.</p>
+
+        <div class="callout">
+          <span class="callout-label">Pista</span>
+          <p>Inicializa un repositorio Git y haz un commit con la clase; luego escribe al menos dos pruebas con pytest y haz un segundo commit con el archivo de pruebas.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 18 — AUTOEVALUACION I -->
+  <section class="slide alt" id="s18">
+    <div class="slide-inner">
+      <p class="kicker">Cierre · Parte 1 de 2</p>
+      <h2>Autoevaluación</h2>
+      <div class="qa-list section-body" style="margin-top:30px;">
+        <div class="qa-item">
+          <p class="q"><span class="q-num">01</span><span>¿Qué representa self dentro de un método?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>El objeto sobre el que se llama el método; Python lo pasa automáticamente, nunca se pasa a mano.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">02</span><span>¿Diferencia entre atributo de instancia y de clase?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>El de instancia pertenece a un objeto (definido con <code style="font-family:var(--font-mono);">self.</code> en <code style="font-family:var(--font-mono);">__init__</code>); el de clase es compartido por todas las instancias.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">03</span><span>¿Por qué usar una lista como atributo de clase suele ser un error?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>Todos los objetos terminarían compartiendo y modificando la misma lista, en vez de tener cada uno la suya.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">04</span><span>¿Diferencia entre git add y git commit?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span><code style="font-family:var(--font-mono);">add</code> marca cambios para el próximo punto de guardado; <code style="font-family:var(--font-mono);">commit</code> los guarda de forma permanente, con mensaje.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">05</span><span>¿Para qué sirve un archivo .gitignore?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>Le dice a Git qué archivos generados automáticamente (como <code style="font-family:var(--font-mono);">__pycache__/</code>) nunca debe rastrear.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 19 — AUTOEVALUACION II -->
+  <section class="slide" id="s19">
+    <div class="slide-inner">
+      <p class="kicker">Cierre · Parte 2 de 2</p>
+      <h2>Autoevaluación (continuación)</h2>
+      <div class="qa-list section-body" style="margin-top:30px;">
+        <div class="qa-item">
+          <p class="q"><span class="q-num">06</span><span>¿Qué hace assert condicion cuando condicion es falsa?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>Lanza un error inmediatamente, interrumpiendo la ejecución; si es verdadera, no hace nada visible.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">07</span><span>¿Cómo identifica pytest qué funciones son pruebas?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>Busca archivos y funciones cuyo nombre empiece con <code style="font-family:var(--font-mono);">test_</code>.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">08</span><span>V/F: "assert True siempre pasa, así que confirma que el código funciona."</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>Falso; no verifica ningún valor real y solo da una falsa sensación de seguridad.</p>
+        </div>
+        <div class="qa-item">
+          <p class="q"><span class="q-num">09</span><span>Sin jerga técnica: ¿por qué un equipo de ML necesita Git además de pruebas?</span></p>
+          <p class="a"><span class="a-tag">Respuesta</span>Sin Git es casi imposible saber qué versión de código produjo un modelo entrenado; sin pruebas, un cambio en la preparación de datos puede arruinar un entrenamiento sin que nadie lo note.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 20 — DEPENDENCIAS -->
+  <section class="slide alt" id="s20">
+    <div class="slide-inner">
+      <p class="kicker">Cierre</p>
+      <h2>Verificación de dependencias</h2>
+      <div class="section-body">
+        <p class="body-text">Depende directamente de la Semana 5 (razonar sobre la corrección de una función antes de organizarla dentro de una clase y probarla — <code style="font-family:var(--font-mono);">promedio()</code> reutiliza lógica ya vista) y de la Semana 4 (listas y diccionarios, usados como atributos de instancia). No se introduce ningún concepto matemático nuevo.</p>
+        <p class="body-text">Es prerrequisito directo del Módulo 7 (matemáticas para ML I), donde los ejemplos empiezan a organizarse como clases y funciones probadas, en vez de scripts sueltos.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="end">
+    <span>Aprende con Gutyy IA — Semana 6 · v1.0</span>
+    <span>2026-09-28</span>
+  </footer>
+
+</main>
+
+<script>
+  (function(){
+    var sections = Array.prototype.slice.call(document.querySelectorAll('section.slide'));
+    var dots = Array.prototype.slice.call(document.querySelectorAll('.rail a'));
+    var counter = document.getElementById('counter-current');
+
+    if (!('IntersectionObserver' in window)) return;
+
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting){
+          var idx = sections.indexOf(entry.target);
+          dots.forEach(function(d){ d.classList.remove('active'); });
+          if (dots[idx]) dots[idx].classList.add('active');
+          if (counter) counter.textContent = String(idx + 1).padStart(2, '0');
+        }
+      });
+    }, { threshold: 0.55 });
+
+    sections.forEach(function(s){ io.observe(s); });
+  })();
+</script>
