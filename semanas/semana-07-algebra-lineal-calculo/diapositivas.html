@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Matemáticas para ML I: Álgebra Lineal y Cálculo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  /* =========================================================
+     Aprende con Gutyy IA — Semana 7 (v1.0)
+     Identidad: académico-editorial, claro, un acento, mucho aire.
+     Misma guía de marca fijada en la Semana 1 — sin cambios de
+     identidad, solo aplicada al contenido nuevo.
+     ========================================================= */
+
+  :root{
+    --bg:            #FFFFFF;
+    --bg-alt:        #F5F6FA;
+    --ink:           #171A24;
+    --ink-secondary: #4B4F5E;
+    --ink-tertiary:  #8A8FA3;
+    --accent:        #3548C4;
+    --accent-dark:   #24308C;
+    --accent-tint:   #EAEDFB;
+    --border:        #E2E4EC;
+    --code-bg:       #F3F4F8;
+    --code-border:   #E3E5EE;
+    --code-ink:      #23262F;
+    --code-comment:  #9297A8;
+    --code-string:   #5B5F70;
+
+    --font-display: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-body:    "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-mono:    "IBM Plex Mono", ui-monospace, "Consolas", monospace;
+
+    color-scheme: light;
+  }
+
+  *,*::before,*::after{ box-sizing: border-box; }
+
+  html{
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+  }
+
+  body{
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior: auto; }
+    *{ animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  .grid-field{
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      linear-gradient(to right, rgba(53,72,196,0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(53,72,196,0.05) 1px, transparent 1px);
+    background-size: 48px 48px;
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent 75%);
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent 75%);
+  }
+
+  .brand-mark{
+    position: fixed;
+    top: 28px;
+    left: clamp(24px, 5vw, 64px);
+    z-index: 20;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    pointer-events: none;
+  }
+  .brand-mark strong{
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .brand-mark .dot{ color: var(--accent); }
+
+  .slide-counter{
+    position: fixed;
+    top: 28px;
+    right: clamp(24px, 5vw, 64px);
+    z-index: 20;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--ink-tertiary);
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+  .slide-counter strong{ color: var(--ink); font-weight: 600; }
+
+  .rail{
+    position: fixed;
+    right: clamp(14px, 3vw, 30px);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .rail a{
+    position: relative;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    border: 1px solid var(--border);
+    display: block;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .rail a:hover{ transform: scale(1.3); }
+  .rail a.active{
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .rail a .rail-label{
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    color: var(--ink-secondary);
+    background: var(--bg);
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+  }
+  .rail a:hover .rail-label{ opacity: 1; }
+
+  a:focus-visible,
+  .rail a:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .deck{ position: relative; z-index: 1; }
+
+  section.slide{
+    min-height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    align-items: center;
+    padding: 120px clamp(24px, 8vw, 96px) 96px;
+    border-bottom: 1px solid var(--border);
+  }
+  section.slide.alt{ background: var(--bg-alt); }
+
+  .slide-inner{
+    max-width: 880px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .kicker{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 18px;
+  }
+  .kicker::before{
+    content: "";
+    width: 18px;
+    height: 1px;
+    background: var(--accent);
+    display: inline-block;
+  }
+
+  h1,h2,h3{
+    font-family: var(--font-display);
+    color: var(--ink);
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  h2{
+    font-size: clamp(28px, 3.6vw, 40px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  .lede{
+    font-size: 19px;
+    line-height: 1.6;
+    color: var(--ink-secondary);
+    max-width: 62ch;
+    margin: 22px 0 0;
+  }
+
+  p{ line-height: 1.65; color: var(--ink-secondary); }
+  p.body-text{ font-size: 16.5px; max-width: 66ch; }
+
+  strong.term{
+    color: var(--ink);
+    font-weight: 600;
+    background: linear-gradient(to bottom, transparent 62%, var(--accent-tint) 62%);
+    padding: 0 1px;
+  }
+
+  em.term-accent{
+    font-style: normal;
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+
+  .section-body{ margin-top: 36px; }
+  .section-body > * + *{ margin-top: 20px; }
+
+  .callout{
+    border-left: 2px solid var(--accent);
+    padding: 4px 0 4px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .callout .callout-label{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .callout p{ margin: 0; color: var(--ink); font-size: 16px; }
+
+  .pull-quote{
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 600;
+    color: var(--accent-dark);
+    line-height: 1.5;
+    max-width: 48ch;
+    margin: 0;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    text-wrap: balance;
+  }
+
+  .divider-row{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 34px 0 22px;
+  }
+  .divider-row::after{
+    content:"";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .divider-row .divider-label{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    white-space: nowrap;
+  }
+
+  .code-card{
+    border: 1px solid var(--code-border);
+    background: var(--code-bg);
+    overflow: hidden;
+  }
+  .code-card .code-bar{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--code-border);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+  }
+  .code-card .code-bar .lang-tag{
+    color: var(--accent-dark);
+    font-weight: 500;
+  }
+  .code-card pre{
+    margin: 0;
+    padding: 18px 20px 20px;
+    overflow-x: auto;
+  }
+  .code-card code{
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--code-ink);
+    white-space: pre;
+  }
+  .code-card .cm{ color: var(--code-comment); font-style: italic; }
+  .code-card .kw{ color: var(--accent-dark); font-weight: 600; }
+  .code-card .st{ color: var(--code-string); }
+  .code-card .fn{ color: var(--accent); }
+
+  .code-card.compact pre{ padding: 14px 18px 16px; }
+  .code-card.compact code{ font-size: 13.5px; }
+
+  .code-result{
+    margin-top: 10px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink-secondary);
+  }
+  .code-result .result-tag{
+    color: var(--ink-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 11px;
+  }
+  .code-result .result-val{ color: var(--accent-dark); font-weight: 500; }
+
+  .blocks-grid{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 8px;
+  }
+  .blocks-grid.cols-3{ grid-template-columns: repeat(3, 1fr); }
+  .blocks-grid.cols-5{ grid-template-columns: repeat(5, 1fr); }
+  .block-card{
+    background: var(--bg);
+    padding: 26px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .block-card .block-letter{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+  .block-card h3{
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .block-card p{ font-size: 14.5px; margin: 0; }
+  .block-card .block-example{
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+    font-size: 13px;
+    color: var(--ink-tertiary);
+    font-style: italic;
+  }
+
+  .progression{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 26px;
+  }
+  .progression .chip{
+    border: 1px solid var(--border);
+    background: var(--bg);
+    padding: 8px 14px;
+    font-size: 13px;
+    color: var(--ink-secondary);
+    font-family: var(--font-mono);
+  }
+  .progression .chip strong{ color: var(--ink); font-weight: 600; }
+  .progression .arrow{ color: var(--ink-tertiary); font-family: var(--font-mono); }
+
+  .obj-list{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .obj-list li{
+    display: flex;
+    gap: 20px;
+    padding: 18px 0;
+    border-top: 1px solid var(--border);
+  }
+  .obj-list li:last-child{ border-bottom: 1px solid var(--border); }
+  .obj-list .obj-num{
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-size: 14px;
+    padding-top: 2px;
+    flex-shrink: 0;
+    width: 24px;
+  }
+  .obj-list p{ margin: 0; color: var(--ink); font-size: 16px; }
+
+  .two-col{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  @media (max-width: 760px){
+    .two-col{ grid-template-columns: 1fr; }
+    .blocks-grid{ grid-template-columns: 1fr; }
+    .blocks-grid.cols-3{ grid-template-columns: 1fr; }
+    .blocks-grid.cols-5{ grid-template-columns: 1fr; }
+    section.slide{ padding-top: 96px; }
+    .type-table{ font-size: 13px; }
+  }
+
+  .qa-list{
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .qa-item{
+    padding: 18px 0;
+    border-top: 1px solid var(--border);
+  }
+  .qa-item:last-child{ border-bottom: 1px solid var(--border); }
+  .qa-item .q{
+    display: flex;
+    gap: 14px;
+    font-size: 15.5px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .qa-item .q .q-num{
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .qa-item .a{
+    margin: 8px 0 0 34px;
+    font-size: 14.5px;
+    color: var(--ink-secondary);
+  }
+  .qa-item .a .a-tag{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    margin-right: 8px;
+  }
+
+  .status-row{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--accent-dark);
+    background: var(--accent-tint);
+    border: 1px solid #DADFF6;
+    padding: 10px 16px;
+    width: fit-content;
+  }
+  .status-row .status-dot{
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .meta-list{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    margin-top: 8px;
+  }
+  .meta-list div{ font-size: 14px; color: var(--ink-secondary); }
+  .meta-list dt{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-tertiary);
+    margin: 0 0 3px;
+  }
+  .meta-list dd{ margin: 0; color: var(--ink); font-weight: 500; }
+
+  /* type table */
+  .type-table{
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 14.5px;
+  }
+  .type-table th, .type-table td{
+    text-align: left;
+    padding: 12px 14px;
+    border-top: 1px solid var(--border);
+  }
+  .type-table thead th{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    border-top: none;
+    padding-top: 0;
+  }
+  .type-table tbody tr:last-child td{ border-bottom: 1px solid var(--border); }
+  .type-table td.type-name{
+    font-family: var(--font-mono);
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+  .type-table td.type-ex{ font-family: var(--font-mono); color: var(--ink); }
+
+  .cover{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 0 clamp(24px, 8vw, 96px);
+  }
+  .cover-eyebrow{
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .cover-eyebrow::before{
+    content:"";
+    width: 34px;
+    height: 1px;
+    background: var(--accent);
+  }
+  .cover h1{
+    font-size: clamp(40px, 6.4vw, 76px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    max-width: 14ch;
+    margin-top: 26px;
+  }
+  .cover h1 em{
+    font-style: normal;
+    color: var(--accent);
+  }
+  .cover .cover-sub{
+    font-size: clamp(17px, 2vw, 20px);
+    color: var(--ink-secondary);
+    max-width: 56ch;
+    margin-top: 22px;
+    line-height: 1.6;
+  }
+  .cover-footer{
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    margin-top: 56px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .cover-footer .fmeta dt{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-tertiary);
+    margin: 0 0 4px;
+  }
+  .cover-footer .fmeta dd{
+    margin: 0;
+    font-size: 14.5px;
+    color: var(--ink);
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+  .scroll-cue{
+    position: absolute;
+    bottom: 40px;
+    left: clamp(24px, 8vw, 96px);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .scroll-cue .chevron{
+    display: inline-block;
+    animation: bob 1.8s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce){ .scroll-cue .chevron{ animation: none; } }
+  @keyframes bob{
+    0%,100%{ transform: translateY(0); }
+    50%{ transform: translateY(4px); }
+  }
+
+  footer.end{
+    padding: 64px clamp(24px, 8vw, 96px) 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-tertiary);
+    position: relative;
+    z-index: 1;
+  }
+</style>
+</head>
+<body>
+<div class="grid-field" aria-hidden="true"></div>
+
+<div class="brand-mark">
+  <strong>Aprende con Gutyy IA</strong><span class="dot">·</span><span>Semana 7</span>
+</div>
+<div class="slide-counter"><strong id="counter-current">01</strong> / 21</div>
+
+<nav class="rail" aria-label="Navegación de diapositivas">
+  <a href="#s01" data-label="Portada" class="active"><span class="rail-label">Portada</span></a>
+  <a href="#s02" data-label="Objetivos"><span class="rail-label">Objetivos</span></a>
+  <a href="#s03" data-label="Dos ideas"><span class="rail-label">Dos ideas</span></a>
+  <a href="#s04" data-label="Vectores"><span class="rail-label">Vectores</span></a>
+  <a href="#s05" data-label="Producto punto"><span class="rail-label">Producto punto</span></a>
+  <a href="#s06" data-label="Qué significa"><span class="rail-label">Qué significa</span></a>
+  <a href="#s07" data-label="Matrices"><span class="rail-label">Matrices</span></a>
+  <a href="#s08" data-label="Derivada"><span class="rail-label">Derivada</span></a>
+  <a href="#s09" data-label="Derivada en código"><span class="rail-label">Derivada en código</span></a>
+  <a href="#s10" data-label="Descenso"><span class="rail-label">Descenso</span></a>
+  <a href="#s11" data-label="Tasa de aprendizaje"><span class="rail-label">Tasa de aprendizaje</span></a>
+  <a href="#s12" data-label="Por qué importa"><span class="rail-label">Por qué importa</span></a>
+  <a href="#s13" data-label="Neurona: pseudocódigo"><span class="rail-label">Neurona: pseudocódigo</span></a>
+  <a href="#s14" data-label="Neurona: código"><span class="rail-label">Neurona: código</span></a>
+  <a href="#s15" data-label="Pruebas"><span class="rail-label">Pruebas</span></a>
+  <a href="#s16" data-label="Vigencia"><span class="rail-label">Vigencia</span></a>
+  <a href="#s17" data-label="Errores comunes"><span class="rail-label">Errores comunes</span></a>
+  <a href="#s18" data-label="Ejercicio"><span class="rail-label">Ejercicio</span></a>
+  <a href="#s19" data-label="Autoevaluación I"><span class="rail-label">Autoevaluación I</span></a>
+  <a href="#s20" data-label="Autoevaluación II"><span class="rail-label">Autoevaluación II</span></a>
+  <a href="#s21" data-label="Dependencias"><span class="rail-label">Dependencias</span></a>
+</nav>
+
+<main class="deck">
+
+  <section class="slide" id="s01">
+    <div class="cover">
+      <p class="cover-eyebrow">Aprende con Gutyy IA — Academia de programación, IA y Machine Learning</p>
+      <h1>Álgebra lineal y <em>cálculo</em> esencial</h1>
+      <p class="cover-sub">Semana 7 del roadmap — vectores, matrices, producto punto, derivadas y descenso del gradiente: las matemáticas detrás de entrenar un modelo.</p>
+      <div class="cover-footer">
+        <dl class="fmeta"><dt>Nivel</dt><dd>Intermedio</dd></dl>
+        <dl class="fmeta"><dt>Prerrequisitos</dt><dd>Semanas 3–6</dd></dl>
+        <dl class="fmeta"><dt>Versión</dt><dd>v1.0</dd></dl>
+        <dl class="fmeta"><dt>Fecha</dt><dd>2026-10-05</dd></dl>
+      </div>
+    </div>
+    <div class="scroll-cue"><span>Desplázate</span><span class="chevron">↓</span></div>
+  </section>
+
+  <!-- 02 — OBJETIVOS -->
+  <section class="slide alt" id="s02">
+    <div class="slide-inner">
+      <p class="kicker">Objetivos de aprendizaje</p>
+      <h2>Al terminar esta semana, vas a poder…</h2>
+      <ol class="obj-list section-body" style="margin-top:36px;"><li><span class="obj-num">01</span><p>Representar <strong class="term">vectores</strong> y <strong class="term">matrices</strong> como listas en Python.</p></li><li><span class="obj-num">02</span><p>Calcular el <strong class="term">producto punto</strong> y el producto matriz-vector, y explicar qué significan.</p></li><li><span class="obj-num">03</span><p>Explicar qué es una <strong class="term">derivada</strong> (la pendiente en un punto) y aproximarla en código.</p></li><li><span class="obj-num">04</span><p>Programar el <strong class="term">descenso del gradiente</strong> y explicar la <em class="term-accent">tasa de aprendizaje</em>.</p></li><li><span class="obj-num">05</span><p>Ver cómo todo se combina en una neurona simple que aprende un parámetro.</p></li></ol>
+    </div>
+  </section>
+
+  <!-- 03 — DOS IDEAS -->
+  <section class="slide" id="s03">
+    <div class="slide-inner">
+      <p class="kicker">01 · El panorama</p>
+      <h2>Las matemáticas del ML, en dos ideas</h2>
+      <p class="lede">Casi todo el Machine Learning se apoya en estas dos piezas.</p>
+      <div class="section-body"><div class="blocks-grid cols-3" style="grid-template-columns:repeat(2,1fr);"><div class="block-card"><span class="block-letter">A</span><h3>Álgebra lineal</h3><p>Manejar <em class="term-accent">muchos números a la vez</em>: cada dato de entrenamiento es una lista de números.</p></div><div class="block-card"><span class="block-letter">B</span><h3>Cálculo</h3><p>Saber <em class="term-accent">hacia dónde mover un número</em> para que un error disminuya.</p></div></div><div class="callout"><span class="callout-label">Hoy</span><p>Sin demostraciones: intuición + código en Python puro. NumPy llega en la Semana 9, cuando ya entiendas qué hace por debajo.</p></div></div>
+    </div>
+  </section>
+
+  <!-- 04 — VECTORES -->
+  <section class="slide alt" id="s04">
+    <div class="slide-inner">
+      <p class="kicker">02 · Vectores</p>
+      <h2>Vectores: una lista de características</h2>
+      <div class="section-body"><div class="callout"><span class="callout-label">Analogía · la ficha de un jugador</span><p><code style="font-family:var(--font-mono);">[goles, asistencias, minutos]</code>: una lista ordenada donde la <em class="term-accent">posición</em> tiene significado.</p></div><div class="code-card">
+          <div class="code-bar"><span>vectores.py</span><span class="lang-tag">python</span></div>
+          <pre><code>jugador_a = [12, 5, 2700]
+jugador_b = [3, 9, 1800]
+
+<span class="cm"># Suma: posición con posición</span>
+suma = [x + y <span class="kw">for</span> x, y <span class="kw">in</span> <span class="fn">zip</span>(jugador_a, jugador_b)]
+<span class="cm"># Escalar: multiplicar cada posición</span>
+doble = [2 * x <span class="kw">for</span> x <span class="kw">in</span> jugador_a]</code></pre>
+          <div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">suma = [15, 14, 4500]  ·  doble = [24, 10, 5400]</span></div>
+        </div><p class="body-text">En ML <strong class="term">cada dato es un vector</strong>: una casa, una imagen, incluso una palabra (un <em class="term-accent">embedding</em>).</p></div>
+    </div>
+  </section>
+
+  <!-- 05 — PRODUCTO PUNTO -->
+  <section class="slide" id="s05">
+    <div class="slide-inner">
+      <p class="kicker">03 · Producto punto</p>
+      <h2>El producto punto: dos vectores, un número</h2>
+      <div class="section-body"><div class="callout"><span class="callout-label">Analogía · la cuenta del súper</span><p>Compras <code style="font-family:var(--font-mono);">[2, 1, 3]</code> unidades a precios <code style="font-family:var(--font-mono);">[4.0, 0.5, 2.0]</code>: <code style="font-family:var(--font-mono);">2·4.0 + 1·0.5 + 3·2.0 = 14.5</code>.</p></div><div class="code-card">
+          <div class="code-bar"><span>algebra.py</span><span class="lang-tag">python</span></div>
+          <pre><code><span class="kw">def</span> <span class="fn">producto_punto</span>(a: list[float], b: list[float]) -> float:
+    <span class="st">"""Suma de multiplicar componente a componente."""</span>
+    <span class="kw">if</span> <span class="fn">len</span>(a) != <span class="fn">len</span>(b):
+        <span class="cm"># Fallar rápido: un error claro vale más que un resultado silenciosamente erróneo.</span>
+        <span class="kw">raise</span> <span class="fn">ValueError</span>(<span class="st">"Los vectores deben tener la misma longitud"</span>)
+    <span class="kw">return</span> <span class="fn">sum</span>(x * y <span class="kw">for</span> x, y <span class="kw">in</span> <span class="fn">zip</span>(a, b))</code></pre>
+          <div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">producto_punto([2, 1, 3], [4.0, 0.5, 2.0]) → 14.5</span></div>
+        </div></div>
+    </div>
+  </section>
+
+  <!-- 06 — QUÉ SIGNIFICA -->
+  <section class="slide alt" id="s06">
+    <div class="slide-inner">
+      <p class="kicker">03 · Producto punto</p>
+      <h2>Qué mide el producto punto</h2>
+      <div class="section-body"><p class="lede" style="margin-top:0;">Mide cuánto «coinciden» dos vectores.</p><table class="type-table"><thead><tr><th>Caso</th><th>Ejemplo</th><th>Resultado</th></tr></thead><tbody><tr><td class="type-name">Misma dirección</td><td class="type-ex">[1,2,3] · [2,4,6]</td><td class="type-ex">28 (grande)</td></tr><tr><td class="type-name">Perpendiculares</td><td class="type-ex">[1,2,3] · [3,0,-1]</td><td class="type-ex">0</td></tr><tr><td class="type-name">Opuestos</td><td class="type-ex">[1,2,3] · [-1,-2,-3]</td><td class="type-ex">-14 (negativo)</td></tr></tbody></table><div class="callout"><span class="callout-label">En ML</span><p>Una neurona calcula <code style="font-family:var(--font-mono);">entradas · pesos</code>; un buscador compara textos con el producto punto normalizado (<em class="term-accent">similitud coseno</em>).</p></div></div>
+    </div>
+  </section>
+
+  <!-- 07 — MATRICES -->
+  <section class="slide" id="s07">
+    <div class="slide-inner">
+      <p class="kicker">04 · Matrices</p>
+      <h2>Matrices: una tabla de números</h2>
+      <div class="section-body"><p class="body-text">Una <strong class="term">matriz</strong> es una lista de filas; cada fila es un vector. El <em class="term-accent">producto matriz-vector</em> hace un producto punto de cada fila con el vector.</p><div class="code-card">
+          <div class="code-bar"><span>algebra.py</span><span class="lang-tag">python</span></div>
+          <pre><code>matriz = [[2, 1],
+          [0, 3]]
+
+<span class="kw">def</span> <span class="fn">matriz_por_vector</span>(matriz, v):
+    <span class="kw">return</span> [<span class="fn">producto_punto</span>(fila, v) <span class="kw">for</span> fila <span class="kw">in</span> matriz]
+
+<span class="fn">print</span>(<span class="fn">matriz_por_vector</span>(matriz, [1, 2]))</code></pre>
+          <div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">[4, 6]  ← fila 1: 2·1+1·2 = 4 · fila 2: 0·1+3·2 = 6</span></div>
+        </div><div class="callout"><span class="callout-label">En ML</span><p>Una capa de red neuronal es una matriz de pesos; aplicarla a un dato es esta operación. Costo: <code style="font-family:var(--font-mono);">O(m·n)</code> (Semana 5).</p></div></div>
+    </div>
+  </section>
+
+  <!-- 08 — DERIVADA -->
+  <section class="slide alt" id="s08">
+    <div class="slide-inner">
+      <p class="kicker">05 · Cálculo</p>
+      <h2>La derivada: la pendiente en un punto</h2>
+      <div class="section-body"><div class="callout"><span class="callout-label">Analogía · la ladera de una montaña</span><p>La pendiente te dice qué tan empinado es el suelo <em class="term-accent">justo donde estás</em> y hacia dónde sube.</p></div><table class="type-table"><thead><tr><th>Derivada</th><th>La función…</th></tr></thead><tbody><tr><td class="type-name">Positiva</td><td>sube al avanzar a la derecha</td></tr><tr><td class="type-name">Negativa</td><td>baja</td></tr><tr><td class="type-name">Cero</td><td>punto plano: cima o valle</td></tr></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- 09 — DERIVADA EN CÓDIGO -->
+  <section class="slide" id="s09">
+    <div class="slide-inner">
+      <p class="kicker">05 · Cálculo</p>
+      <h2>Aproximar la derivada en código</h2>
+      <div class="section-body"><div class="code-card">
+          <div class="code-bar"><span>algebra.py</span><span class="lang-tag">python</span></div>
+          <pre><code><span class="kw">def</span> <span class="fn">derivada_numerica</span>(f, x: float, h: float = 1e-6) -> float:
+    <span class="st">"""Pendiente aproximada de f en x (diferencia central)."""</span>
+    <span class="kw">return</span> (f(x + h) - f(x - h)) / (2 * h)
+
+<span class="fn">print</span>(<span class="fn">round</span>(<span class="fn">derivada_numerica</span>(<span class="kw">lambda</span> x: x ** 2, 3), 4))</code></pre>
+          <div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">6.0  ← la regla 2x da 2·3 = 6</span></div>
+        </div><p class="body-text">Se mide la pendiente entre dos puntos muy cercanos. Nótese que se pasa una <strong class="term">función como argumento</strong>: en Python las funciones también son valores.</p></div>
+    </div>
+  </section>
+
+  <!-- 10 — DESCENSO -->
+  <section class="slide alt" id="s10">
+    <div class="slide-inner">
+      <p class="kicker">06 · Descenso del gradiente</p>
+      <h2>Descenso del gradiente: bajar el cerro con niebla</h2>
+      <div class="section-body"><div class="callout"><span class="callout-label">Analogía</span><p>No ves el valle, pero sientes la pendiente. Da un paso pequeño <em class="term-accent">contra</em> la pendiente y repite.</p></div><div class="code-card">
+          <div class="code-bar"><span>algebra.py</span><span class="lang-tag">python</span></div>
+          <pre><code><span class="kw">def</span> <span class="fn">descenso_gradiente</span>(f, x_inicial, tasa=0.1, pasos=50):
+    x = x_inicial
+    <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(pasos):
+        x = x - tasa * <span class="fn">derivada_numerica</span>(f, x)
+    <span class="kw">return</span> x
+
+error = <span class="kw">lambda</span> x: (x - 3) ** 2   <span class="cm"># mínimo en x = 3</span>
+<span class="fn">print</span>(<span class="fn">round</span>(<span class="fn">descenso_gradiente</span>(error, 0), 4))</code></pre>
+          <div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">3.0</span></div>
+        </div><div class="progression"><span class="chip">0</span><span class="arrow">→</span><span class="chip">0.6</span><span class="arrow">→</span><span class="chip">1.08</span><span class="arrow">→</span><span class="chip">1.464</span><span class="arrow">→</span><span class="chip">1.771</span><span class="arrow">→</span><span class="chip"><strong>3</strong></span></div></div>
+    </div>
+  </section>
+
+  <!-- 11 — TASA DE APRENDIZAJE -->
+  <section class="slide" id="s11">
+    <div class="slide-inner">
+      <p class="kicker">06 · Descenso del gradiente</p>
+      <h2>La tasa de aprendizaje</h2>
+      <div class="section-body"><div class="blocks-grid cols-3"><div class="block-card"><span class="block-letter">MUY PEQUEÑA</span><h3>Lento</h3><p>Avanza con seguridad pero necesita muchísimos pasos.</p></div><div class="block-card"><span class="block-letter">ADECUADA</span><h3>Converge</h3><p>Pasos que se acortan solos al acercarse al valle.</p></div><div class="block-card"><span class="block-letter">MUY GRANDE</span><h3>Diverge</h3><p>Se pasa de largo y rebota cada vez más lejos.</p></div></div><div class="callout"><span class="callout-label">Regla</span><p><code style="font-family:var(--font-mono);">x_nuevo = x - tasa * derivada(x)</code>. Elegir bien la tasa es una de las decisiones más prácticas del ML.</p></div></div>
+    </div>
+  </section>
+
+  <!-- 12 — POR QUÉ IMPORTA -->
+  <section class="slide alt" id="s12">
+    <div class="slide-inner">
+      <p class="kicker">07 · Para IA/ML</p>
+      <h2>Por qué esto importa para IA/ML</h2>
+      <div class="section-body"><ol class="obj-list" style="margin:0;"><li><span class="obj-num">01</span><p><strong class="term">Entrenar = minimizar un error.</strong> Se define qué tan mal predice el modelo y se baja esa montaña.</p></li><li><span class="obj-num">02</span><p><strong class="term">Pesos = vectores y matrices.</strong> Predecir es producto punto / matriz-vector.</p></li><li><span class="obj-num">03</span><p><strong class="term">Muchas dimensiones.</strong> Con millones de pesos el gradiente es un vector (una derivada por peso); PyTorch lo calcula solo (Semana 11).</p></li></ol></div>
+    </div>
+  </section>
+
+  <!-- 13 — NEURONA: PSEUDOCÓDIGO -->
+  <section class="slide" id="s13">
+    <div class="slide-inner">
+      <p class="kicker">08 · Ejemplo práctico</p>
+      <h2>Una neurona que aprende un peso</h2>
+      <div class="section-body"><p class="body-text">Datos <code style="font-family:var(--font-mono);">(1,2), (2,4), (3,6)</code>. Objetivo: hallar <code style="font-family:var(--font-mono);">w</code> tal que <code style="font-family:var(--font-mono);">salida ≈ w · entrada</code>.</p><div class="code-card">
+          <div class="code-bar"><span>pseudocodigo</span><span class="lang-tag">python</span></div>
+          <pre><code>w ← 0
+repetir 100 veces:
+    para cada ejemplo (x, y): error = w·x − y
+    gradiente ← promedio de 2 · error · x
+    w ← w − tasa · gradiente
+mostrar w</code></pre>
+        </div></div>
+    </div>
+  </section>
+
+  <!-- 14 — NEURONA: CÓDIGO -->
+  <section class="slide alt" id="s14">
+    <div class="slide-inner">
+      <p class="kicker">08 · Ejemplo práctico</p>
+      <h2>Del pseudocódigo al código real</h2>
+      <div class="section-body"><div class="code-card">
+          <div class="code-bar"><span>neurona.py</span><span class="lang-tag">python</span></div>
+          <pre><code>datos = [(1, 2), (2, 4), (3, 6)]   <span class="cm"># (entrada, salida esperada)</span>
+w = 0.0                            <span class="cm"># el peso que debe aprender el modelo</span>
+tasa = 0.05
+
+<span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(100):
+    <span class="cm"># Derivada del error cuadrático medio respecto a w</span>
+    gradiente = <span class="fn">sum</span>(2 * (w * x - y) * x <span class="kw">for</span> x, y <span class="kw">in</span> datos) / <span class="fn">len</span>(datos)
+    w = w - tasa * gradiente
+
+<span class="fn">print</span>(<span class="fn">round</span>(w, 4))</code></pre>
+          <div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">2.0  ← el modelo descubrió: salida = 2 · entrada</span></div>
+        </div><div class="callout"><span class="callout-label">Esto es entrenar</span><p>Datos, un parámetro, una medida de error y descenso del gradiente. El Deep Learning es una versión más grande del mismo bucle.</p></div></div>
+    </div>
+  </section>
+
+  <!-- 15 — PRUEBAS -->
+  <section class="slide" id="s15">
+    <div class="slide-inner">
+      <p class="kicker">08 · Ejemplo práctico</p>
+      <h2>Pruebas con pytest</h2>
+      <div class="section-body"><div class="code-card">
+          <div class="code-bar"><span>test_algebra.py</span><span class="lang-tag">python</span></div>
+          <pre><code><span class="kw">import</span> pytest
+<span class="kw">from</span> algebra <span class="kw">import</span> producto_punto, matriz_por_vector, derivada_numerica
+
+<span class="kw">def</span> <span class="fn">test_producto_punto</span>():
+    <span class="kw">assert</span> producto_punto([1, 2, 3], [4, 5, 6]) == 32
+
+<span class="kw">def</span> <span class="fn">test_longitudes_distintas</span>():
+    <span class="kw">with</span> pytest.raises(ValueError):
+        producto_punto([1, 2], [1, 2, 3])
+
+<span class="kw">def</span> <span class="fn">test_derivada</span>():
+    <span class="cm"># Con decimales nunca se compara con ==</span>
+    <span class="kw">assert</span> derivada_numerica(<span class="kw">lambda</span> x: x ** 2, 3) == pytest.approx(6, abs=1e-4)</code></pre>
+          <div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">5 passed</span></div>
+        </div></div>
+    </div>
+  </section>
+
+  <!-- 16 — VIGENCIA -->
+  <section class="slide alt" id="s16">
+    <div class="slide-inner">
+      <p class="kicker">09 · Vigencia técnica</p>
+      <h2>Vigencia técnica (2026)</h2>
+      <div class="section-body"><ol class="obj-list" style="margin:0;"><li><span class="obj-num">01</span><p><strong class="term">NumPy</strong> hace esto mismo (<code style="font-family:var(--font-mono);">np.dot</code>, operador <code style="font-family:var(--font-mono);">@</code>) mucho más rápido. Hoy lo escribimos a mano a propósito.</p></li><li><span class="obj-num">02</span><p><strong class="term">Autodiferenciación:</strong> PyTorch y JAX calculan gradientes exactos; la derivada numérica es solo didáctica.</p></li><li><span class="obj-num">03</span><p><strong class="term">Adam/AdamW</strong> es el optimizador habitual hoy: variante del descenso con tasa adaptativa por peso.</p></li></ol></div>
+    </div>
+  </section>
+
+  <!-- 17 — ERRORES COMUNES -->
+  <section class="slide" id="s17">
+    <div class="slide-inner">
+      <p class="kicker">10 · Antes de seguir</p>
+      <h2>Errores comunes de principiante</h2>
+      <ol class="obj-list section-body" style="margin-top:36px;"><li><span class="obj-num">01</span><p>Producto punto de vectores de distinta longitud: <code style="font-family:var(--font-mono);">zip</code> corta en silencio al más corto.</p></li><li><span class="obj-num">02</span><p>Confundir producto punto (un número) con operar componente a componente (un vector).</p></li><li><span class="obj-num">03</span><p>Comparar decimales con <code style="font-family:var(--font-mono);">==</code> en pruebas: usar <code style="font-family:var(--font-mono);">pytest.approx</code>.</p></li><li><span class="obj-num">04</span><p>Restar el gradiente con el signo equivocado: se sube la montaña en vez de bajarla.</p></li><li><span class="obj-num">05</span><p>Tasa de aprendizaje demasiado grande: el error crece en vez de bajar.</p></li></ol>
+    </div>
+  </section>
+
+  <!-- 18 — EJERCICIO -->
+  <section class="slide alt" id="s18">
+    <div class="slide-inner">
+      <p class="kicker">11 · Practica</p>
+      <h2>Ejercicio propuesto: similitud coseno</h2>
+      <div class="section-body"><p class="body-text">Escribe <code style="font-family:var(--font-mono);">similitud_coseno(a, b)</code> = <code style="font-family:var(--font-mono);">producto_punto(a, b) / (norma(a) * norma(b))</code>, con <code style="font-family:var(--font-mono);">norma(v)</code> = raíz de <code style="font-family:var(--font-mono);">producto_punto(v, v)</code> (usa <code style="font-family:var(--font-mono);">math.sqrt</code>). Debe dar <code style="font-family:var(--font-mono);">1.0</code> para [1,2,3] y [2,4,6], y <code style="font-family:var(--font-mono);">0.0</code> para [1,2,3] y [3,0,-1].</p><div class="callout"><span class="callout-label">Pista</span><p>Cuida el vector de ceros (norma 0): decide cómo manejarlo y pruébalo. Mínimo 3 pruebas y 2 commits en Git.</p></div></div>
+    </div>
+  </section>
+
+  <!-- 19 — AUTOEVALUACIÓN I -->
+  <section class="slide" id="s19">
+    <div class="slide-inner">
+      <p class="kicker">Cierre · Parte 1 de 2</p>
+      <h2>Autoevaluación</h2>
+      <div class="qa-list section-body" style="margin-top:30px;"><div class="qa-item"><p class="q"><span class="q-num">01</span><span>¿Qué es un vector en ML?</span></p><p class="a"><span class="a-tag">Respuesta</span>Una lista ordenada de números donde cada posición tiene significado; cada dato suele ser un vector de características.</p></div><div class="qa-item"><p class="q"><span class="q-num">02</span><span>Producto punto de [1,2,3] y [4,5,6]</span></p><p class="a"><span class="a-tag">Respuesta</span>1·4 + 2·5 + 3·6 = 32.</p></div><div class="qa-item"><p class="q"><span class="q-num">03</span><span>¿Qué mide intuitivamente el producto punto?</span></p><p class="a"><span class="a-tag">Respuesta</span>Cuánto coinciden en dirección: grande si apuntan igual, 0 si son perpendiculares, negativo si son opuestos.</p></div><div class="qa-item"><p class="q"><span class="q-num">04</span><span>¿Qué hace el producto matriz-vector?</span></p><p class="a"><span class="a-tag">Respuesta</span>Producto punto de cada fila con el vector; junta los resultados en un vector nuevo.</p></div><div class="qa-item"><p class="q"><span class="q-num">05</span><span>¿Qué indica el signo de la derivada?</span></p><p class="a"><span class="a-tag">Respuesta</span>Positiva: sube; negativa: baja; cero: punto plano (cima o valle).</p></div></div>
+    </div>
+  </section>
+
+  <!-- 20 — AUTOEVALUACIÓN II -->
+  <section class="slide alt" id="s20">
+    <div class="slide-inner">
+      <p class="kicker">Cierre · Parte 2 de 2</p>
+      <h2>Autoevaluación (continuación)</h2>
+      <div class="qa-list section-body" style="margin-top:30px;"><div class="qa-item"><p class="q"><span class="q-num">06</span><span>¿Por qué se <em>resta</em> la derivada en el descenso del gradiente?</span></p><p class="a"><span class="a-tag">Respuesta</span>Para moverse contra la pendiente, hacia donde la función baja.</p></div><div class="qa-item"><p class="q"><span class="q-num">07</span><span>¿Y si la tasa de aprendizaje es demasiado grande?</span></p><p class="a"><span class="a-tag">Respuesta</span>Se pasa del mínimo y el valor oscila o diverge.</p></div><div class="qa-item"><p class="q"><span class="q-num">08</span><span>V/F: «zip lanza error si las longitudes difieren».</span></p><p class="a"><span class="a-tag">Respuesta</span>Falso; corta al más corto sin avisar. Por eso se valida explícitamente.</p></div><div class="qa-item"><p class="q"><span class="q-num">09</span><span>Sin jerga: ¿qué es «entrenar» un modelo?</span></p><p class="a"><span class="a-tag">Respuesta</span>Ajustar números (pesos) una y otra vez, bajando por una medida de error, hasta que las predicciones coincidan con los ejemplos.</p></div></div>
+    </div>
+  </section>
+
+  <!-- 21 — DEPENDENCIAS -->
+  <section class="slide" id="s21">
+    <div class="slide-inner">
+      <p class="kicker">Cierre</p>
+      <h2>Verificación de dependencias</h2>
+      <div class="section-body"><p class="body-text">Depende de la Semana 6 (<code style="font-family:var(--font-mono);">pytest</code>, <code style="font-family:var(--font-mono);">pytest.approx</code> y Git en el ejercicio), la Semana 5 (el análisis <code style="font-family:var(--font-mono);">O(m·n)</code>), la Semana 4 (listas de listas y <em>list comprehensions</em>) y la Semana 3 (funciones, valores por defecto, bucles). El álgebra y el cálculo se introducen desde cero; no se usa NumPy (Semana 9) ni librerías externas salvo pytest.</p><p class="body-text">Es prerrequisito directo de la Semana 8 (probabilidad y estadística) y del Módulo 10 en adelante, donde el descenso del gradiente entrena modelos reales.</p></div>
+    </div>
+  </section>
+
+  <footer class="end">
+    <span>Aprende con Gutyy IA — Semana 7 · v1.0</span>
+    <span>2026-10-05</span>
+  </footer>
+
+</main>
+
+<script>
+  (function(){
+    var sections = Array.prototype.slice.call(document.querySelectorAll('section.slide'));
+    var dots = Array.prototype.slice.call(document.querySelectorAll('.rail a'));
+    var counter = document.getElementById('counter-current');
+
+    if (!('IntersectionObserver' in window)) return;
+
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting){
+          var idx = sections.indexOf(entry.target);
+          dots.forEach(function(d){ d.classList.remove('active'); });
+          if (dots[idx]) dots[idx].classList.add('active');
+          if (counter) counter.textContent = String(idx + 1).padStart(2, '0');
+        }
+      });
+    }, { threshold: 0.55 });
+
+    sections.forEach(function(s){ io.observe(s); });
+  })();
+</script>
+
+</body>
+</html>

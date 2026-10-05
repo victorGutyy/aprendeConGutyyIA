@@ -20,7 +20,7 @@ Cada clase queda versionada (`vX.Y`) con fecha, y el [CHANGELOG.md](CHANGELOG.md
 | 4 | Estructuras de datos fundamentales: listas, diccionarios, tuplas, conjuntos |
 | 5 | Algoritmos y complejidad básica (búsqueda, ordenamiento, Big O) |
 | 6 | Buenas prácticas de ingeniería: POO introductoria, Git, testing básico |
-| 7 | Matemáticas para ML I: álgebra lineal y cálculo esencial |
+| 7 | Matemáticas para ML I: álgebra lineal y cálculo esencial *(Semana 7)* |
 | 8 | Matemáticas para ML II: probabilidad y estadística aplicada |
 | 9 | Python científico: NumPy, Pandas, Matplotlib |
 | 10 | Machine Learning clásico: regresión, clasificación, scikit-learn |
@@ -37,6 +37,7 @@ Cada clase queda versionada (`vX.Y`) con fecha, y el [CHANGELOG.md](CHANGELOG.md
 | 4 | Estructuras de datos fundamentales: listas, diccionarios, tuplas, conjuntos | v1.0 | [clase.md](semanas/semana-04-estructuras-datos-fundamentales/clase.md) · [diapositivas.html](semanas/semana-04-estructuras-datos-fundamentales/diapositivas.html) · [clase.pdf](semanas/semana-04-estructuras-datos-fundamentales/clase.pdf) |
 | 5 | Algoritmos y complejidad básica: búsqueda, ordenamiento, Big O | v1.0 | [clase.md](semanas/semana-05-algoritmos-complejidad-basica/clase.md) · [diapositivas.html](semanas/semana-05-algoritmos-complejidad-basica/diapositivas.html) · [clase.pdf](semanas/semana-05-algoritmos-complejidad-basica/clase.pdf) |
 | 6 | Buenas prácticas de ingeniería: POO introductoria, Git, testing básico | v1.0 | [clase.md](semanas/semana-06-poo-git-testing/clase.md) · [diapositivas.html](semanas/semana-06-poo-git-testing/diapositivas.html) · [clase.pdf](semanas/semana-06-poo-git-testing/clase.pdf) |
+| 7 | Matemáticas para ML I: álgebra lineal y cálculo esencial | v1.0 | [clase.md](semanas/semana-07-algebra-lineal-calculo/clase.md) · [diapositivas.html](semanas/semana-07-algebra-lineal-calculo/diapositivas.html) · [clase.pdf](semanas/semana-07-algebra-lineal-calculo/clase.pdf) |
 
 ## Guía de marca
 

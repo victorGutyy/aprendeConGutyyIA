@@ -2,6 +2,13 @@
 
 Registro de cambios semana a semana. Cada clase mantiene su propio número de versión (`vX.Y`) independiente del historial de Git.
 
+## Semana 7 — Matemáticas para ML I: álgebra lineal y cálculo esencial
+
+### v1.0 — 2026-10-05
+- Primera publicación: vectores como listas de características (suma y escalado componente a componente), producto punto (analogía de la cuenta del supermercado, significado como medida de coincidencia, similitud coseno), matrices como listas de listas y producto matriz-vector (con costo `O(m·n)`), derivada como pendiente (analogía de la ladera) y su aproximación numérica, descenso del gradiente en una dimensión (analogía del cerro con niebla) y rol de la tasa de aprendizaje, sección "Por qué esto importa para IA/ML" (entrenar = minimizar un error, pesos como vectores/matrices, gradiente en muchas dimensiones), ejemplo práctico de una neurona que aprende un peso a partir de datos (pseudocódigo + Python, verificado por ejecución: `w → 2.0`), pruebas con `pytest` incluyendo `pytest.approx` (5 pruebas verificadas), notas de vigencia técnica (NumPy, autodiferenciación en PyTorch/JAX, optimizadores Adam/AdamW), errores comunes de principiante, ejercicio propuesto (`similitud_coseno`, sin resolver), autoevaluación de 9 preguntas, verificación de dependencias.
+- Diapositivas: 21, mismo diseño y guía de marca fijada en la Semana 1.
+- PDF generado a partir de un documento HTML con la misma guía de marca, vía Python + weasyprint.
+
 ## Semana 6 — Buenas prácticas de ingeniería: POO introductoria, Git, testing básico
 
 ### v1.0 — 2026-09-28
