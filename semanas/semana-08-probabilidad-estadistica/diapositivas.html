@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Matemáticas para ML II: Probabilidad y Estadística</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  /* =========================================================
+     Aprende con Gutyy IA — Semana 8 (v1.0)
+     Identidad: académico-editorial, claro, un acento, mucho aire.
+     Misma guía de marca fijada en la Semana 1 — sin cambios de
+     identidad, solo aplicada al contenido nuevo.
+     ========================================================= */
+
+  :root{
+    --bg:            #FFFFFF;
+    --bg-alt:        #F5F6FA;
+    --ink:           #171A24;
+    --ink-secondary: #4B4F5E;
+    --ink-tertiary:  #8A8FA3;
+    --accent:        #3548C4;
+    --accent-dark:   #24308C;
+    --accent-tint:   #EAEDFB;
+    --border:        #E2E4EC;
+    --code-bg:       #F3F4F8;
+    --code-border:   #E3E5EE;
+    --code-ink:      #23262F;
+    --code-comment:  #9297A8;
+    --code-string:   #5B5F70;
+
+    --font-display: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-body:    "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-mono:    "IBM Plex Mono", ui-monospace, "Consolas", monospace;
+
+    color-scheme: light;
+  }
+
+  *,*::before,*::after{ box-sizing: border-box; }
+
+  html{
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+  }
+
+  body{
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior: auto; }
+    *{ animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  .grid-field{
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      linear-gradient(to right, rgba(53,72,196,0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(53,72,196,0.05) 1px, transparent 1px);
+    background-size: 48px 48px;
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent 75%);
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent 75%);
+  }
+
+  .brand-mark{
+    position: fixed;
+    top: 28px;
+    left: clamp(24px, 5vw, 64px);
+    z-index: 20;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    pointer-events: none;
+  }
+  .brand-mark strong{
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .brand-mark .dot{ color: var(--accent); }
+
+  .slide-counter{
+    position: fixed;
+    top: 28px;
+    right: clamp(24px, 5vw, 64px);
+    z-index: 20;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--ink-tertiary);
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+  .slide-counter strong{ color: var(--ink); font-weight: 600; }
+
+  .rail{
+    position: fixed;
+    right: clamp(14px, 3vw, 30px);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .rail a{
+    position: relative;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    border: 1px solid var(--border);
+    display: block;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .rail a:hover{ transform: scale(1.3); }
+  .rail a.active{
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .rail a .rail-label{
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    color: var(--ink-secondary);
+    background: var(--bg);
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+  }
+  .rail a:hover .rail-label{ opacity: 1; }
+
+  a:focus-visible,
+  .rail a:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .deck{ position: relative; z-index: 1; }
+
+  section.slide{
+    min-height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    align-items: center;
+    padding: 120px clamp(24px, 8vw, 96px) 96px;
+    border-bottom: 1px solid var(--border);
+  }
+  section.slide.alt{ background: var(--bg-alt); }
+
+  .slide-inner{
+    max-width: 880px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .kicker{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 18px;
+  }
+  .kicker::before{
+    content: "";
+    width: 18px;
+    height: 1px;
+    background: var(--accent);
+    display: inline-block;
+  }
+
+  h1,h2,h3{
+    font-family: var(--font-display);
+    color: var(--ink);
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  h2{
+    font-size: clamp(28px, 3.6vw, 40px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  .lede{
+    font-size: 19px;
+    line-height: 1.6;
+    color: var(--ink-secondary);
+    max-width: 62ch;
+    margin: 22px 0 0;
+  }
+
+  p{ line-height: 1.65; color: var(--ink-secondary); }
+  p.body-text{ font-size: 16.5px; max-width: 66ch; }
+
+  strong.term{
+    color: var(--ink);
+    font-weight: 600;
+    background: linear-gradient(to bottom, transparent 62%, var(--accent-tint) 62%);
+    padding: 0 1px;
+  }
+
+  em.term-accent{
+    font-style: normal;
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+
+  .section-body{ margin-top: 36px; }
+  .section-body > * + *{ margin-top: 20px; }
+
+  .callout{
+    border-left: 2px solid var(--accent);
+    padding: 4px 0 4px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .callout .callout-label{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .callout p{ margin: 0; color: var(--ink); font-size: 16px; }
+
+  .pull-quote{
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 600;
+    color: var(--accent-dark);
+    line-height: 1.5;
+    max-width: 48ch;
+    margin: 0;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    text-wrap: balance;
+  }
+
+  .divider-row{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 34px 0 22px;
+  }
+  .divider-row::after{
+    content:"";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .divider-row .divider-label{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    white-space: nowrap;
+  }
+
+  .code-card{
+    border: 1px solid var(--code-border);
+    background: var(--code-bg);
+    overflow: hidden;
+  }
+  .code-card .code-bar{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--code-border);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+  }
+  .code-card .code-bar .lang-tag{
+    color: var(--accent-dark);
+    font-weight: 500;
+  }
+  .code-card pre{
+    margin: 0;
+    padding: 18px 20px 20px;
+    overflow-x: auto;
+  }
+  .code-card code{
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--code-ink);
+    white-space: pre;
+  }
+  .code-card .cm{ color: var(--code-comment); font-style: italic; }
+  .code-card .kw{ color: var(--accent-dark); font-weight: 600; }
+  .code-card .st{ color: var(--code-string); }
+  .code-card .fn{ color: var(--accent); }
+
+  .code-card.compact pre{ padding: 14px 18px 16px; }
+  .code-card.compact code{ font-size: 13.5px; }
+
+  .code-result{
+    margin-top: 10px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink-secondary);
+  }
+  .code-result .result-tag{
+    color: var(--ink-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 11px;
+  }
+  .code-result .result-val{ color: var(--accent-dark); font-weight: 500; }
+
+  .blocks-grid{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 8px;
+  }
+  .blocks-grid.cols-3{ grid-template-columns: repeat(3, 1fr); }
+  .blocks-grid.cols-5{ grid-template-columns: repeat(5, 1fr); }
+  .block-card{
+    background: var(--bg);
+    padding: 26px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .block-card .block-letter{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+  .block-card h3{
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .block-card p{ font-size: 14.5px; margin: 0; }
+  .block-card .block-example{
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+    font-size: 13px;
+    color: var(--ink-tertiary);
+    font-style: italic;
+  }
+
+  .progression{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 26px;
+  }
+  .progression .chip{
+    border: 1px solid var(--border);
+    background: var(--bg);
+    padding: 8px 14px;
+    font-size: 13px;
+    color: var(--ink-secondary);
+    font-family: var(--font-mono);
+  }
+  .progression .chip strong{ color: var(--ink); font-weight: 600; }
+  .progression .arrow{ color: var(--ink-tertiary); font-family: var(--font-mono); }
+
+  .obj-list{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .obj-list li{
+    display: flex;
+    gap: 20px;
+    padding: 18px 0;
+    border-top: 1px solid var(--border);
+  }
+  .obj-list li:last-child{ border-bottom: 1px solid var(--border); }
+  .obj-list .obj-num{
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-size: 14px;
+    padding-top: 2px;
+    flex-shrink: 0;
+    width: 24px;
+  }
+  .obj-list p{ margin: 0; color: var(--ink); font-size: 16px; }
+
+  .two-col{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  @media (max-width: 760px){
+    .two-col{ grid-template-columns: 1fr; }
+    .blocks-grid{ grid-template-columns: 1fr; }
+    .blocks-grid.cols-3{ grid-template-columns: 1fr; }
+    .blocks-grid.cols-5{ grid-template-columns: 1fr; }
+    section.slide{ padding-top: 96px; }
+    .type-table{ font-size: 13px; }
+  }
+
+  .qa-list{
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .qa-item{
+    padding: 18px 0;
+    border-top: 1px solid var(--border);
+  }
+  .qa-item:last-child{ border-bottom: 1px solid var(--border); }
+  .qa-item .q{
+    display: flex;
+    gap: 14px;
+    font-size: 15.5px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .qa-item .q .q-num{
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .qa-item .a{
+    margin: 8px 0 0 34px;
+    font-size: 14.5px;
+    color: var(--ink-secondary);
+  }
+  .qa-item .a .a-tag{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    margin-right: 8px;
+  }
+
+  .status-row{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--accent-dark);
+    background: var(--accent-tint);
+    border: 1px solid #DADFF6;
+    padding: 10px 16px;
+    width: fit-content;
+  }
+  .status-row .status-dot{
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .meta-list{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    margin-top: 8px;
+  }
+  .meta-list div{ font-size: 14px; color: var(--ink-secondary); }
+  .meta-list dt{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-tertiary);
+    margin: 0 0 3px;
+  }
+  .meta-list dd{ margin: 0; color: var(--ink); font-weight: 500; }
+
+  /* type table */
+  .type-table{
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 14.5px;
+  }
+  .type-table th, .type-table td{
+    text-align: left;
+    padding: 12px 14px;
+    border-top: 1px solid var(--border);
+  }
+  .type-table thead th{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    border-top: none;
+    padding-top: 0;
+  }
+  .type-table tbody tr:last-child td{ border-bottom: 1px solid var(--border); }
+  .type-table td.type-name{
+    font-family: var(--font-mono);
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+  .type-table td.type-ex{ font-family: var(--font-mono); color: var(--ink); }
+
+  .cover{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 0 clamp(24px, 8vw, 96px);
+  }
+  .cover-eyebrow{
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .cover-eyebrow::before{
+    content:"";
+    width: 34px;
+    height: 1px;
+    background: var(--accent);
+  }
+  .cover h1{
+    font-size: clamp(40px, 6.4vw, 76px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    max-width: 14ch;
+    margin-top: 26px;
+  }
+  .cover h1 em{
+    font-style: normal;
+    color: var(--accent);
+  }
+  .cover .cover-sub{
+    font-size: clamp(17px, 2vw, 20px);
+    color: var(--ink-secondary);
+    max-width: 56ch;
+    margin-top: 22px;
+    line-height: 1.6;
+  }
+  .cover-footer{
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    margin-top: 56px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .cover-footer .fmeta dt{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-tertiary);
+    margin: 0 0 4px;
+  }
+  .cover-footer .fmeta dd{
+    margin: 0;
+    font-size: 14.5px;
+    color: var(--ink);
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+  .scroll-cue{
+    position: absolute;
+    bottom: 40px;
+    left: clamp(24px, 8vw, 96px);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .scroll-cue .chevron{
+    display: inline-block;
+    animation: bob 1.8s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce){ .scroll-cue .chevron{ animation: none; } }
+  @keyframes bob{
+    0%,100%{ transform: translateY(0); }
+    50%{ transform: translateY(4px); }
+  }
+
+  footer.end{
+    padding: 64px clamp(24px, 8vw, 96px) 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-tertiary);
+    position: relative;
+    z-index: 1;
+  }
+</style>
+</head>
+<body>
+<div class="grid-field" aria-hidden="true"></div>
+
+<div class="brand-mark">
+  <strong>Aprende con Gutyy IA</strong><span class="dot">·</span><span>Semana 8</span>
+</div>
+<div class="slide-counter"><strong id="counter-current">01</strong> / 21</div>
+
+<nav class="rail" aria-label="Navegación de diapositivas">
+  <a href="#s01" data-label="Portada" class="active"><span class="rail-label">Portada</span></a>
+  <a href="#s02" data-label="Objetivos"><span class="rail-label">Objetivos</span></a>
+  <a href="#s03" data-label="Panorama"><span class="rail-label">Panorama</span></a>
+  <a href="#s04" data-label="Media y mediana"><span class="rail-label">Media y mediana</span></a>
+  <a href="#s05" data-label="Cuál usar"><span class="rail-label">Cuál usar</span></a>
+  <a href="#s06" data-label="Desviación estándar"><span class="rail-label">Desviación estándar</span></a>
+  <a href="#s07" data-label="Probabilidad"><span class="rail-label">Probabilidad</span></a>
+  <a href="#s08" data-label="Simulación"><span class="rail-label">Simulación</span></a>
+  <a href="#s09" data-label="Grandes números"><span class="rail-label">Grandes números</span></a>
+  <a href="#s10" data-label="Bayes"><span class="rail-label">Bayes</span></a>
+  <a href="#s11" data-label="Filtro de spam"><span class="rail-label">Filtro de spam</span></a>
+  <a href="#s12" data-label="Por qué importa"><span class="rail-label">Por qué importa</span></a>
+  <a href="#s13" data-label="Ejemplo: pseudocódigo"><span class="rail-label">Ejemplo: pseudocódigo</span></a>
+  <a href="#s14" data-label="Ejemplo: código"><span class="rail-label">Ejemplo: código</span></a>
+  <a href="#s15" data-label="Pruebas"><span class="rail-label">Pruebas</span></a>
+  <a href="#s16" data-label="Vigencia"><span class="rail-label">Vigencia</span></a>
+  <a href="#s17" data-label="Errores comunes"><span class="rail-label">Errores comunes</span></a>
+  <a href="#s18" data-label="Ejercicio"><span class="rail-label">Ejercicio</span></a>
+  <a href="#s19" data-label="Autoevaluación I"><span class="rail-label">Autoevaluación I</span></a>
+  <a href="#s20" data-label="Autoevaluación II"><span class="rail-label">Autoevaluación II</span></a>
+  <a href="#s21" data-label="Dependencias"><span class="rail-label">Dependencias</span></a>
+</nav>
+
+<main class="deck">
+
+  <section class="slide" id="s01">
+    <div class="cover">
+      <p class="cover-eyebrow">Aprende con Gutyy IA — Academia de programación, IA y Machine Learning</p>
+      <h1>Probabilidad y <em>estadística</em> aplicada</h1>
+      <p class="cover-sub">Semana 8 del roadmap — media, mediana, desviación estándar, probabilidad, simulación y teorema de Bayes: cómo razonar con datos inciertos.</p>
+      <div class="cover-footer">
+        <dl class="fmeta"><dt>Nivel</dt><dd>Intermedio</dd></dl>
+        <dl class="fmeta"><dt>Prerrequisitos</dt><dd>Semanas 3–7</dd></dl>
+        <dl class="fmeta"><dt>Versión</dt><dd>v1.0</dd></dl>
+        <dl class="fmeta"><dt>Fecha</dt><dd>2026-10-12</dd></dl>
+      </div>
+    </div>
+    <div class="scroll-cue"><span>Desplázate</span><span class="chevron">↓</span></div>
+  </section>
+
+  <section class="slide alt" id="s02">
+    <div class="slide-inner">
+      <p class="kicker">Objetivos de aprendizaje</p>
+      <h2>Al terminar esta semana, vas a poder…</h2>
+      <ol class="obj-list section-body" style="margin-top:36px;"><li><span class="obj-num">01</span><p>Calcular e interpretar <strong class="term">media</strong>, <strong class="term">mediana</strong> y <strong class="term">desviación estándar</strong>.</p></li><li><span class="obj-num">02</span><p>Calcular una <strong class="term">probabilidad</strong> como favorables sobre posibles y <em class="term-accent">estimarla por simulación</em>.</p></li><li><span class="obj-num">03</span><p>Explicar la <strong class="term">ley de los grandes números</strong>.</p></li><li><span class="obj-num">04</span><p>Aplicar el <strong class="term">teorema de Bayes</strong> para actualizar una creencia con evidencia (filtro de spam).</p></li><li><span class="obj-num">05</span><p>Entender por qué los modelos usan probabilidades y por qué se separan datos de <em class="term-accent">entrenamiento y prueba</em>.</p></li></ol>
+    </div>
+  </section>
+
+  <section class="slide" id="s03">
+    <div class="slide-inner">
+      <p class="kicker">01 · El panorama</p>
+      <h2>ML es, en el fondo, estadística con código</h2><p class="lede">Los datos reales traen ruido; esta semana aprendes a razonar sobre él.</p>
+      <div class="section-body"><div class="blocks-grid cols-3" style="grid-template-columns:repeat(2,1fr);"><div class="block-card"><span class="block-letter">A</span><h3>Estadística descriptiva</h3><p>Resumir muchos datos con <em class="term-accent">pocos números</em>.</p></div><div class="block-card"><span class="block-letter">B</span><h3>Probabilidad</h3><p>Medir <em class="term-accent">cuán plausible</em> es que algo ocurra.</p></div></div><div class="callout"><span class="callout-label">Idea clave</span><p>Un modelo casi nunca «sabe»: <em class="term-accent">estima</em>. Un clasificador dice «gato, con 93 % de probabilidad».</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s04">
+    <div class="slide-inner">
+      <p class="kicker">02 · Resumir datos</p>
+      <h2>Media y mediana</h2>
+      <div class="section-body"><div class="callout"><span class="callout-label">Analogía · el sueldo del barrio</span><p>Cinco vecinos ganan <code style="font-family:var(--font-mono);">[1, 2, 3, 4, 1000]</code> (miles). ¿Cuál es el sueldo típico?</p></div><div class="code-card"><div class="code-bar"><span>estadistica.py</span><span class="lang-tag">python</span></div><pre><code><span class="kw">def</span> media(valores: list[float]) -&gt; float:
+    <span class="st">"""Promedio: suma dividida por cuántos hay."""</span>
+    <span class="kw">if</span> <span class="kw">not</span> valores:
+        <span class="kw">raise</span> ValueError(<span class="st">"La lista no puede estar vacía"</span>)
+    <span class="kw">return</span> <span class="kw">sum</span>(valores) / len(valores)
+
+
+<span class="kw">def</span> mediana(valores: list[float]) -&gt; float:
+    <span class="st">"""Valor del medio una vez ordenados."""</span>
+    <span class="kw">if</span> <span class="kw">not</span> valores:
+        <span class="kw">raise</span> ValueError(<span class="st">"La lista no puede estar vacía"</span>)
+    ordenados = sorted(valores)   <span class="cm"># no altera la original</span>
+    n = len(ordenados)
+    medio = n // 2
+    <span class="kw">if</span> n % 2 == 1:
+        <span class="kw">return</span> ordenados[medio]
+    <span class="kw">return</span> (ordenados[medio - 1] + ordenados[medio]) / 2</code></pre></div></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s05">
+    <div class="slide-inner">
+      <p class="kicker">02 · Resumir datos</p>
+      <h2>Media vs. mediana: cuál usar</h2>
+      <div class="section-body"><table class="type-table"><thead><tr><th>Medida</th><th>Con [1, 2, 3, 4, 1000]</th><th>Cuándo usarla</th></tr></thead><tbody><tr><td class="type-name">Media</td><td class="type-ex">202.0</td><td class="type-ex">Datos sin valores extremos</td></tr><tr><td class="type-name">Mediana</td><td class="type-ex">3</td><td class="type-ex">Hay valores atípicos (outliers)</td></tr></tbody></table><div class="callout"><span class="callout-label">Cuidado</span><p>Un <em class="term-accent">valor atípico</em> arrastra la media; la mediana lo ignora.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s06">
+    <div class="slide-inner">
+      <p class="kicker">02 · Resumir datos</p>
+      <h2>Desviación estándar: cuán dispersos están</h2>
+      <div class="section-body"><p class="body-text">Dos grupos pueden tener media 10 y ser muy distintos: <code style="font-family:var(--font-mono);">[10, 10, 10]</code> y <code style="font-family:var(--font-mono);">[2, 10, 18]</code>.</p><div class="code-card"><div class="code-bar"><span>estadistica.py</span><span class="lang-tag">python</span></div><pre><code><span class="kw">import</span> math
+
+
+<span class="kw">def</span> desviacion_estandar(valores: list[float]) -&gt; float:
+    <span class="st">"""Distancia típica de los valores respecto a su media."""</span>
+    m = media(valores)
+    <span class="cm"># Al cuadrado: negativos y positivos no se cancelan.</span>
+    varianza = <span class="kw">sum</span>((x - m) ** 2 <span class="kw">for</span> x <span class="kw">in</span> valores) / len(valores)
+    <span class="kw">return</span> math.sqrt(varianza)   <span class="cm"># vuelve a las unidades originales</span></code></pre><div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">[10,10,10] → 0.0  ·  [2,10,18] → 6.532</span></div></div><div class="callout"><span class="callout-label">Conexión con la Semana 7</span><p>El error cuadrático medio que minimizaste con descenso del gradiente es una <em class="term-accent">varianza</em> de los errores.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s07">
+    <div class="slide-inner">
+      <p class="kicker">03 · Probabilidad</p>
+      <h2>Probabilidad: medir lo incierto</h2>
+      <div class="section-body"><div class="callout"><span class="callout-label">Analogía · el dado</span><p>Un número entre 0 (imposible) y 1 (seguro). <code style="font-family:var(--font-mono);">P(evento) = favorables / posibles</code>.</p></div><div class="blocks-grid cols-3" style="grid-template-columns:repeat(3,1fr);"><div class="block-card"><span class="block-letter">1</span><h3>Dado</h3><p>P(sacar 6) = 1/6 ≈ 0.1667</p></div><div class="block-card"><span class="block-letter">2</span><h3>Complemento</h3><p>P(no ocurre) = 1 − P(ocurre)</p></div><div class="block-card"><span class="block-letter">3</span><h3>Independientes</h3><p>P(A y B) = P(A) · P(B)</p></div></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s08">
+    <div class="slide-inner">
+      <p class="kicker">04 · Simulación</p>
+      <h2>Simular en vez de calcular</h2>
+      <div class="section-body"><p class="body-text">Repite el experimento muchas veces con números aleatorios y cuenta (<em class="term-accent">Monte Carlo</em>).</p><div class="code-card"><div class="code-bar"><span>simulacion.py</span><span class="lang-tag">python</span></div><pre><code><span class="kw">import</span> random
+
+
+<span class="kw">def</span> probabilidad_simulada(evento, repeticiones: int = 100_000, semilla: int = 42) -&gt; float:
+    <span class="st">"""Estima P(evento) repitiendo un experimento muchas veces."""</span>
+    azar = random.Random(semilla)   <span class="cm"># semilla: resultados reproducibles</span>
+    exitos = <span class="kw">sum</span>(1 <span class="kw">for</span> _ <span class="kw">in</span> range(repeticiones) <span class="kw">if</span> evento(azar))
+    <span class="kw">return</span> exitos / repeticiones
+
+
+<span class="cm"># ¿Probabilidad de sacar un 6? (teoría: 1/6 ≈ 0.1667)</span>
+probabilidad_simulada(<span class="kw">lambda</span> azar: azar.randint(1, 6) == 6)</code></pre><div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">≈ 0.1687  (teoría: 0.1667)</span></div></div><div class="callout"><span class="callout-label">Semilla</span><p>Con <code style="font-family:var(--font-mono);">semilla=42</code> el «azar» es repetible. Fijar semillas es obligatorio para la reproducibilidad.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s09">
+    <div class="slide-inner">
+      <p class="kicker">04 · Simulación</p>
+      <h2>Ley de los grandes números</h2>
+      <div class="section-body"><table class="type-table"><thead><tr><th>Repeticiones</th><th>P(6) estimada</th><th>Error vs. 0.1667</th></tr></thead><tbody><tr><td class="type-name">10</td><td class="type-ex">0.3</td><td class="type-ex">grande</td></tr><tr><td class="type-name">100</td><td class="type-ex">0.2</td><td class="type-ex">mediano</td></tr><tr><td class="type-name">1.000</td><td class="type-ex">0.175</td><td class="type-ex">pequeño</td></tr><tr><td class="type-name">100.000</td><td class="type-ex">0.1687</td><td class="type-ex">casi nulo</td></tr></tbody></table><div class="callout"><span class="callout-label">Idea clave</span><p>Con pocos datos, el azar engaña. Por eso los modelos necesitan <em class="term-accent">muchos ejemplos</em>.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s10">
+    <div class="slide-inner">
+      <p class="kicker">05 · Condicional y Bayes</p>
+      <h2>Probabilidad condicional y teorema de Bayes</h2>
+      <div class="section-body"><div class="callout"><span class="callout-label">Analogía · el detective</span><p>Empiezas con una sospecha y la ajustas con cada pista. <code style="font-family:var(--font-mono);">P(A | B)</code>: probabilidad de A <em class="term-accent">dado</em> B.</p></div><p class="pull-quote">P(clase | pista) = P(pista | clase) · P(clase) / P(pista)</p><p class="body-text">Convierte lo que sabes en lo que quieres saber.</p></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s11">
+    <div class="slide-inner">
+      <p class="kicker">05 · Condicional y Bayes</p>
+      <h2>Ejemplo: filtro de spam</h2>
+      <div class="section-body"><p class="body-text">40 % del correo es spam. «gratis» aparece en 50 % del spam y en 5 % del correo legítimo. Llega un correo con «gratis»…</p><div class="code-card"><div class="code-bar"><span>bayes.py</span><span class="lang-tag">python</span></div><pre><code><span class="kw">def</span> bayes(p_clase: float, p_pista_dada_clase: float, p_pista_dada_otra: float) -&gt; float:
+    <span class="st">"""P(clase | pista) por el teorema de Bayes, con dos clases."""</span>
+    numerador = p_pista_dada_clase * p_clase
+    <span class="cm"># P(pista) = suma de ambos caminos posibles</span>
+    total = numerador + p_pista_dada_otra * (1 - p_clase)
+    <span class="kw">return</span> numerador / total
+
+
+bayes(p_clase=0.4, p_pista_dada_clase=0.5, p_pista_dada_otra=0.05)</code></pre><div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">0.8696 → de 40 % a 87 % con una sola pista</span></div></div><p class="body-text">Un clasificador <em class="term-accent">Naive Bayes</em> hace esto con cientos de palabras (Módulo 10).</p></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s12">
+    <div class="slide-inner">
+      <p class="kicker">06 · IA/ML</p>
+      <h2>Por qué esto importa para IA/ML</h2>
+      <div class="section-body"><div class="blocks-grid cols-3" style="grid-template-columns:repeat(3,1fr);"><div class="block-card"><span class="block-letter">A</span><h3>Probabilidades</h3><p>Los modelos devuelven probabilidades; los LLM eligen la siguiente palabra así.</p></div><div class="block-card"><span class="block-letter">B</span><h3>Entrenamiento / prueba</h3><p>Evaluar con datos nunca vistos evita el <em class="term-accent">sobreajuste</em>.</p></div><div class="block-card"><span class="block-letter">C</span><h3>Normalizar</h3><p>Restar la media y dividir entre la desviación ayuda al descenso del gradiente.</p></div></div><div class="callout"><span class="callout-label">Reproducibilidad</span><p>Fijar semillas permite repetir y comparar experimentos.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s13">
+    <div class="slide-inner">
+      <p class="kicker">07 · Ejemplo práctico</p>
+      <h2>¿Al menos un 6 en 4 tiradas?</h2><p class="lede">Pseudocódigo primero, código después.</p>
+      <div class="section-body"><div class="code-card compact"><div class="code-bar"><span>pseudocodigo.txt</span><span class="lang-tag">pseudocódigo</span></div><pre><code>repetir N veces:
+    tirar un dado 4 veces
+    si alguna salió 6: contar un éxito
+mostrar éxitos / N
+comparar con 1 − (5/6)^4</code></pre></div><div class="callout"><span class="callout-label">Teoría</span><p>Por el complemento: <code style="font-family:var(--font-mono);">1 − (5/6)⁴ ≈ 0.5177</code>. Verificaremos por simulación.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s14">
+    <div class="slide-inner">
+      <p class="kicker">07 · Ejemplo práctico</p>
+      <h2>Del pseudocódigo a Python</h2>
+      <div class="section-body"><div class="code-card"><div class="code-bar"><span>ejemplo.py</span><span class="lang-tag">python</span></div><pre><code><span class="kw">def</span> al_menos_un_seis(azar) -&gt; bool:
+    <span class="kw">return</span> <span class="kw">any</span>(azar.randint(1, 6) == 6 <span class="kw">for</span> _ <span class="kw">in</span> range(4))   <span class="cm"># corta al primer True</span>
+
+
+simulada = probabilidad_simulada(al_menos_un_seis)
+teorica = 1 - (5 / 6) ** 4
+print(round(simulada, 4), round(teorica, 4))</code></pre><div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">≈ 0.52  ·  0.5177 (simulada vs. teórica)</span></div></div><p class="body-text">Cuando la fórmula exacta es difícil, la simulación es una verificación honesta.</p></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s15">
+    <div class="slide-inner">
+      <p class="kicker">07 · Ejemplo práctico</p>
+      <h2>Pruebas con pytest</h2>
+      <div class="section-body"><div class="code-card compact"><div class="code-bar"><span>test_estadistica.py</span><span class="lang-tag">python</span></div><pre><code><span class="kw">import</span> pytest
+<span class="kw">from</span> estadistica <span class="kw">import</span> media, mediana, desviacion_estandar, probabilidad_simulada, bayes
+
+
+<span class="kw">def</span> test_mediana_resiste_extremos():
+    assert mediana([1, 2, 3, 4, 1000]) == 3
+    assert media([1, 2, 3, 4, 1000]) == 202
+
+
+<span class="kw">def</span> test_desviacion():
+    assert desviacion_estandar([2, 4, 4, 4, 5, 5, 7, 9]) == pytest.approx(2.0)
+
+
+<span class="kw">def</span> test_lista_vacia():
+    <span class="kw">with</span> pytest.raises(ValueError):
+        media([])
+
+
+<span class="kw">def</span> test_simulacion_dado():
+    p = probabilidad_simulada(<span class="kw">lambda</span> azar: azar.randint(1, 6) == 6)
+    assert p == pytest.approx(1 / 6, abs=0.01)
+
+
+<span class="kw">def</span> test_bayes():
+    assert bayes(0.4, 0.5, 0.05) == pytest.approx(0.2 / (0.2 + 0.03))</code></pre><div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">7 pruebas pasan (verificado antes de publicar)</span></div></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s16">
+    <div class="slide-inner">
+      <p class="kicker">08 · Vigencia técnica</p>
+      <h2>Notas de vigencia (2026)</h2>
+      <div class="section-body"><table class="type-table"><thead><tr><th>Tema</th><th>Qué usar hoy</th></tr></thead><tbody><tr><td class="type-name">statistics</td><td class="type-ex">mean, median, pstdev, stdev ya vienen en la biblioteca estándar</td></tr><tr><td class="type-name">pstdev vs. stdev</td><td class="type-ex">÷ n (población) vs. ÷ (n−1) (muestra)</td></tr><tr><td class="type-name">Aleatoriedad</td><td class="type-ex">random.Random(semilla) no es seguro; para tokens usa secrets. En NumPy: default_rng(semilla)</td></tr><tr><td class="type-name">Bayes hoy</td><td class="type-ex">Naive Bayes como línea base; inferencia bayesiana con PyMC</td></tr></tbody></table></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s17">
+    <div class="slide-inner">
+      <p class="kicker">09 · Errores comunes</p>
+      <h2>Errores comunes de principiante</h2>
+      <div class="section-body"><ul class="body-text" style="line-height:1.9;color:var(--ink-secondary);max-width:66ch;"><li>Usar la media con datos atípicos sin mirar la mediana.</li><li>Dividir entre <code style="font-family:var(--font-mono);">len(valores)</code> sin comprobar lista vacía.</li><li>La falacia del apostador: los eventos independientes no tienen memoria.</li><li>Olvidar la semilla y no poder reproducir un resultado.</li><li>Confundir <code style="font-family:var(--font-mono);">P(A | B)</code> con <code style="font-family:var(--font-mono);">P(B | A)</code>.</li><li>Evaluar un modelo con los mismos datos de entrenamiento.</li></ul></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s18">
+    <div class="slide-inner">
+      <p class="kicker">10 · Ejercicio</p>
+      <h2>Ejercicio propuesto</h2>
+      <div class="section-body"><p class="body-text">Escribe <code style="font-family:var(--font-mono);">normalizar(valores)</code> que devuelva <code style="font-family:var(--font-mono);">(x − media) / desviación_estandar</code> para cada valor. Comprueba con pytest que el resultado tiene media ≈ 0 y desviación ≈ 1 (usa <code style="font-family:var(--font-mono);">pytest.approx</code>).</p><div class="callout"><span class="callout-label">Pista</span><p>Si todos los valores son iguales la desviación es 0: elige entre lanzar <code style="font-family:var(--font-mono);">ValueError</code> o devolver ceros, y justifícalo. Versiona con Git en dos commits.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s19">
+    <div class="slide-inner">
+      <p class="kicker">Cierre · Parte 1 de 2</p>
+      <h2>Autoevaluación</h2>
+      <div class="qa-list section-body" style="margin-top:30px;"><div class="qa-item"><p class="q"><span class="q-num">01</span><span>¿Cuándo es mejor la mediana que la media?</span></p><p class="a"><span class="a-tag">Respuesta</span>Con valores atípicos extremos: no se deja arrastrar.</p></div><div class="qa-item"><p class="q"><span class="q-num">02</span><span>Media y mediana de [1, 2, 3, 4, 10].</span></p><p class="a"><span class="a-tag">Respuesta</span>Media 4, mediana 3.</p></div><div class="qa-item"><p class="q"><span class="q-num">03</span><span>¿Qué mide la desviación estándar?</span></p><p class="a"><span class="a-tag">Respuesta</span>La dispersión respecto a la media; 0 = todos iguales.</p></div><div class="qa-item"><p class="q"><span class="q-num">04</span><span>Probabilidad de un número par en un dado justo.</span></p><p class="a"><span class="a-tag">Respuesta</span>3/6 = 0.5.</p></div><div class="qa-item"><p class="q"><span class="q-num">05</span><span>Independientes: P(A)=0.5, P(B)=0.2. ¿P(A y B)?</span></p><p class="a"><span class="a-tag">Respuesta</span>0.5 · 0.2 = 0.1.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s20">
+    <div class="slide-inner">
+      <p class="kicker">Cierre · Parte 2 de 2</p>
+      <h2>Autoevaluación (continuación)</h2>
+      <div class="qa-list section-body" style="margin-top:30px;"><div class="qa-item"><p class="q"><span class="q-num">06</span><span>¿Por qué se fija una semilla?</span></p><p class="a"><span class="a-tag">Respuesta</span>Para que el azar sea reproducible.</p></div><div class="qa-item"><p class="q"><span class="q-num">07</span><span>¿Qué dice la ley de los grandes números?</span></p><p class="a"><span class="a-tag">Respuesta</span>La frecuencia observada se acerca a la probabilidad teórica al aumentar las repeticiones.</p></div><div class="qa-item"><p class="q"><span class="q-num">08</span><span>V/F: «P(spam | gratis) = P(gratis | spam)».</span></p><p class="a"><span class="a-tag">Respuesta</span>Falso; son distintas y Bayes las relaciona.</p></div><div class="qa-item"><p class="q"><span class="q-num">09</span><span>Sin jerga: ¿por qué separar entrenamiento y prueba?</span></p><p class="a"><span class="a-tag">Respuesta</span>Para medir con ejemplos nunca vistos; si no, solo compruebas que memorizó.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s21">
+    <div class="slide-inner">
+      <p class="kicker">Cierre</p>
+      <h2>Verificación de dependencias</h2>
+      <div class="section-body"><p class="body-text">Depende de la Semana 7 (pasar una función como argumento, <code style="font-family:var(--font-mono);">pytest.approx</code> y el error cuadrático medio), la Semana 6 (<code style="font-family:var(--font-mono);">pytest</code> y Git), la Semana 4 (listas, <em>list comprehensions</em>, <code style="font-family:var(--font-mono);">sorted()</code>) y la Semana 3 (funciones y bucles). Solo se usan los módulos estándar <code style="font-family:var(--font-mono);">math</code> y <code style="font-family:var(--font-mono);">random</code>; no hay NumPy ni Pandas (Semana 9).</p><p class="body-text">Es prerrequisito directo de la Semana 9 (Python científico) y del Módulo 10 (Naive Bayes, evaluación con entrenamiento y prueba).</p></div>
+    </div>
+  </section>
+
+  <footer class="end">
+    <span>Aprende con Gutyy IA — Semana 8 · v1.0</span>
+    <span>2026-10-12</span>
+  </footer>
+
+</main>
+<script>
+  (function(){
+    var sections = Array.prototype.slice.call(document.querySelectorAll('section.slide'));
+    var dots = Array.prototype.slice.call(document.querySelectorAll('.rail a'));
+    var counter = document.getElementById('counter-current');
+
+    if (!('IntersectionObserver' in window)) return;
+
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting){
+          var idx = sections.indexOf(entry.target);
+          dots.forEach(function(d){ d.classList.remove('active'); });
+          if (dots[idx]) dots[idx].classList.add('active');
+          if (counter) counter.textContent = String(idx + 1).padStart(2, '0');
+        }
+      });
+    }, { threshold: 0.55 });
+
+    sections.forEach(function(s){ io.observe(s); });
+  })();
+</script>
+
+</body>
+</html>

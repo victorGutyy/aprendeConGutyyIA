@@ -2,6 +2,13 @@
 
 Registro de cambios semana a semana. Cada clase mantiene su propio número de versión (`vX.Y`) independiente del historial de Git.
 
+## Semana 8 — Matemáticas para ML II: probabilidad y estadística aplicada
+
+### v1.0 — 2026-10-12
+- Primera publicación: media, mediana y desviación estándar (analogía del sueldo del barrio, efecto de los valores atípicos), probabilidad como favorables sobre posibles con complemento e independencia, simulación de Monte Carlo con semilla reproducible, ley de los grandes números (tabla con 10 a 100.000 repeticiones), probabilidad condicional y teorema de Bayes (analogía del detective) con ejemplo de filtro de spam (40 % → 87 %), sección "Por qué esto importa para IA/ML" (probabilidades como salida de modelos, entrenamiento vs. prueba y sobreajuste, normalización, reproducibilidad), ejemplo práctico "al menos un 6 en 4 tiradas" (pseudocódigo + Python, verificado por ejecución: ≈0.52 simulado vs. 0.5177 teórico), pruebas con `pytest` (7 pruebas verificadas), notas de vigencia técnica (módulo `statistics`, desviación poblacional vs. muestral, `random` vs. `secrets`, `default_rng` de NumPy), errores comunes de principiante, ejercicio propuesto (`normalizar`, sin resolver), autoevaluación de 9 preguntas, verificación de dependencias.
+- Diapositivas: 21, mismo diseño y guía de marca fijada en la Semana 1.
+- PDF generado a partir de un documento HTML con la misma guía de marca, vía Python + weasyprint.
+
 ## Semana 7 — Matemáticas para ML I: álgebra lineal y cálculo esencial
 
 ### v1.0 — 2026-10-05

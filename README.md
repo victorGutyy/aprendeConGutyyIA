@@ -21,7 +21,7 @@ Cada clase queda versionada (`vX.Y`) con fecha, y el [CHANGELOG.md](CHANGELOG.md
 | 5 | Algoritmos y complejidad básica (búsqueda, ordenamiento, Big O) |
 | 6 | Buenas prácticas de ingeniería: POO introductoria, Git, testing básico |
 | 7 | Matemáticas para ML I: álgebra lineal y cálculo esencial *(Semana 7)* |
-| 8 | Matemáticas para ML II: probabilidad y estadística aplicada |
+| 8 | Matemáticas para ML II: probabilidad y estadística aplicada *(Semana 8)* |
 | 9 | Python científico: NumPy, Pandas, Matplotlib |
 | 10 | Machine Learning clásico: regresión, clasificación, scikit-learn |
 | 11 | Deep Learning: redes neuronales, PyTorch/TensorFlow |
@@ -38,6 +38,7 @@ Cada clase queda versionada (`vX.Y`) con fecha, y el [CHANGELOG.md](CHANGELOG.md
 | 5 | Algoritmos y complejidad básica: búsqueda, ordenamiento, Big O | v1.0 | [clase.md](semanas/semana-05-algoritmos-complejidad-basica/clase.md) · [diapositivas.html](semanas/semana-05-algoritmos-complejidad-basica/diapositivas.html) · [clase.pdf](semanas/semana-05-algoritmos-complejidad-basica/clase.pdf) |
 | 6 | Buenas prácticas de ingeniería: POO introductoria, Git, testing básico | v1.0 | [clase.md](semanas/semana-06-poo-git-testing/clase.md) · [diapositivas.html](semanas/semana-06-poo-git-testing/diapositivas.html) · [clase.pdf](semanas/semana-06-poo-git-testing/clase.pdf) |
 | 7 | Matemáticas para ML I: álgebra lineal y cálculo esencial | v1.0 | [clase.md](semanas/semana-07-algebra-lineal-calculo/clase.md) · [diapositivas.html](semanas/semana-07-algebra-lineal-calculo/diapositivas.html) · [clase.pdf](semanas/semana-07-algebra-lineal-calculo/clase.pdf) |
+| 8 | Matemáticas para ML II: probabilidad y estadística aplicada | v1.0 | [clase.md](semanas/semana-08-probabilidad-estadistica/clase.md) · [diapositivas.html](semanas/semana-08-probabilidad-estadistica/diapositivas.html) · [clase.pdf](semanas/semana-08-probabilidad-estadistica/clase.pdf) |
 
 ## Guía de marca
 
