@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Python científico: NumPy, Pandas y Matplotlib</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  /* =========================================================
+     Aprende con Gutyy IA — Semana 9 (v1.0)
+     Identidad: académico-editorial, claro, un acento, mucho aire.
+     Misma guía de marca fijada en la Semana 1 — sin cambios de
+     identidad, solo aplicada al contenido nuevo.
+     ========================================================= */
+
+  :root{
+    --bg:            #FFFFFF;
+    --bg-alt:        #F5F6FA;
+    --ink:           #171A24;
+    --ink-secondary: #4B4F5E;
+    --ink-tertiary:  #8A8FA3;
+    --accent:        #3548C4;
+    --accent-dark:   #24308C;
+    --accent-tint:   #EAEDFB;
+    --border:        #E2E4EC;
+    --code-bg:       #F3F4F8;
+    --code-border:   #E3E5EE;
+    --code-ink:      #23262F;
+    --code-comment:  #9297A8;
+    --code-string:   #5B5F70;
+
+    --font-display: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-body:    "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-mono:    "IBM Plex Mono", ui-monospace, "Consolas", monospace;
+
+    color-scheme: light;
+  }
+
+  *,*::before,*::after{ box-sizing: border-box; }
+
+  html{
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+  }
+
+  body{
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior: auto; }
+    *{ animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  .grid-field{
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      linear-gradient(to right, rgba(53,72,196,0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(53,72,196,0.05) 1px, transparent 1px);
+    background-size: 48px 48px;
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent 75%);
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent 75%);
+  }
+
+  .brand-mark{
+    position: fixed;
+    top: 28px;
+    left: clamp(24px, 5vw, 64px);
+    z-index: 20;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    pointer-events: none;
+  }
+  .brand-mark strong{
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .brand-mark .dot{ color: var(--accent); }
+
+  .slide-counter{
+    position: fixed;
+    top: 28px;
+    right: clamp(24px, 5vw, 64px);
+    z-index: 20;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--ink-tertiary);
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+  .slide-counter strong{ color: var(--ink); font-weight: 600; }
+
+  .rail{
+    position: fixed;
+    right: clamp(14px, 3vw, 30px);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .rail a{
+    position: relative;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    border: 1px solid var(--border);
+    display: block;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .rail a:hover{ transform: scale(1.3); }
+  .rail a.active{
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .rail a .rail-label{
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    color: var(--ink-secondary);
+    background: var(--bg);
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+  }
+  .rail a:hover .rail-label{ opacity: 1; }
+
+  a:focus-visible,
+  .rail a:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .deck{ position: relative; z-index: 1; }
+
+  section.slide{
+    min-height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    align-items: center;
+    padding: 120px clamp(24px, 8vw, 96px) 96px;
+    border-bottom: 1px solid var(--border);
+  }
+  section.slide.alt{ background: var(--bg-alt); }
+
+  .slide-inner{
+    max-width: 880px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .kicker{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 18px;
+  }
+  .kicker::before{
+    content: "";
+    width: 18px;
+    height: 1px;
+    background: var(--accent);
+    display: inline-block;
+  }
+
+  h1,h2,h3{
+    font-family: var(--font-display);
+    color: var(--ink);
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  h2{
+    font-size: clamp(28px, 3.6vw, 40px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  .lede{
+    font-size: 19px;
+    line-height: 1.6;
+    color: var(--ink-secondary);
+    max-width: 62ch;
+    margin: 22px 0 0;
+  }
+
+  p{ line-height: 1.65; color: var(--ink-secondary); }
+  p.body-text{ font-size: 16.5px; max-width: 66ch; }
+
+  strong.term{
+    color: var(--ink);
+    font-weight: 600;
+    background: linear-gradient(to bottom, transparent 62%, var(--accent-tint) 62%);
+    padding: 0 1px;
+  }
+
+  em.term-accent{
+    font-style: normal;
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+
+  .section-body{ margin-top: 36px; }
+  .section-body > * + *{ margin-top: 20px; }
+
+  .callout{
+    border-left: 2px solid var(--accent);
+    padding: 4px 0 4px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .callout .callout-label{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .callout p{ margin: 0; color: var(--ink); font-size: 16px; }
+
+  .pull-quote{
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 600;
+    color: var(--accent-dark);
+    line-height: 1.5;
+    max-width: 48ch;
+    margin: 0;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    text-wrap: balance;
+  }
+
+  .divider-row{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 34px 0 22px;
+  }
+  .divider-row::after{
+    content:"";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .divider-row .divider-label{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    white-space: nowrap;
+  }
+
+  .code-card{
+    border: 1px solid var(--code-border);
+    background: var(--code-bg);
+    overflow: hidden;
+  }
+  .code-card .code-bar{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--code-border);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+  }
+  .code-card .code-bar .lang-tag{
+    color: var(--accent-dark);
+    font-weight: 500;
+  }
+  .code-card pre{
+    margin: 0;
+    padding: 18px 20px 20px;
+    overflow-x: auto;
+  }
+  .code-card code{
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--code-ink);
+    white-space: pre;
+  }
+  .code-card .cm{ color: var(--code-comment); font-style: italic; }
+  .code-card .kw{ color: var(--accent-dark); font-weight: 600; }
+  .code-card .st{ color: var(--code-string); }
+  .code-card .fn{ color: var(--accent); }
+
+  .code-card.compact pre{ padding: 14px 18px 16px; }
+  .code-card.compact code{ font-size: 13.5px; }
+
+  .code-result{
+    margin-top: 10px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink-secondary);
+  }
+  .code-result .result-tag{
+    color: var(--ink-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 11px;
+  }
+  .code-result .result-val{ color: var(--accent-dark); font-weight: 500; }
+
+  .blocks-grid{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 8px;
+  }
+  .blocks-grid.cols-3{ grid-template-columns: repeat(3, 1fr); }
+  .blocks-grid.cols-5{ grid-template-columns: repeat(5, 1fr); }
+  .block-card{
+    background: var(--bg);
+    padding: 26px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .block-card .block-letter{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+  .block-card h3{
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .block-card p{ font-size: 14.5px; margin: 0; }
+  .block-card .block-example{
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+    font-size: 13px;
+    color: var(--ink-tertiary);
+    font-style: italic;
+  }
+
+  .progression{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 26px;
+  }
+  .progression .chip{
+    border: 1px solid var(--border);
+    background: var(--bg);
+    padding: 8px 14px;
+    font-size: 13px;
+    color: var(--ink-secondary);
+    font-family: var(--font-mono);
+  }
+  .progression .chip strong{ color: var(--ink); font-weight: 600; }
+  .progression .arrow{ color: var(--ink-tertiary); font-family: var(--font-mono); }
+
+  .obj-list{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .obj-list li{
+    display: flex;
+    gap: 20px;
+    padding: 18px 0;
+    border-top: 1px solid var(--border);
+  }
+  .obj-list li:last-child{ border-bottom: 1px solid var(--border); }
+  .obj-list .obj-num{
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-size: 14px;
+    padding-top: 2px;
+    flex-shrink: 0;
+    width: 24px;
+  }
+  .obj-list p{ margin: 0; color: var(--ink); font-size: 16px; }
+
+  .two-col{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  @media (max-width: 760px){
+    .two-col{ grid-template-columns: 1fr; }
+    .blocks-grid{ grid-template-columns: 1fr; }
+    .blocks-grid.cols-3{ grid-template-columns: 1fr; }
+    .blocks-grid.cols-5{ grid-template-columns: 1fr; }
+    section.slide{ padding-top: 96px; }
+    .type-table{ font-size: 13px; }
+  }
+
+  .qa-list{
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .qa-item{
+    padding: 18px 0;
+    border-top: 1px solid var(--border);
+  }
+  .qa-item:last-child{ border-bottom: 1px solid var(--border); }
+  .qa-item .q{
+    display: flex;
+    gap: 14px;
+    font-size: 15.5px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .qa-item .q .q-num{
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .qa-item .a{
+    margin: 8px 0 0 34px;
+    font-size: 14.5px;
+    color: var(--ink-secondary);
+  }
+  .qa-item .a .a-tag{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    margin-right: 8px;
+  }
+
+  .status-row{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--accent-dark);
+    background: var(--accent-tint);
+    border: 1px solid #DADFF6;
+    padding: 10px 16px;
+    width: fit-content;
+  }
+  .status-row .status-dot{
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .meta-list{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    margin-top: 8px;
+  }
+  .meta-list div{ font-size: 14px; color: var(--ink-secondary); }
+  .meta-list dt{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-tertiary);
+    margin: 0 0 3px;
+  }
+  .meta-list dd{ margin: 0; color: var(--ink); font-weight: 500; }
+
+  /* type table */
+  .type-table{
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 14.5px;
+  }
+  .type-table th, .type-table td{
+    text-align: left;
+    padding: 12px 14px;
+    border-top: 1px solid var(--border);
+  }
+  .type-table thead th{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    border-top: none;
+    padding-top: 0;
+  }
+  .type-table tbody tr:last-child td{ border-bottom: 1px solid var(--border); }
+  .type-table td.type-name{
+    font-family: var(--font-mono);
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+  .type-table td.type-ex{ font-family: var(--font-mono); color: var(--ink); }
+
+  .cover{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 0 clamp(24px, 8vw, 96px);
+  }
+  .cover-eyebrow{
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .cover-eyebrow::before{
+    content:"";
+    width: 34px;
+    height: 1px;
+    background: var(--accent);
+  }
+  .cover h1{
+    font-size: clamp(40px, 6.4vw, 76px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    max-width: 14ch;
+    margin-top: 26px;
+  }
+  .cover h1 em{
+    font-style: normal;
+    color: var(--accent);
+  }
+  .cover .cover-sub{
+    font-size: clamp(17px, 2vw, 20px);
+    color: var(--ink-secondary);
+    max-width: 56ch;
+    margin-top: 22px;
+    line-height: 1.6;
+  }
+  .cover-footer{
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    margin-top: 56px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .cover-footer .fmeta dt{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-tertiary);
+    margin: 0 0 4px;
+  }
+  .cover-footer .fmeta dd{
+    margin: 0;
+    font-size: 14.5px;
+    color: var(--ink);
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+  .scroll-cue{
+    position: absolute;
+    bottom: 40px;
+    left: clamp(24px, 8vw, 96px);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .scroll-cue .chevron{
+    display: inline-block;
+    animation: bob 1.8s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce){ .scroll-cue .chevron{ animation: none; } }
+  @keyframes bob{
+    0%,100%{ transform: translateY(0); }
+    50%{ transform: translateY(4px); }
+  }
+
+  footer.end{
+    padding: 64px clamp(24px, 8vw, 96px) 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-tertiary);
+    position: relative;
+    z-index: 1;
+  }
+</style>
+</head>
+<body>
+<div class="grid-field" aria-hidden="true"></div>
+
+<div class="brand-mark">
+  <strong>Aprende con Gutyy IA</strong><span class="dot">·</span><span>Semana 9</span>
+</div>
+<div class="slide-counter"><strong id="counter-current">01</strong> / 22</div>
+
+<nav class="rail" aria-label="Navegación de diapositivas">
+  <a href="#s01" data-label="Portada" class="active"><span class="rail-label">Portada</span></a>
+  <a href="#s02" data-label="Objetivos"><span class="rail-label">Objetivos</span></a>
+  <a href="#s03" data-label="Panorama"><span class="rail-label">Panorama</span></a>
+  <a href="#s04" data-label="Arreglos"><span class="rail-label">Arreglos</span></a>
+  <a href="#s05" data-label="Vectorización"><span class="rail-label">Vectorización</span></a>
+  <a href="#s06" data-label="Matrices y ejes"><span class="rail-label">Matrices y ejes</span></a>
+  <a href="#s07" data-label="Máscaras y broadcasting"><span class="rail-label">Máscaras y broadcasting</span></a>
+  <a href="#s08" data-label="DataFrame"><span class="rail-label">DataFrame</span></a>
+  <a href="#s09" data-label="Limpiar"><span class="rail-label">Limpiar</span></a>
+  <a href="#s10" data-label="Filtros y resúmenes"><span class="rail-label">Filtros y resúmenes</span></a>
+  <a href="#s11" data-label="groupby"><span class="rail-label">groupby</span></a>
+  <a href="#s12" data-label="Matplotlib"><span class="rail-label">Matplotlib</span></a>
+  <a href="#s13" data-label="Por qué importa"><span class="rail-label">Por qué importa</span></a>
+  <a href="#s14" data-label="Ejemplo: pseudocódigo"><span class="rail-label">Ejemplo: pseudocódigo</span></a>
+  <a href="#s15" data-label="Ejemplo: código"><span class="rail-label">Ejemplo: código</span></a>
+  <a href="#s16" data-label="Pruebas"><span class="rail-label">Pruebas</span></a>
+  <a href="#s17" data-label="Vigencia"><span class="rail-label">Vigencia</span></a>
+  <a href="#s18" data-label="Errores comunes"><span class="rail-label">Errores comunes</span></a>
+  <a href="#s19" data-label="Ejercicio"><span class="rail-label">Ejercicio</span></a>
+  <a href="#s20" data-label="Autoevaluación I"><span class="rail-label">Autoevaluación I</span></a>
+  <a href="#s21" data-label="Autoevaluación II"><span class="rail-label">Autoevaluación II</span></a>
+  <a href="#s22" data-label="Dependencias"><span class="rail-label">Dependencias</span></a>
+</nav>
+
+<main class="deck">
+
+  <section class="slide" id="s01">
+    <div class="cover">
+      <p class="cover-eyebrow">Aprende con Gutyy IA — Academia de programación, IA y Machine Learning</p>
+      <h1>Python <em>científico</em>: NumPy, Pandas y Matplotlib</h1>
+      <p class="cover-sub">Semana 9 del roadmap — arreglos vectorizados, tablas de datos y gráficos: las herramientas con las que se prepara todo proyecto de ML.</p>
+      <div class="cover-footer">
+        <dl class="fmeta"><dt>Nivel</dt><dd>Intermedio</dd></dl>
+        <dl class="fmeta"><dt>Prerrequisitos</dt><dd>Semanas 3–8</dd></dl>
+        <dl class="fmeta"><dt>Versión</dt><dd>v1.0</dd></dl>
+        <dl class="fmeta"><dt>Fecha</dt><dd>2026-10-19</dd></dl>
+      </div>
+    </div>
+    <div class="scroll-cue"><span>Desplázate</span><span class="chevron">↓</span></div>
+  </section>
+
+  <section class="slide alt" id="s02">
+    <div class="slide-inner">
+      <p class="kicker">Objetivos de aprendizaje</p>
+      <h2>Al terminar esta semana, vas a poder…</h2>
+      <div class="section-body"><ol class="obj-list section-body" style="margin-top:36px;"><li><span class="obj-num">01</span><p>Crear y manipular <strong class="term">arreglos de NumPy</strong>: forma, tipo, indexación y filtrado con máscaras booleanas.</p></li><li><span class="obj-num">02</span><p>Explicar qué es la <strong class="term">vectorización</strong> y por qué reemplaza a los bucles <code style="font-family:var(--font-mono);">for</code>.</p></li><li><span class="obj-num">03</span><p>Cargar, limpiar y resumir una tabla con <strong class="term">Pandas</strong>: columnas, filtros, faltantes y <code style="font-family:var(--font-mono);">groupby</code>.</p></li><li><span class="obj-num">04</span><p>Producir un <strong class="term">gráfico claro con Matplotlib</strong> y guardarlo en un archivo.</p></li><li><span class="obj-num">05</span><p>Reconocer cómo estas librerías son la base de todo el ecosistema de ML.</p></li></ol></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s03">
+    <div class="slide-inner">
+      <p class="kicker">01 · Por qué existen</p>
+      <h2>Python puro llega a su límite</h2><p class="lede">Un bucle sobre un millón de números es lento, y reescribir la media a mano cansa.</p>
+      <div class="section-body"><div class="blocks-grid cols-3" style="grid-template-columns:repeat(3,1fr);"><div class="block-card"><span class="block-letter">A</span><h3>NumPy</h3><p>Arreglos numéricos rápidos de N dimensiones: los vectores y matrices de la Semana 7.</p></div><div class="block-card"><span class="block-letter">B</span><h3>Pandas</h3><p>Tablas con columnas con nombre: un diccionario de listas (Semana 4) con superpoderes.</p></div><div class="block-card"><span class="block-letter">C</span><h3>Matplotlib</h3><p>Convierte números en imágenes para entenderlos y comunicarlos.</p></div></div><div class="callout"><span class="callout-label">Analogía · cocina industrial</span><p>Con Python puro cocinas plato por plato. NumPy es una línea de producción: la misma operación sobre toda la bandeja a la vez. Pandas es el cuaderno de pedidos; Matplotlib, la vitrina.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s04">
+    <div class="slide-inner">
+      <p class="kicker">02 · NumPy</p>
+      <h2>Del vector al ndarray</h2>
+      <div class="section-body"><div class="code-card"><div class="code-bar"><span>numpy_basico.py</span><span class="lang-tag">python</span></div><pre><code><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+sueldos = np.array([1, 2, 3, 4, 1000])
+
+<span class="kw">print</span>(sueldos.shape)        <span class="cm"># (5,)   → forma</span>
+<span class="kw">print</span>(sueldos.dtype)        <span class="cm"># int64  → un solo tipo</span>
+<span class="kw">print</span>(sueldos.mean())       <span class="cm"># 202.0  → media de la Semana 8</span>
+<span class="kw">print</span>(np.median(sueldos))   <span class="cm"># 3.0</span>
+<span class="kw">print</span>(sueldos * 2)          <span class="cm"># [2 4 6 8 2000] → ¡sin bucle!</span></code></pre></div><div class="callout"><span class="callout-label">Ojo</span><p><code style="font-family:var(--font-mono);">[1, 2, 3] * 2</code> repite la lista; <code style="font-family:var(--font-mono);">np.array([1, 2, 3]) * 2</code> multiplica cada elemento.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s05">
+    <div class="slide-inner">
+      <p class="kicker">02 · NumPy</p>
+      <h2>Vectorización: el bucle se hace por dentro</h2>
+      <div class="section-body"><p class="body-text">Escribes la operación sobre el arreglo completo; NumPy ejecuta el bucle en código compilado.</p><div class="code-card"><div class="code-bar"><span>vectorizar.py</span><span class="lang-tag">python</span></div><pre><code>rng = np.random.default_rng(42)   <span class="cm"># semilla (Semana 8)</span>
+x = rng.random(1_000_000)
+
+<span class="cm"># Con bucle de Python:</span>
+lento = sum(v * v <span class="kw">for</span> v <span class="kw">in</span> x.tolist())
+<span class="cm"># Vectorizado (producto punto consigo mismo):</span>
+rapido = float(np.dot(x, x))</code></pre><div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">ambos → 333336.885…  ·  vectorizado: más de 10× más rápido</span></div></div><div class="callout"><span class="callout-label">Regla práctica</span><p>Si escribes un <code style="font-family:var(--font-mono);">for</code> sobre un arreglo de NumPy, probablemente exista una forma vectorizada.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s06">
+    <div class="slide-inner">
+      <p class="kicker">02 · NumPy</p>
+      <h2>Matrices, ejes y producto punto</h2>
+      <div class="section-body"><div class="code-card compact"><div class="code-bar"><span>matrices.py</span><span class="lang-tag">python</span></div><pre><code>m = np.array([[1, 2, 3],
+              [4, 5, 6]])      <span class="cm"># matriz 2×3</span>
+
+<span class="kw">print</span>(m.shape)         <span class="cm"># (2, 3)</span>
+<span class="kw">print</span>(m.sum(axis=0))   <span class="cm"># [5 7 9]  → una suma por columna</span>
+<span class="kw">print</span>(m.sum(axis=1))   <span class="cm"># [ 6 15]  → una suma por fila</span>
+
+a = np.array([1, 2, 3]); b = np.array([4, 5, 6])
+<span class="kw">print</span>(a @ b)           <span class="cm"># 32 → producto punto (Semana 7)</span></code></pre></div><div class="callout"><span class="callout-label">Truco para el axis</span><p><code style="font-family:var(--font-mono);">axis=0</code> colapsa las filas (queda una entrada por columna); <code style="font-family:var(--font-mono);">axis=1</code> colapsa las columnas.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s07">
+    <div class="slide-inner">
+      <p class="kicker">02 · NumPy</p>
+      <h2>Filtrar y operar arreglos de distinta forma</h2>
+      <div class="section-body"><div class="two-col"><div><div class="code-card compact"><div class="code-bar"><span>mascara.py</span><span class="lang-tag">python</span></div><pre><code><span class="kw">print</span>(sueldos &gt; 3)
+<span class="cm"># [False False False True True]</span>
+<span class="kw">print</span>(sueldos[sueldos &gt; 3])
+<span class="cm"># [   4 1000]</span></code></pre></div></div><div><div class="code-card compact"><div class="code-bar"><span>broadcasting.py</span><span class="lang-tag">python</span></div><pre><code>notas = np.array([[7, 8],
+                  [5, 6],
+                  [9, 10]])
+<span class="kw">print</span>(notas - notas.mean(axis=0))
+<span class="cm"># [[ 0.  0.]</span>
+<span class="cm">#  [-2. -2.]</span>
+<span class="cm">#  [ 2.  2.]]</span></code></pre></div></div></div><div class="callout"><span class="callout-label">Normalizar en una línea</span><p>Con broadcasting, la normalización de la Semana 8 es <code style="font-family:var(--font-mono);">(v - v.mean()) / v.std()</code>.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s08">
+    <div class="slide-inner">
+      <p class="kicker">03 · Pandas</p>
+      <h2>Pandas: tablas con nombre</h2>
+      <div class="section-body"><p class="body-text">Un <em class="term-accent">DataFrame</em> tiene filas, columnas con nombre y un tipo por columna. Por dentro, cada columna es un arreglo de NumPy.</p><div class="code-card compact"><div class="code-bar"><span>dataframe.py</span><span class="lang-tag">python</span></div><pre><code><span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+df = pd.DataFrame({
+    <span class="st">"producto"</span>: [<span class="st">"pan"</span>, <span class="st">"leche"</span>, <span class="st">"pan"</span>, <span class="st">"queso"</span>,
+                 <span class="st">"leche"</span>, <span class="st">"pan"</span>, <span class="st">"queso"</span>, <span class="st">"leche"</span>],
+    <span class="st">"tienda"</span>:   [<span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"B"</span>, <span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"B"</span>],
+    <span class="st">"unidades"</span>: [10, 4, 7, 2, 5, 12, 3, <span class="kw">None</span>],   <span class="cm"># None → faltante</span>
+    <span class="st">"precio"</span>:   [1.5, 2.0, 1.5, 8.0, 2.0, 1.5, 8.0, 2.0],
+})</code></pre></div></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s09">
+    <div class="slide-inner">
+      <p class="kicker">03 · Pandas</p>
+      <h2>Explorar y limpiar</h2>
+      <div class="section-body"><div class="code-card compact"><div class="code-bar"><span>limpiar.py</span><span class="lang-tag">python</span></div><pre><code><span class="kw">print</span>(df.isna().sum())   <span class="cm"># faltantes por columna → unidades: 1</span>
+
+<span class="cm"># Rellenar con la mediana (no se deja arrastrar por extremos)</span>
+df[<span class="st">"unidades"</span>] = df[<span class="st">"unidades"</span>].fillna(df[<span class="st">"unidades"</span>].median())</code></pre></div><div class="callout"><span class="callout-label">Datos reales</span><p>Siempre traen huecos. Revisar faltantes <em>antes</em> de calcular es el primer reflejo de un buen analista.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s10">
+    <div class="slide-inner">
+      <p class="kicker">03 · Pandas</p>
+      <h2>Columnas nuevas, filtros y resúmenes</h2>
+      <div class="section-body"><div class="code-card compact"><div class="code-bar"><span>columnas.py</span><span class="lang-tag">python</span></div><pre><code>df[<span class="st">"total"</span>] = df[<span class="st">"unidades"</span>] * df[<span class="st">"precio"</span>]   <span class="cm"># columna nueva, vectorizada</span>
+
+<span class="kw">print</span>(df[df[<span class="st">"total"</span>] &gt; 15])   <span class="cm"># máscara booleana</span>
+<span class="kw">print</span>(df.describe())          <span class="cm"># conteo, media, desviación, cuartiles…</span></code></pre><div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">filtro → quesos 16.0 y 24.0, pan 18.0</span></div></div><div class="callout"><span class="callout-label">Conexión</span><p>Es la misma máscara booleana de NumPy, aplicada a las filas de una tabla.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s11">
+    <div class="slide-inner">
+      <p class="kicker">03 · Pandas</p>
+      <h2>groupby: separar → aplicar → combinar</h2>
+      <div class="section-body"><div class="code-card"><div class="code-bar"><span>groupby.py</span><span class="lang-tag">python</span></div><pre><code>por_producto = (df.groupby(<span class="st">"producto"</span>)[<span class="st">"total"</span>]
+                  .sum()
+                  .sort_values(ascending=<span class="kw">False</span>))
+<span class="kw">print</span>(por_producto)</code></pre><div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">pan 43.5  ·  queso 40.0  ·  leche 28.0</span></div></div><div class="blocks-grid cols-3" style="grid-template-columns:repeat(3,1fr);"><div class="block-card"><span class="block-letter">1</span><h3>Separar</h3><p>Las filas se reparten por producto.</p></div><div class="block-card"><span class="block-letter">2</span><h3>Aplicar</h3><p>Se suma cada grupo.</p></div><div class="block-card"><span class="block-letter">3</span><h3>Combinar</h3><p>Se juntan los resultados.</p></div></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s12">
+    <div class="slide-inner">
+      <p class="kicker">04 · Matplotlib</p>
+      <h2>Ver los datos</h2>
+      <div class="section-body"><div class="code-card compact"><div class="code-bar"><span>grafico.py</span><span class="lang-tag">python</span></div><pre><code><span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+
+fig, ax = plt.subplots(figsize=(6, 4))
+ax.bar(por_producto.index, por_producto.values, color=<span class="st">"#3548C4"</span>)
+ax.set_title(<span class="st">"Ventas por producto"</span>)
+ax.set_xlabel(<span class="st">"Producto"</span>)
+ax.set_ylabel(<span class="st">"Total vendido ($)"</span>)
+fig.tight_layout()
+fig.savefig(<span class="st">"ventas.png"</span>, dpi=150)
+plt.close(fig)   <span class="cm"># libera memoria</span></code></pre></div><div class="callout"><span class="callout-label">Siempre</span><p>Título, etiquetas de ejes (con unidades) y leyenda si hay varias series. Interfaz orientada a objetos: <code style="font-family:var(--font-mono);">fig, ax = plt.subplots()</code>.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s13">
+    <div class="slide-inner">
+      <p class="kicker">05 · IA/ML</p>
+      <h2>Por qué esto importa para IA/ML</h2>
+      <div class="section-body"><div class="blocks-grid cols-3" style="grid-template-columns:repeat(3,1fr);"><div class="block-card"><span class="block-letter">A</span><h3>Todo se apoya en NumPy</h3><p>scikit-learn consume arreglos; PyTorch y TensorFlow usan tensores con la misma idea.</p></div><div class="block-card"><span class="block-letter">B</span><h3>Un dataset es una matriz</h3><p>Filas = ejemplos, columnas = características (Semana 7).</p></div><div class="block-card"><span class="block-letter">C</span><h3>Preparar datos</h3><p>Limpiar, filtrar y normalizar es la mayor parte del trabajo real.</p></div><div class="block-card"><span class="block-letter">D</span><h3>Graficar es depurar</h3><p>La distribución y la curva de error revelan lo que los números ocultan.</p></div><div class="block-card"><span class="block-letter">E</span><h3>Vectorizar permite entrenar</h3><p>Matrices enormes solo son viables con operaciones vectorizadas.</p></div></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s14">
+    <div class="slide-inner">
+      <p class="kicker">06 · Ejemplo práctico</p>
+      <h2>Análisis de ventas de una tienda</h2><p class="lede">Pseudocódigo primero, código después.</p>
+      <div class="section-body"><div class="code-card compact"><div class="code-bar"><span>pseudocodigo.txt</span><span class="lang-tag">pseudocódigo</span></div><pre><code>cargar la tabla de ventas
+rellenar las unidades faltantes con la mediana
+total de cada venta = unidades × precio
+sumar los totales agrupando por producto
+ordenar de mayor a menor
+dibujar un gráfico de barras con título y etiquetas</code></pre></div><div class="callout"><span class="callout-label">Diseño</span><p>Cuatro funciones pequeñas, cada una con una sola responsabilidad (Semana 3): <code style="font-family:var(--font-mono);">cargar_ventas</code>, <code style="font-family:var(--font-mono);">limpiar</code>, <code style="font-family:var(--font-mono);">ventas_por_producto</code>, <code style="font-family:var(--font-mono);">graficar</code>.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s15">
+    <div class="slide-inner">
+      <p class="kicker">06 · Ejemplo práctico</p>
+      <h2>Del pseudocódigo a Python</h2>
+      <div class="section-body"><div class="code-card"><div class="code-bar"><span>analisis_ventas.py</span><span class="lang-tag">python</span></div><pre><code><span class="kw">def</span> limpiar(df: pd.DataFrame) -&gt; pd.DataFrame:
+    <span class="st">""</span><span class="st">"Copia con 'unidades' rellenadas con la mediana."</span><span class="st">""</span>
+    limpio = df.copy()   <span class="cm"># no mutar el original</span>
+    limpio[<span class="st">"unidades"</span>] = limpio[<span class="st">"unidades"</span>].fillna(
+        limpio[<span class="st">"unidades"</span>].median())
+    <span class="kw">return</span> limpio
+
+
+<span class="kw">def</span> ventas_por_producto(df: pd.DataFrame) -&gt; pd.Series:
+    total = df[<span class="st">"unidades"</span>] * df[<span class="st">"precio"</span>]
+    <span class="kw">return</span> (total.groupby(df[<span class="st">"producto"</span>])
+                 .sum().sort_values(ascending=<span class="kw">False</span>))</code></pre><div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">pan 43.5  ·  queso 40.0  ·  leche 28.0  → ventas.png</span></div></div><div class="callout"><span class="callout-label">Decisión de ingeniería</span><p><code style="font-family:var(--font-mono);">limpiar</code> devuelve una <strong>copia</strong>: así los datos originales no cambian por sorpresa (Semana 6).</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s16">
+    <div class="slide-inner">
+      <p class="kicker">06 · Ejemplo práctico</p>
+      <h2>Pruebas con pytest</h2>
+      <div class="section-body"><div class="code-card compact"><div class="code-bar"><span>test_analisis_ventas.py</span><span class="lang-tag">python</span></div><pre><code><span class="kw">def</span> test_limpiar_rellena_con_la_mediana():
+    limpio = limpiar(cargar_ventas())
+    assert limpio[<span class="st">"unidades"</span>].isna().sum() == 0
+    assert limpio[<span class="st">"unidades"</span>].iloc[-1] == 5
+
+
+<span class="kw">def</span> test_limpiar_no_modifica_el_original():
+    original = cargar_ventas()
+    limpiar(original)
+    assert original[<span class="st">"unidades"</span>].isna().sum() == 1
+
+
+<span class="kw">def</span> test_ventas_por_producto():
+    totales = ventas_por_producto(limpiar(cargar_ventas()))
+    assert totales.index[0] == <span class="st">"pan"</span>
+    assert totales[<span class="st">"pan"</span>] == pytest.approx(43.5)</code></pre><div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">5 passed (verificado antes de publicar)</span></div></div></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s17">
+    <div class="slide-inner">
+      <p class="kicker">07 · Vigencia técnica</p>
+      <h2>Notas de vigencia (2026)</h2>
+      <div class="section-body"><table class="type-table"><thead><tr><th>Tema</th><th>Qué usar hoy</th></tr></thead><tbody><tr><td class="type-name">Pandas 3.0</td><td class="">Texto como tipo <code>str</code> por defecto y copy-on-write: se acabó el encadenado <code>df[c]["b"] = 0</code>; usa <code>df.loc[c, "b"] = 0</code>.</td></tr><tr><td class="type-name">inplace=True</td><td class="">Desaconsejado: reasigna o encadena métodos.</td></tr><tr><td class="type-name">NumPy 2.x</td><td class="">Aleatoriedad con <code>default_rng(semilla)</code>; <code>np.random.seed</code> es heredado.</td></tr><tr><td class="type-name">std()</td><td class="">NumPy: <code>ddof=0</code> (poblacional). Pandas: <code>ddof=1</code> (muestral).</td></tr><tr><td class="type-name">Polars</td><td class="">Alternativa moderna y veloz; Pandas sigue siendo el estándar del ecosistema ML.</td></tr><tr><td class="type-name">Entornos</td><td class=""><code>python -m venv .venv</code> + versiones fijadas.</td></tr></tbody></table></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s18">
+    <div class="slide-inner">
+      <p class="kicker">08 · Errores comunes</p>
+      <h2>Errores comunes de principiante</h2>
+      <div class="section-body"><ul class="body-text" style="line-height:1.9;color:var(--ink-secondary);max-width:66ch;"><li>Escribir un <code>for</code> donde basta vectorizar.</li><li>Confundir <code>lista * 2</code> con <code>arreglo * 2</code>.</li><li>Confundir <code>axis=0</code> con <code>axis=1</code>.</li><li>Calcular sin revisar valores faltantes.</li><li>Modificar el DataFrame original dentro de una función.</li><li>Usar <code>inplace=True</code> o asignaciones encadenadas.</li><li>Publicar un gráfico sin título, ejes ni unidades.</li><li>Olvidar <code>plt.close(fig)</code> en bucles de gráficos.</li></ul></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s19">
+    <div class="slide-inner">
+      <p class="kicker">09 · Ejercicio</p>
+      <h2>Ejercicio propuesto</h2>
+      <div class="section-body"><p class="body-text">Escribe <code style="font-family:var(--font-mono);">ventas_por_tienda(df)</code> que devuelva el total por tienda y el <strong class="term">producto más vendido de cada tienda</strong> (pista: <code style="font-family:var(--font-mono);">groupby</code> con dos columnas e <code style="font-family:var(--font-mono);">idxmax()</code>).</p><p class="body-text">Haz un gráfico de barras agrupadas (una serie por tienda) con título, ejes y leyenda. Añade pruebas con pytest y versiona con Git en dos commits.</p><div class="callout"><span class="callout-label">Pista</span><p>Si dos productos empatan en una tienda, decide qué hacer y documéntalo en un comentario.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s20">
+    <div class="slide-inner">
+      <p class="kicker">Cierre · Parte 1 de 2</p>
+      <h2>Autoevaluación</h2>
+      <div class="section-body"><div class="qa-list section-body" style="margin-top:30px;"><div class="qa-item"><p class="q"><span class="q-num">01</span><span>¿Diferencia entre <code>[1,2,3]*2</code> y <code>np.array([1,2,3])*2</code>?</span></p><p class="a"><span class="a-tag">Respuesta</span>La lista se repite; el arreglo multiplica cada elemento → <code>[2,4,6]</code>.</p></div><div class="qa-item"><p class="q"><span class="q-num">02</span><span>¿Qué es la vectorización y por qué importa?</span></p><p class="a"><span class="a-tag">Respuesta</span>Operar el arreglo completo sin <code>for</code>; es más corta y mucho más rápida.</p></div><div class="qa-item"><p class="q"><span class="q-num">03</span><span>Para <code>[[1,2,3],[4,5,6]]</code>, ¿qué da <code>sum(axis=0)</code>?</span></p><p class="a"><span class="a-tag">Respuesta</span><code>[5, 7, 9]</code> — suma de cada columna.</p></div><div class="qa-item"><p class="q"><span class="q-num">04</span><span>¿Qué hace <code>sueldos[sueldos &gt; 3]</code>?</span></p><p class="a"><span class="a-tag">Respuesta</span>Devuelve solo los elementos mayores que 3 (máscara booleana).</p></div><div class="qa-item"><p class="q"><span class="q-num">05</span><span>¿Qué es un DataFrame en una frase?</span></p><p class="a"><span class="a-tag">Respuesta</span>Una tabla con columnas con nombre; cada columna es un arreglo de un solo tipo.</p></div></div></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s21">
+    <div class="slide-inner">
+      <p class="kicker">Cierre · Parte 2 de 2</p>
+      <h2>Autoevaluación (continuación)</h2>
+      <div class="section-body"><div class="qa-list section-body" style="margin-top:30px;"><div class="qa-item"><p class="q"><span class="q-num">06</span><span>¿Por qué rellenar faltantes con la mediana?</span></p><p class="a"><span class="a-tag">Respuesta</span>No se deja arrastrar por valores atípicos (Semana 8).</p></div><div class="qa-item"><p class="q"><span class="q-num">07</span><span>Explica <code>groupby</code> sin jerga.</span></p><p class="a"><span class="a-tag">Respuesta</span>Reparte las filas en grupos, calcula algo por grupo y junta los resultados.</p></div><div class="qa-item"><p class="q"><span class="q-num">08</span><span>V/F: <code>np.std</code> y <code>Series.std</code> siempre coinciden.</span></p><p class="a"><span class="a-tag">Respuesta</span>Falso: NumPy usa <code>ddof=0</code> y Pandas <code>ddof=1</code>.</p></div><div class="qa-item"><p class="q"><span class="q-num">09</span><span>¿Qué tres elementos no pueden faltar en un gráfico?</span></p><p class="a"><span class="a-tag">Respuesta</span>Título, etiquetas de ejes con unidades y, si hay varias series, leyenda.</p></div></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s22">
+    <div class="slide-inner">
+      <p class="kicker">Cierre</p>
+      <h2>Verificación de dependencias</h2>
+      <div class="section-body"><p class="body-text">Depende de la Semana 8 (media, mediana, desviación, normalización y <code>default_rng</code>), de la Semana 7 (vectores, producto punto, matrices, <code>pytest.approx</code>), de la Semana 6 (pytest, copias frente a mutación, entornos, Git) y de las Semanas 3–5 (listas, diccionarios, funciones, escalabilidad).</p><p class="body-text">NumPy, Pandas y Matplotlib se introducen desde cero a partir de conceptos ya vistos; nada posterior es necesario. Es prerrequisito directo del Módulo 10 (ML clásico con scikit-learn) y del Módulo 11 (tensores del Deep Learning).</p><div class="status-row"><span class="status-dot"></span>Sin dependencias de semanas no publicadas</div></div>
+    </div>
+  </section>
+
+  <footer class="end">
+    <span>Aprende con Gutyy IA — Semana 9 · v1.0</span>
+    <span>2026-10-19</span>
+  </footer>
+
+</main>
+<script>
+  (function(){
+    var sections = Array.prototype.slice.call(document.querySelectorAll('section.slide'));
+    var dots = Array.prototype.slice.call(document.querySelectorAll('.rail a'));
+    var counter = document.getElementById('counter-current');
+
+    if (!('IntersectionObserver' in window)) return;
+
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting){
+          var idx = sections.indexOf(entry.target);
+          dots.forEach(function(d){ d.classList.remove('active'); });
+          if (dots[idx]) dots[idx].classList.add('active');
+          if (counter) counter.textContent = String(idx + 1).padStart(2, '0');
+        }
+      });
+    }, { threshold: 0.55 });
+
+    sections.forEach(function(s){ io.observe(s); });
+  })();
+</script>
+
+</body>
+</html>

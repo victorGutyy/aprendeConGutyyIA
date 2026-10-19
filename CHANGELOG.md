@@ -2,6 +2,13 @@
 
 Registro de cambios semana a semana. Cada clase mantiene su propio número de versión (`vX.Y`) independiente del historial de Git.
 
+## Semana 9 — Python científico: NumPy, Pandas y Matplotlib
+
+### v1.0 — 2026-10-19
+- Primera publicación: por qué existen las librerías científicas (analogía de la cocina industrial), NumPy (`ndarray`, forma y tipo, vectorización con comparación de velocidad, matrices y `axis`, producto punto con `@`, máscaras booleanas, *broadcasting* y normalización en una línea), Pandas (`DataFrame`, `isna`, `fillna` con la mediana, columnas nuevas, filtros, `describe`, `groupby`), Matplotlib (interfaz orientada a objetos, título y ejes, `savefig`, `plt.close`), sección "Por qué esto importa para IA/ML" (NumPy como base del ecosistema, datasets como matrices, preparación de datos, graficar para depurar), ejemplo práctico de análisis de ventas (pseudocódigo + Python, verificado por ejecución: pan 43.5, queso 40.0, leche 28.0), pruebas con `pytest` (5 pruebas verificadas con NumPy 2.4, Pandas 3.0 y Matplotlib 3.11), notas de vigencia técnica (Pandas 3.0: tipo `str` y copy-on-write, evitar `inplace=True`, NumPy 2.x y `default_rng`, `ddof` en NumPy vs. Pandas, Polars como alternativa, entornos virtuales), errores comunes de principiante, ejercicio propuesto (`ventas_por_tienda`, sin resolver), autoevaluación de 9 preguntas, verificación de dependencias.
+- Diapositivas: 22, mismo diseño y guía de marca fijada en la Semana 1.
+- PDF generado a partir de un documento HTML con la misma guía de marca, vía Python + weasyprint.
+
 ## Semana 8 — Matemáticas para ML II: probabilidad y estadística aplicada
 
 ### v1.0 — 2026-10-12

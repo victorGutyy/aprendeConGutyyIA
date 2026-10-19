@@ -22,7 +22,7 @@ Cada clase queda versionada (`vX.Y`) con fecha, y el [CHANGELOG.md](CHANGELOG.md
 | 6 | Buenas prácticas de ingeniería: POO introductoria, Git, testing básico |
 | 7 | Matemáticas para ML I: álgebra lineal y cálculo esencial *(Semana 7)* |
 | 8 | Matemáticas para ML II: probabilidad y estadística aplicada *(Semana 8)* |
-| 9 | Python científico: NumPy, Pandas, Matplotlib |
+| 9 | Python científico: NumPy, Pandas, Matplotlib *(Semana 9)* |
 | 10 | Machine Learning clásico: regresión, clasificación, scikit-learn |
 | 11 | Deep Learning: redes neuronales, PyTorch/TensorFlow |
 | 12 | IA generativa y agentes: LLMs, prompting, RAG, frameworks de agentes |
@@ -39,6 +39,7 @@ Cada clase queda versionada (`vX.Y`) con fecha, y el [CHANGELOG.md](CHANGELOG.md
 | 6 | Buenas prácticas de ingeniería: POO introductoria, Git, testing básico | v1.0 | [clase.md](semanas/semana-06-poo-git-testing/clase.md) · [diapositivas.html](semanas/semana-06-poo-git-testing/diapositivas.html) · [clase.pdf](semanas/semana-06-poo-git-testing/clase.pdf) |
 | 7 | Matemáticas para ML I: álgebra lineal y cálculo esencial | v1.0 | [clase.md](semanas/semana-07-algebra-lineal-calculo/clase.md) · [diapositivas.html](semanas/semana-07-algebra-lineal-calculo/diapositivas.html) · [clase.pdf](semanas/semana-07-algebra-lineal-calculo/clase.pdf) |
 | 8 | Matemáticas para ML II: probabilidad y estadística aplicada | v1.0 | [clase.md](semanas/semana-08-probabilidad-estadistica/clase.md) · [diapositivas.html](semanas/semana-08-probabilidad-estadistica/diapositivas.html) · [clase.pdf](semanas/semana-08-probabilidad-estadistica/clase.pdf) |
+| 9 | Python científico: NumPy, Pandas, Matplotlib | v1.0 | [clase.md](semanas/semana-09-python-cientifico/clase.md) · [diapositivas.html](semanas/semana-09-python-cientifico/diapositivas.html) · [clase.pdf](semanas/semana-09-python-cientifico/clase.pdf) |
 
 ## Guía de marca
 
