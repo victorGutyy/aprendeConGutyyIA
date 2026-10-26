@@ -23,7 +23,8 @@ Cada clase queda versionada (`vX.Y`) con fecha, y el [CHANGELOG.md](CHANGELOG.md
 | 7 | Matemáticas para ML I: álgebra lineal y cálculo esencial *(Semana 7)* |
 | 8 | Matemáticas para ML II: probabilidad y estadística aplicada *(Semana 8)* |
 | 9 | Python científico: NumPy, Pandas, Matplotlib *(Semana 9)* |
-| 10 | Machine Learning clásico: regresión, clasificación, scikit-learn |
+| 10 | Machine Learning clásico: regresión, clasificación y scikit-learn | v1.0 | [clase.md](semanas/semana-10-ml-clasico-scikit-learn/clase.md) · [diapositivas.html](semanas/semana-10-ml-clasico-scikit-learn/diapositivas.html) · [clase.pdf](semanas/semana-10-ml-clasico-scikit-learn/clase.pdf) |
+| 10 | Machine Learning clásico: regresión, clasificación, scikit-learn *(Semana 10)* |
 | 11 | Deep Learning: redes neuronales, PyTorch/TensorFlow |
 | 12 | IA generativa y agentes: LLMs, prompting, RAG, frameworks de agentes |
 

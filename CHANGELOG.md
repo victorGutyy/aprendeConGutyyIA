@@ -2,6 +2,13 @@
 
 Registro de cambios semana a semana. Cada clase mantiene su propio número de versión (`vX.Y`) independiente del historial de Git.
 
+## Semana 10 — Machine Learning clásico: regresión, clasificación y scikit-learn
+
+### v1.0 — 2026-10-26
+- Primera publicación: aprendizaje supervisado (analogía de los exámenes de años anteriores; características `X` y etiqueta `y`), regresión vs. clasificación, regresión lineal (`y ≈ w·x + b`, MSE, conexión con la neurona de la Semana 7; verificado: coeficiente ≈ 1507 e intercepto ≈ 19385 sobre datos con relación real 1500 y 20000), regresión logística y árboles de decisión con la interfaz `fit`/`predict`/`predict_proba`/`score`, división entrenamiento/prueba (`train_test_split`, `random_state`, `stratify`), sobreajuste y subajuste, métricas (MSE/RMSE, R², exactitud, matriz de confusión) y el problema de la exactitud con clases desbalanceadas, `Pipeline` con `StandardScaler` y fuga de datos, sección "Por qué esto importa para IA/ML", ejemplo práctico de clasificación de flores Iris (pseudocódigo + Python, verificado por ejecución: exactitud 0.933 en prueba; árbol sin límite 1.0 en entrenamiento vs. 0.933 en prueba), segundo ejemplo de evaluación de una regresión (RMSE ≈ 7413, R² ≈ 0.962), pruebas con `pytest` (5 pruebas verificadas con scikit-learn 1.9, NumPy 2.4 y Pandas 3.1), notas de vigencia técnica (`load_boston` eliminado, gradient boosting, validación cruzada, reproducibilidad), errores comunes de principiante, ejercicio propuesto (dataset de vinos, sin resolver), autoevaluación de 9 preguntas, verificación de dependencias.
+- Diapositivas: 24, mismo diseño y guía de marca fijada en la Semana 1.
+- PDF generado a partir de un documento HTML con la misma guía de marca, vía Python + weasyprint.
+
 ## Semana 9 — Python científico: NumPy, Pandas y Matplotlib
 
 ### v1.0 — 2026-10-19

@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Machine Learning clásico: regresión, clasificación y scikit-learn</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  /* =========================================================
+     Aprende con Gutyy IA — Semana 10 (v1.0)
+     Identidad: académico-editorial, claro, un acento, mucho aire.
+     Misma guía de marca fijada en la Semana 1 — sin cambios de
+     identidad, solo aplicada al contenido nuevo.
+     ========================================================= */
+
+  :root{
+    --bg:            #FFFFFF;
+    --bg-alt:        #F5F6FA;
+    --ink:           #171A24;
+    --ink-secondary: #4B4F5E;
+    --ink-tertiary:  #8A8FA3;
+    --accent:        #3548C4;
+    --accent-dark:   #24308C;
+    --accent-tint:   #EAEDFB;
+    --border:        #E2E4EC;
+    --code-bg:       #F3F4F8;
+    --code-border:   #E3E5EE;
+    --code-ink:      #23262F;
+    --code-comment:  #9297A8;
+    --code-string:   #5B5F70;
+
+    --font-display: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-body:    "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-mono:    "IBM Plex Mono", ui-monospace, "Consolas", monospace;
+
+    color-scheme: light;
+  }
+
+  *,*::before,*::after{ box-sizing: border-box; }
+
+  html{
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+  }
+
+  body{
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior: auto; }
+    *{ animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  .grid-field{
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      linear-gradient(to right, rgba(53,72,196,0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(53,72,196,0.05) 1px, transparent 1px);
+    background-size: 48px 48px;
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent 75%);
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent 75%);
+  }
+
+  .brand-mark{
+    position: fixed;
+    top: 28px;
+    left: clamp(24px, 5vw, 64px);
+    z-index: 20;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    pointer-events: none;
+  }
+  .brand-mark strong{
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .brand-mark .dot{ color: var(--accent); }
+
+  .slide-counter{
+    position: fixed;
+    top: 28px;
+    right: clamp(24px, 5vw, 64px);
+    z-index: 20;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--ink-tertiary);
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+  .slide-counter strong{ color: var(--ink); font-weight: 600; }
+
+  .rail{
+    position: fixed;
+    right: clamp(14px, 3vw, 30px);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .rail a{
+    position: relative;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    border: 1px solid var(--border);
+    display: block;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .rail a:hover{ transform: scale(1.3); }
+  .rail a.active{
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .rail a .rail-label{
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    color: var(--ink-secondary);
+    background: var(--bg);
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+  }
+  .rail a:hover .rail-label{ opacity: 1; }
+
+  a:focus-visible,
+  .rail a:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .deck{ position: relative; z-index: 1; }
+
+  section.slide{
+    min-height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    align-items: center;
+    padding: 120px clamp(24px, 8vw, 96px) 96px;
+    border-bottom: 1px solid var(--border);
+  }
+  section.slide.alt{ background: var(--bg-alt); }
+
+  .slide-inner{
+    max-width: 880px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .kicker{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 18px;
+  }
+  .kicker::before{
+    content: "";
+    width: 18px;
+    height: 1px;
+    background: var(--accent);
+    display: inline-block;
+  }
+
+  h1,h2,h3{
+    font-family: var(--font-display);
+    color: var(--ink);
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  h2{
+    font-size: clamp(28px, 3.6vw, 40px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  .lede{
+    font-size: 19px;
+    line-height: 1.6;
+    color: var(--ink-secondary);
+    max-width: 62ch;
+    margin: 22px 0 0;
+  }
+
+  p{ line-height: 1.65; color: var(--ink-secondary); }
+  p.body-text{ font-size: 16.5px; max-width: 66ch; }
+
+  strong.term{
+    color: var(--ink);
+    font-weight: 600;
+    background: linear-gradient(to bottom, transparent 62%, var(--accent-tint) 62%);
+    padding: 0 1px;
+  }
+
+  em.term-accent{
+    font-style: normal;
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+
+  .section-body{ margin-top: 36px; }
+  .section-body > * + *{ margin-top: 20px; }
+
+  .callout{
+    border-left: 2px solid var(--accent);
+    padding: 4px 0 4px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .callout .callout-label{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .callout p{ margin: 0; color: var(--ink); font-size: 16px; }
+
+  .pull-quote{
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 600;
+    color: var(--accent-dark);
+    line-height: 1.5;
+    max-width: 48ch;
+    margin: 0;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    text-wrap: balance;
+  }
+
+  .divider-row{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 34px 0 22px;
+  }
+  .divider-row::after{
+    content:"";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .divider-row .divider-label{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    white-space: nowrap;
+  }
+
+  .code-card{
+    border: 1px solid var(--code-border);
+    background: var(--code-bg);
+    overflow: hidden;
+  }
+  .code-card .code-bar{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--code-border);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+  }
+  .code-card .code-bar .lang-tag{
+    color: var(--accent-dark);
+    font-weight: 500;
+  }
+  .code-card pre{
+    margin: 0;
+    padding: 18px 20px 20px;
+    overflow-x: auto;
+  }
+  .code-card code{
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--code-ink);
+    white-space: pre;
+  }
+  .code-card .cm{ color: var(--code-comment); font-style: italic; }
+  .code-card .kw{ color: var(--accent-dark); font-weight: 600; }
+  .code-card .st{ color: var(--code-string); }
+  .code-card .fn{ color: var(--accent); }
+
+  .code-card.compact pre{ padding: 14px 18px 16px; }
+  .code-card.compact code{ font-size: 13.5px; }
+
+  .code-result{
+    margin-top: 10px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink-secondary);
+  }
+  .code-result .result-tag{
+    color: var(--ink-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 11px;
+  }
+  .code-result .result-val{ color: var(--accent-dark); font-weight: 500; }
+
+  .blocks-grid{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 8px;
+  }
+  .blocks-grid.cols-3{ grid-template-columns: repeat(3, 1fr); }
+  .blocks-grid.cols-5{ grid-template-columns: repeat(5, 1fr); }
+  .block-card{
+    background: var(--bg);
+    padding: 26px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .block-card .block-letter{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+  .block-card h3{
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .block-card p{ font-size: 14.5px; margin: 0; }
+  .block-card .block-example{
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+    font-size: 13px;
+    color: var(--ink-tertiary);
+    font-style: italic;
+  }
+
+  .progression{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 26px;
+  }
+  .progression .chip{
+    border: 1px solid var(--border);
+    background: var(--bg);
+    padding: 8px 14px;
+    font-size: 13px;
+    color: var(--ink-secondary);
+    font-family: var(--font-mono);
+  }
+  .progression .chip strong{ color: var(--ink); font-weight: 600; }
+  .progression .arrow{ color: var(--ink-tertiary); font-family: var(--font-mono); }
+
+  .obj-list{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .obj-list li{
+    display: flex;
+    gap: 20px;
+    padding: 18px 0;
+    border-top: 1px solid var(--border);
+  }
+  .obj-list li:last-child{ border-bottom: 1px solid var(--border); }
+  .obj-list .obj-num{
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-size: 14px;
+    padding-top: 2px;
+    flex-shrink: 0;
+    width: 24px;
+  }
+  .obj-list p{ margin: 0; color: var(--ink); font-size: 16px; }
+
+  .two-col{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  @media (max-width: 760px){
+    .two-col{ grid-template-columns: 1fr; }
+    .blocks-grid{ grid-template-columns: 1fr; }
+    .blocks-grid.cols-3{ grid-template-columns: 1fr; }
+    .blocks-grid.cols-5{ grid-template-columns: 1fr; }
+    section.slide{ padding-top: 96px; }
+    .type-table{ font-size: 13px; }
+  }
+
+  .qa-list{
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .qa-item{
+    padding: 18px 0;
+    border-top: 1px solid var(--border);
+  }
+  .qa-item:last-child{ border-bottom: 1px solid var(--border); }
+  .qa-item .q{
+    display: flex;
+    gap: 14px;
+    font-size: 15.5px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .qa-item .q .q-num{
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .qa-item .a{
+    margin: 8px 0 0 34px;
+    font-size: 14.5px;
+    color: var(--ink-secondary);
+  }
+  .qa-item .a .a-tag{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    margin-right: 8px;
+  }
+
+  .status-row{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--accent-dark);
+    background: var(--accent-tint);
+    border: 1px solid #DADFF6;
+    padding: 10px 16px;
+    width: fit-content;
+  }
+  .status-row .status-dot{
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .meta-list{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    margin-top: 8px;
+  }
+  .meta-list div{ font-size: 14px; color: var(--ink-secondary); }
+  .meta-list dt{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-tertiary);
+    margin: 0 0 3px;
+  }
+  .meta-list dd{ margin: 0; color: var(--ink); font-weight: 500; }
+
+  /* type table */
+  .type-table{
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 14.5px;
+  }
+  .type-table th, .type-table td{
+    text-align: left;
+    padding: 12px 14px;
+    border-top: 1px solid var(--border);
+  }
+  .type-table thead th{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    border-top: none;
+    padding-top: 0;
+  }
+  .type-table tbody tr:last-child td{ border-bottom: 1px solid var(--border); }
+  .type-table td.type-name{
+    font-family: var(--font-mono);
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+  .type-table td.type-ex{ font-family: var(--font-mono); color: var(--ink); }
+
+  .cover{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 0 clamp(24px, 8vw, 96px);
+  }
+  .cover-eyebrow{
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .cover-eyebrow::before{
+    content:"";
+    width: 34px;
+    height: 1px;
+    background: var(--accent);
+  }
+  .cover h1{
+    font-size: clamp(40px, 6.4vw, 76px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    max-width: 14ch;
+    margin-top: 26px;
+  }
+  .cover h1 em{
+    font-style: normal;
+    color: var(--accent);
+  }
+  .cover .cover-sub{
+    font-size: clamp(17px, 2vw, 20px);
+    color: var(--ink-secondary);
+    max-width: 56ch;
+    margin-top: 22px;
+    line-height: 1.6;
+  }
+  .cover-footer{
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    margin-top: 56px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .cover-footer .fmeta dt{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-tertiary);
+    margin: 0 0 4px;
+  }
+  .cover-footer .fmeta dd{
+    margin: 0;
+    font-size: 14.5px;
+    color: var(--ink);
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+  .scroll-cue{
+    position: absolute;
+    bottom: 40px;
+    left: clamp(24px, 8vw, 96px);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .scroll-cue .chevron{
+    display: inline-block;
+    animation: bob 1.8s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce){ .scroll-cue .chevron{ animation: none; } }
+  @keyframes bob{
+    0%,100%{ transform: translateY(0); }
+    50%{ transform: translateY(4px); }
+  }
+
+  footer.end{
+    padding: 64px clamp(24px, 8vw, 96px) 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-tertiary);
+    position: relative;
+    z-index: 1;
+  }
+</style>
+</head>
+<body>
+<div class="grid-field" aria-hidden="true"></div>
+
+<div class="brand-mark">
+  <strong>Aprende con Gutyy IA</strong><span class="dot">·</span><span>Semana 10</span>
+</div>
+<div class="slide-counter"><strong id="counter-current">01</strong> / 24</div>
+
+<nav class="rail" aria-label="Navegación de diapositivas">
+  <a href="#s01" data-label="Portada" class="active"><span class="rail-label">Portada</span></a>
+  <a href="#s02" data-label="Objetivos"><span class="rail-label">Objetivos</span></a>
+  <a href="#s03" data-label="Panorama"><span class="rail-label">Panorama</span></a>
+  <a href="#s04" data-label="Dos problemas"><span class="rail-label">Dos problemas</span></a>
+  <a href="#s05" data-label="Regresión lineal"><span class="rail-label">Regresión lineal</span></a>
+  <a href="#s06" data-label="Regresión en código"><span class="rail-label">Regresión en código</span></a>
+  <a href="#s07" data-label="Clasificación"><span class="rail-label">Clasificación</span></a>
+  <a href="#s08" data-label="fit / predict"><span class="rail-label">fit / predict</span></a>
+  <a href="#s09" data-label="Train / test"><span class="rail-label">Train / test</span></a>
+  <a href="#s10" data-label="Sobreajuste"><span class="rail-label">Sobreajuste</span></a>
+  <a href="#s11" data-label="Métricas"><span class="rail-label">Métricas</span></a>
+  <a href="#s12" data-label="Pipeline"><span class="rail-label">Pipeline</span></a>
+  <a href="#s13" data-label="Por qué importa"><span class="rail-label">Por qué importa</span></a>
+  <a href="#s14" data-label="Ejemplo: pseudocódigo"><span class="rail-label">Ejemplo: pseudocódigo</span></a>
+  <a href="#s15" data-label="Ejemplo: código"><span class="rail-label">Ejemplo: código</span></a>
+  <a href="#s16" data-label="Matriz de confusión"><span class="rail-label">Matriz de confusión</span></a>
+  <a href="#s17" data-label="Regresión: métricas"><span class="rail-label">Regresión: métricas</span></a>
+  <a href="#s18" data-label="Pruebas"><span class="rail-label">Pruebas</span></a>
+  <a href="#s19" data-label="Vigencia"><span class="rail-label">Vigencia</span></a>
+  <a href="#s20" data-label="Errores comunes"><span class="rail-label">Errores comunes</span></a>
+  <a href="#s21" data-label="Ejercicio"><span class="rail-label">Ejercicio</span></a>
+  <a href="#s22" data-label="Autoevaluación I"><span class="rail-label">Autoevaluación I</span></a>
+  <a href="#s23" data-label="Autoevaluación II"><span class="rail-label">Autoevaluación II</span></a>
+  <a href="#s24" data-label="Dependencias"><span class="rail-label">Dependencias</span></a>
+</nav>
+
+<main class="deck">
+
+  <section class="slide" id="s01">
+    <div class="cover">
+      <p class="cover-eyebrow">Aprende con Gutyy IA — Academia de programación, IA y Machine Learning</p>
+      <h1>Machine Learning <em>clásico</em> con scikit-learn</h1>
+      <p class="cover-sub">Semana 10 del roadmap — regresión, clasificación y el flujo completo: dividir, entrenar, evaluar y predecir.</p>
+      <div class="cover-footer">
+        <dl class="fmeta"><dt>Nivel</dt><dd>Intermedio</dd></dl>
+        <dl class="fmeta"><dt>Prerrequisitos</dt><dd>Semanas 3–9</dd></dl>
+        <dl class="fmeta"><dt>Versión</dt><dd>v1.0</dd></dl>
+        <dl class="fmeta"><dt>Fecha</dt><dd>2026-10-26</dd></dl>
+      </div>
+    </div>
+    <div class="scroll-cue"><span>Desplázate</span><span class="chevron">↓</span></div>
+  </section>
+
+  <section class="slide alt" id="s02">
+    <div class="slide-inner">
+      <p class="kicker">Objetivos de aprendizaje</p>
+      <h2>Al terminar esta semana, vas a poder…</h2>
+      <div class="section-body"><ol class="obj-list section-body" style="margin-top:36px;"><li><span class="obj-num">01</span><p>Explicar el <strong class="term">aprendizaje supervisado</strong> y distinguir características (<code style="font-family:var(--font-mono);">X</code>) de etiqueta (<code style="font-family:var(--font-mono);">y</code>).</p></li><li><span class="obj-num">02</span><p>Distinguir un problema de <strong class="term">regresión</strong> de uno de <strong class="term">clasificación</strong>.</p></li><li><span class="obj-num">03</span><p>Entrenar y usar un modelo de scikit-learn con <code style="font-family:var(--font-mono);">fit</code> / <code style="font-family:var(--font-mono);">predict</code> / <code style="font-family:var(--font-mono);">score</code>.</p></li><li><span class="obj-num">04</span><p><strong class="term">Dividir los datos</strong> en entrenamiento y prueba, y explicar por qué.</p></li><li><span class="obj-num">05</span><p>Medir un modelo (MSE, exactitud, matriz de confusión) e identificar el <strong class="term">sobreajuste</strong>.</p></li><li><span class="obj-num">06</span><p>Encadenar preprocesamiento y modelo en un <code style="font-family:var(--font-mono);">Pipeline</code> para evitar fugas de datos.</p></li></ol></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s03">
+    <div class="slide-inner">
+      <p class="kicker">01 · Qué es el ML clásico</p>
+      <h2>Tú dabas las reglas; ahora el modelo las descubre</h2><p class="lede">Aprendizaje supervisado: aprender de ejemplos que ya traen su respuesta.</p>
+      <div class="section-body"><div class="blocks-grid cols-3" style="grid-template-columns:repeat(3,1fr);"><div class="block-card"><span class="block-letter">A</span><h3>Característica (X)</h3><p>El dato de entrada: una columna. Metros cuadrados, medidas de un pétalo.</p></div><div class="block-card"><span class="block-letter">B</span><h3>Etiqueta (y)</h3><p>La respuesta que queremos predecir: el precio, la especie.</p></div><div class="block-card"><span class="block-letter">C</span><h3>Entrenar y predecir</h3><p><code>fit</code> ajusta el modelo a ejemplos resueltos; <code>predict</code> responde a casos nuevos.</p></div></div><div class="callout"><span class="callout-label">Analogía · exámenes de años anteriores</span><p>Resuelves muchos exámenes viejos con las respuestas a la vista. El día del examen real se nota si aprendiste el patrón o solo memorizaste.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s04">
+    <div class="slide-inner">
+      <p class="kicker">01 · Qué es el ML clásico</p>
+      <h2>Regresión vs. clasificación</h2>
+      <div class="section-body"><table class="type-table"><thead><tr><th>Tipo</th><th>La respuesta es…</th><th>Ejemplos</th></tr></thead><tbody><tr><td class="type-name">Regresión</td><td>un <strong>número</strong></td><td>precio de una casa, temperatura, minutos de retraso</td></tr><tr><td class="type-name">Clasificación</td><td>una <strong>categoría</strong></td><td>spam o no spam, especie de flor, aprobado o reprobado</td></tr></tbody></table><div class="callout"><span class="callout-label">Y entonces… X</span><p><code>X</code> es una matriz <code>n_ejemplos × n_características</code> (Semanas 7 y 9); <code>y</code> es un vector con una respuesta por ejemplo.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s05">
+    <div class="slide-inner">
+      <p class="kicker">02 · Regresión</p>
+      <h2>Regresión lineal: ajustar una recta</h2>
+      <div class="section-body"><p class="body-text">Es la neurona de la Semana 7 con un término extra: <em class="term-accent">y ≈ w · x + b</em>.</p><div class="blocks-grid cols-3" style="grid-template-columns:repeat(3,1fr);"><div class="block-card"><span class="block-letter">w</span><h3>Coeficiente</h3><p>Cuánto sube <code>y</code> por cada unidad de <code>x</code>.</p></div><div class="block-card"><span class="block-letter">b</span><h3>Intercepto</h3><p>El valor base cuando <code>x</code> es 0.</p></div><div class="block-card"><span class="block-letter">MSE</span><h3>Error cuadrático medio</h3><p><code>promedio((real − predicho)²)</code>: lo que el modelo minimiza.</p></div></div><div class="callout"><span class="callout-label">Conexión · Semana 7</span><p>Con varias características, <code>w · x</code> es el producto punto. Minimizar el error es lo que hacía el descenso del gradiente.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s06">
+    <div class="slide-inner">
+      <p class="kicker">02 · Regresión</p>
+      <h2>Regresión lineal con scikit-learn</h2>
+      <div class="section-body"><div class="code-card compact"><div class="code-bar"><span>regresion.py</span><span class="lang-tag">python</span></div><pre><code>rng = np.random.default_rng(42)
+m2 = rng.uniform(30, 120, size=100)
+precio = 1500 * m2 + 20000 + rng.normal(0, 8000, size=100)
+
+X = m2.reshape(-1, 1)   <span class="cm"># scikit-learn exige X en 2D</span>
+modelo = LinearRegression().fit(X, precio)
+
+print(modelo.coef_)        <span class="cm"># [1506.8…] ≈ 1500</span>
+print(modelo.intercept_)   <span class="cm"># 19385.2…  ≈ 20000</span>
+print(modelo.predict([[80]]))   <span class="cm"># [139930.1…]</span></code></pre><div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">recuperó la relación escondida (1500 y 20000) a pesar del ruido</span></div></div><div class="callout"><span class="callout-label">Aprender</span><p>Los datos tenían ruido; el modelo igual encontró casi exactamente la recta que los generó.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s07">
+    <div class="slide-inner">
+      <p class="kicker">03 · Clasificación</p>
+      <h2>Clasificar: de la puntuación a la probabilidad</h2>
+      <div class="section-body"><div class="two-col"><div><h3 style="margin-bottom:10px;">Regresión logística</h3><p class="body-text" style="font-size:15px;">Calcula una puntuación lineal <code>w · x + b</code> y la convierte en una <strong class="term">probabilidad</strong> entre 0 y 1 (Semana 8). A pesar del nombre, es un clasificador.</p></div><div><h3 style="margin-bottom:10px;">Árbol de decisión</h3><p class="body-text" style="font-size:15px;">Una cadena de preguntas de sí/no hasta llegar a una respuesta, como el juego de las veinte preguntas.</p></div></div><div class="callout"><span class="callout-label">Misma interfaz</span><p>Cambiar de modelo cuesta una línea: ambos son <strong>estimadores</strong> con <code>fit</code>, <code>predict</code> y <code>score</code> (POO de la Semana 6).</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s08">
+    <div class="slide-inner">
+      <p class="kicker">03 · Clasificación</p>
+      <h2>El patrón fit → predict → score</h2>
+      <div class="section-body"><div class="code-card"><div class="code-bar"><span>estimador.py</span><span class="lang-tag">python</span></div><pre><code>modelo = LogisticRegression(max_iter=1000)  <span class="cm"># o DecisionTreeClassifier()</span>
+modelo.fit(X_ent, y_ent)       <span class="cm"># aprender</span>
+modelo.predict(X_nuevos)       <span class="cm"># clase para cada fila</span>
+modelo.predict_proba(X_nuevos) <span class="cm"># probabilidad de cada clase</span>
+modelo.score(X_prueba, y_prueba)  <span class="cm"># exactitud (accuracy)</span></code></pre></div><div class="callout"><span class="callout-label">Estándar de facto</span><p>XGBoost, LightGBM y casi todas las librerías de ML imitan esta interfaz.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s09">
+    <div class="slide-inner">
+      <p class="kicker">04 · Evaluar</p>
+      <h2>Entrenamiento y prueba</h2>
+      <div class="section-body"><div class="two-col"><div><div class="blocks-grid cols-1" style="grid-template-columns:1fr;"><div class="block-card"><span class="block-letter">80 %</span><h3>Entrenamiento</h3><p>Con esto el modelo aprende.</p></div><div class="block-card"><span class="block-letter">20 %</span><h3>Prueba</h3><p>Bajo llave: solo se usa al final.</p></div></div></div><div><div class="code-card compact"><div class="code-bar"><span>dividir.py</span><span class="lang-tag">python</span></div><pre><code>X_ent, X_prueba, y_ent, y_prueba = \
+    train_test_split(
+        X, y,
+        test_size=0.2,
+        random_state=42,  <span class="cm"># reproducible</span>
+        stratify=y,       <span class="cm"># mismas proporciones</span>
+    )</code></pre></div></div></div><div class="callout"><span class="callout-label">¿Por qué?</span><p>Calificar con el examen que el estudiante ya memorizó no dice nada. Se evalúa con datos que el modelo <em>nunca vio</em>.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s10">
+    <div class="slide-inner">
+      <p class="kicker">04 · Evaluar</p>
+      <h2>Sobreajuste: memorizar no es aprender</h2>
+      <div class="section-body"><div class="blocks-grid cols-3" style="grid-template-columns:repeat(3,1fr);"><div class="block-card"><span class="block-letter">↗</span><h3>Sobreajuste</h3><p>Memoriza el entrenamiento, ruido incluido. Nota alta en entrenamiento, peor en prueba.</p></div><div class="block-card"><span class="block-letter">↘</span><h3>Subajuste</h3><p>Modelo demasiado simple: falla incluso en entrenamiento.</p></div><div class="block-card"><span class="block-letter">✓</span><h3>Buen ajuste</h3><p>Notas parecidas en entrenamiento y prueba.</p></div></div><div class="callout"><span class="callout-label">Ejemplo real de esta clase</span><p>Un árbol sin límite saca <strong>1.0</strong> en entrenamiento y <strong>0.933</strong> en prueba. La que cuenta es la de prueba.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s11">
+    <div class="slide-inner">
+      <p class="kicker">04 · Evaluar</p>
+      <h2>Métricas básicas</h2>
+      <div class="section-body"><table class="type-table"><thead><tr><th>Problema</th><th>Métrica</th><th>Qué mide</th></tr></thead><tbody><tr><td class="type-name">Regresión</td><td>MSE / RMSE</td><td>Error promedio (RMSE en unidades de <code>y</code>); menor es mejor</td></tr><tr><td class="type-name">Regresión</td><td>R²</td><td>Fracción de la variación que el modelo explica (1.0 = perfecto)</td></tr><tr><td class="type-name">Clasificación</td><td>Exactitud</td><td>Porcentaje de aciertos</td></tr><tr><td class="type-name">Clasificación</td><td>Matriz de confusión</td><td>Qué clase real se confundió con cuál</td></tr></tbody></table><div class="callout"><span class="callout-label">Cuidado</span><p>Si solo el 1 % de los correos son fraude, decir siempre «no es fraude» acierta el 99 % y no sirve de nada.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s12">
+    <div class="slide-inner">
+      <p class="kicker">05 · Pipeline</p>
+      <h2>Preprocesar sin hacer trampa</h2>
+      <div class="section-body"><p class="body-text">La media y la desviación del escalado deben calcularse <strong class="term">solo con el entrenamiento</strong>. Si usas los datos de prueba, hay <em class="term-accent">fuga de datos</em> y la métrica sale falsamente optimista.</p><div class="code-card compact"><div class="code-bar"><span>pipeline.py</span><span class="lang-tag">python</span></div><pre><code>modelo = make_pipeline(
+    StandardScaler(),                    <span class="cm"># normalización (Semana 8)</span>
+    LogisticRegression(max_iter=1000),
+)
+modelo.fit(X_ent, y_ent)   <span class="cm"># aprende solo de X_ent</span>
+modelo.score(X_prueba, y_prueba)</code></pre></div><div class="callout"><span class="callout-label">Garantía</span><p>El <code>Pipeline</code> aprende todo en <code>fit</code> y solo aplica lo aprendido en <code>predict</code>.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s13">
+    <div class="slide-inner">
+      <p class="kicker">06 · IA/ML</p>
+      <h2>Por qué esto importa para IA/ML</h2>
+      <div class="section-body"><div class="blocks-grid cols-3" style="grid-template-columns:repeat(3,1fr);"><div class="block-card"><span class="block-letter">A</span><h3>El flujo de todo proyecto</h3><p>Datos → X/y → dividir → entrenar → evaluar → predecir. Las redes neuronales siguen igual.</p></div><div class="block-card"><span class="block-letter">B</span><h3>Línea base obligatoria</h3><p>En datos tabulares igualan o superan a modelos complejos: rápidos, baratos e interpretables.</p></div><div class="block-card"><span class="block-letter">C</span><h3>Ladrillo del Deep Learning</h3><p>Una neurona es una puntuación lineal más una activación; una red las apila.</p></div><div class="block-card"><span class="block-letter">D</span><h3>Disciplina de evaluación</h3><p>Probar con datos no vistos y desconfiar de la nota de entrenamiento.</p></div><div class="block-card"><span class="block-letter">E</span><h3>Patrón estándar</h3><p><code>fit</code>/<code>predict</code> lo imitan XGBoost, LightGBM y más.</p></div></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s14">
+    <div class="slide-inner">
+      <p class="kicker">07 · Ejemplo práctico</p>
+      <h2>Clasificar especies de flores (Iris)</h2><p class="lede">Pseudocódigo primero, código después.</p>
+      <div class="section-body"><div class="code-card compact"><div class="code-bar"><span>pseudocodigo.txt</span><span class="lang-tag">pseudocódigo</span></div><pre><code>cargar las 150 flores: X (medidas) e y (especie)
+dividir: 80 % entrenar, 20 % probar (misma proporción de especies)
+crear modelo: escalar medidas + regresión logística
+entrenar solo con las flores de entrenamiento
+predecir las flores de prueba
+medir exactitud y mostrar la matriz de confusión</code></pre></div><div class="callout"><span class="callout-label">Datos</span><p>150 flores, 4 medidas en cm (largo/ancho de sépalo y pétalo) y 3 especies: setosa, versicolor, virginica.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s15">
+    <div class="slide-inner">
+      <p class="kicker">07 · Ejemplo práctico</p>
+      <h2>Del pseudocódigo a scikit-learn</h2>
+      <div class="section-body"><div class="code-card compact"><div class="code-bar"><span>analisis_flores.py</span><span class="lang-tag">python</span></div><pre><code><span class="kw">def</span> dividir(X, y, semilla=42):
+    <span class="kw">return</span> train_test_split(
+        X, y, test_size=0.2, random_state=semilla, stratify=y)
+
+<span class="kw">def</span> crear_modelo():
+    <span class="st">""</span><span class="st">"Escalado + regresión logística (evita fugas de datos)."</span><span class="st">""</span>
+    <span class="kw">return</span> make_pipeline(StandardScaler(),
+                         LogisticRegression(max_iter=1000))
+
+<span class="kw">def</span> evaluar(modelo, X_prueba, y_prueba):
+    pred = modelo.predict(X_prueba)
+    <span class="kw">return</span> (accuracy_score(y_prueba, pred),
+            confusion_matrix(y_prueba, pred))</code></pre><div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">exactitud en prueba: 0.933</span></div></div><div class="callout"><span class="callout-label">Diseño</span><p>Funciones pequeñas con una sola responsabilidad (Semana 3), fáciles de probar (Semana 6).</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s16">
+    <div class="slide-inner">
+      <p class="kicker">07 · Ejemplo práctico</p>
+      <h2>Leer la matriz de confusión</h2>
+      <div class="section-body"><div class="two-col"><div><div class="code-card compact"><div class="code-bar"><span>matriz.txt</span><span class="lang-tag">salida</span></div><pre><code>[[10  0  0]    setosa
+ [ 0  9  1]    versicolor
+ [ 0  1  9]]   virginica</code></pre></div></div><div><p class="body-text" style="font-size:15.5px;">Cada <strong class="term">fila</strong> es la especie real; cada <strong class="term">columna</strong>, la predicha. La diagonal son los aciertos: <strong>28 de 30</strong>.</p></div></div><div class="callout"><span class="callout-label">Los dos errores</span><p>Una versicolor predicha como virginica y viceversa: especies que de verdad se parecen. La setosa se separa perfectamente.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s17">
+    <div class="slide-inner">
+      <p class="kicker">07 · Ejemplo práctico</p>
+      <h2>Segundo ejemplo: evaluar una regresión</h2>
+      <div class="section-body"><div class="code-card compact"><div class="code-bar"><span>metricas.py</span><span class="lang-tag">python</span></div><pre><code>pred = modelo.predict(X_prueba)
+rmse = mean_squared_error(y_prueba, pred) ** 0.5  <span class="cm"># ≈ 7413</span>
+r2 = r2_score(y_prueba, pred)                     <span class="cm"># ≈ 0.962</span></code></pre><div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">error típico ≈ 7 400 $  ·  explica ≈ 96 % de la variación</span></div></div><div class="callout"><span class="callout-label">Lectura</span><p>El ruido inyectado tenía desviación 8 000: el modelo no elimina el ruido, solo capta la relación.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s18">
+    <div class="slide-inner">
+      <p class="kicker">07 · Ejemplo práctico</p>
+      <h2>Pruebas con pytest</h2>
+      <div class="section-body"><div class="code-card compact"><div class="code-bar"><span>test_analisis_flores.py</span><span class="lang-tag">python</span></div><pre><code><span class="kw">def</span> test_division_80_20_conserva_clases():
+    X, y = cargar_datos()
+    X_ent, X_prueba, y_ent, y_prueba = dividir(X, y)
+    <span class="kw">assert</span> len(X_ent) == 120 <span class="kw">and</span> len(X_prueba) == 30
+    <span class="kw">assert</span> set(np.unique(y_prueba)) == {0, 1, 2}
+
+
+<span class="kw">def</span> test_modelo_supera_90_por_ciento():
+    ...
+    <span class="kw">assert</span> exactitud &gt; 0.9   <span class="cm"># umbral, no igualdad exacta</span>
+
+
+<span class="kw">def</span> test_probabilidades_suman_uno():
+    ...
+    <span class="kw">assert</span> modelo.predict_proba(X[:5]).sum(axis=1) == pytest.approx(1.0)</code></pre><div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">5 passed (verificado antes de publicar)</span></div></div><div class="callout"><span class="callout-label">Idea</span><p>Un modelo es una función numérica, no una receta exacta: se prueba con umbrales.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s19">
+    <div class="slide-inner">
+      <p class="kicker">08 · Vigencia técnica</p>
+      <h2>Notas de vigencia (2026)</h2>
+      <div class="section-body"><table class="type-table"><thead><tr><th>Tema</th><th>Qué usar hoy</th></tr></thead><tbody><tr><td class="type-name">scikit-learn</td><td>Sigue siendo el estándar de ML clásico en datos tabulares (1.9); <code>fit</code>/<code>predict</code> y <code>Pipeline</code> son estables.</td></tr><tr><td class="type-name">load_boston</td><td>Eliminado hace años. Usa Iris, <code>fetch_california_housing</code> o tus datos.</td></tr><tr><td class="type-name">Gradient boosting</td><td><code>HistGradientBoosting*</code>, XGBoost, LightGBM, CatBoost: lo más fuerte en tablas, después de dominar lo básico.</td></tr><tr><td class="type-name">Validación cruzada</td><td><code>cross_val_score</code>: varias divisiones y se promedia; una sola puede engañar.</td></tr><tr><td class="type-name">Reproducibilidad</td><td><code>random_state</code> fijo y versiones fijadas en <code>requirements.txt</code>.</td></tr><tr><td class="type-name">Pandas 3.x</td><td>Los estimadores aceptan <code>DataFrame</code>; <code>set_output(transform="pandas")</code> conserva nombres de columna.</td></tr></tbody></table></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s20">
+    <div class="slide-inner">
+      <p class="kicker">09 · Errores comunes</p>
+      <h2>Errores comunes de principiante</h2>
+      <div class="section-body"><ul class="body-text" style="line-height:1.9;color:var(--ink-secondary);max-width:66ch;"><li>Evaluar con los datos de entrenamiento.</li><li>Escalar o limpiar antes de dividir (fuga de datos).</li><li>Olvidar <code>reshape(-1, 1)</code> con una sola característica.</li><li>Fiarse de la exactitud con clases desbalanceadas.</li><li>No fijar <code>random_state</code>.</li><li>Confundir regresión con clasificación.</li><li>Leer <code>predict_proba</code> como certeza.</li><li>Empezar con un modelo sofisticado sin línea base simple.</li></ul></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s21">
+    <div class="slide-inner">
+      <p class="kicker">10 · Ejercicio</p>
+      <h2>Ejercicio propuesto</h2>
+      <div class="section-body"><p class="body-text">Con <code style="font-family:var(--font-mono);">load_wine</code> (dataset de vinos), crea <code style="font-family:var(--font-mono);">analisis_vinos.py</code> con <code style="font-family:var(--font-mono);">cargar_datos()</code>, <code style="font-family:var(--font-mono);">dividir()</code>, <code style="font-family:var(--font-mono);">crear_modelo()</code> y <code style="font-family:var(--font-mono);">evaluar()</code>, igual que en <code style="font-family:var(--font-mono);">analisis_flores.py</code>.</p><p class="body-text">Compara en la prueba una <code style="font-family:var(--font-mono);">LogisticRegression</code> con escalado contra un <code style="font-family:var(--font-mono);">DecisionTreeClassifier</code> con <code style="font-family:var(--font-mono);">max_depth=3</code>: muestra ambas exactitudes y matrices. Añade pruebas con pytest y versiona con Git en dos commits.</p><div class="callout"><span class="callout-label">Pista</span><p>¿Alguno muestra sobreajuste? Compara <code>score</code> en entrenamiento y en prueba y deja la conclusión como comentario.</p></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s22">
+    <div class="slide-inner">
+      <p class="kicker">Cierre · Parte 1 de 2</p>
+      <h2>Autoevaluación</h2>
+      <div class="section-body"><div class="qa-list section-body" style="margin-top:30px;"><div class="qa-item"><p class="q"><span class="q-num">01</span><span>¿Qué es el aprendizaje supervisado?</span></p><p class="a"><span class="a-tag">Respuesta</span>Aprender una regla a partir de ejemplos que ya incluyen la respuesta (<code>X</code> con su <code>y</code>).</p></div><div class="qa-item"><p class="q"><span class="q-num">02</span><span>¿Regresión o clasificación? (a) temperatura de mañana; (b) ¿es spam?</span></p><p class="a"><span class="a-tag">Respuesta</span>(a) regresión: es un número. (b) clasificación: es una categoría.</p></div><div class="qa-item"><p class="q"><span class="q-num">03</span><span>¿Qué hacen <code>fit</code> y <code>predict</code>?</span></p><p class="a"><span class="a-tag">Respuesta</span><code>fit</code> ajusta el modelo al entrenamiento; <code>predict</code> estima la respuesta de datos nuevos.</p></div><div class="qa-item"><p class="q"><span class="q-num">04</span><span>¿Por qué no se evalúa con los datos de entrenamiento?</span></p><p class="a"><span class="a-tag">Respuesta</span>Pueden estar memorizados; la nota no mide el comportamiento con datos nuevos.</p></div><div class="qa-item"><p class="q"><span class="q-num">05</span><span>¿Qué es el sobreajuste y cómo se detecta?</span></p><p class="a"><span class="a-tag">Respuesta</span>Memorizar el entrenamiento; la nota de entrenamiento es muy superior a la de prueba.</p></div></div></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s23">
+    <div class="slide-inner">
+      <p class="kicker">Cierre · Parte 2 de 2</p>
+      <h2>Autoevaluación (continuación)</h2>
+      <div class="section-body"><div class="qa-list section-body" style="margin-top:30px;"><div class="qa-item"><p class="q"><span class="q-num">06</span><span>En <code>y ≈ w·x + b</code>, ¿qué son <code>w</code> y <code>b</code>?</span></p><p class="a"><span class="a-tag">Respuesta</span><code>w</code>: cambio de <code>y</code> por unidad de <code>x</code>; <code>b</code>: valor base.</p></div><div class="qa-item"><p class="q"><span class="q-num">07</span><span>Matriz <code>[[10,0,0],[0,9,1],[0,1,9]]</code>: ¿aciertos y errores?</span></p><p class="a"><span class="a-tag">Respuesta</span>28 aciertos (la diagonal) y 2 errores, de 30.</p></div><div class="qa-item"><p class="q"><span class="q-num">08</span><span>¿Qué es la fuga de datos y cómo la evita un Pipeline?</span></p><p class="a"><span class="a-tag">Respuesta</span>Usar información de prueba al entrenar o preprocesar; el Pipeline aprende solo del entrenamiento.</p></div><div class="qa-item"><p class="q"><span class="q-num">09</span><span>V/F: un modelo con 99 % de exactitud siempre es bueno.</span></p><p class="a"><span class="a-tag">Respuesta</span>Falso: con clases desbalanceadas, predecir siempre la mayoritaria da esa nota sin aprender nada.</p></div></div></div>
+    </div>
+  </section>
+
+  <section class="slide alt" id="s24">
+    <div class="slide-inner">
+      <p class="kicker">Cierre</p>
+      <h2>Verificación de dependencias</h2>
+      <div class="section-body"><p class="body-text">Depende de la Semana 9 (arreglos de NumPy como <code>X</code>/<code>y</code>, <code>reshape</code>, <code>DataFrame</code>), la Semana 8 (probabilidad, normalización, semilla, entrenamiento/prueba), la Semana 7 (producto punto, error y descenso del gradiente), la Semana 6 (objetos <code>fit</code>/<code>predict</code>, pytest, Git) y las Semanas 3–4 (funciones, listas y tuplas).</p><p class="body-text">scikit-learn se introduce desde cero; nada posterior es necesario. Es prerrequisito directo del Módulo 11 (Deep Learning).</p><div class="status-row"><span class="status-dot"></span>Sin dependencias de semanas no publicadas</div></div>
+    </div>
+  </section>
+
+  <footer class="end">
+    <span>Aprende con Gutyy IA — Semana 10 · v1.0</span>
+    <span>2026-10-26</span>
+  </footer>
+
+</main>
+<script>
+  (function(){
+    var sections = Array.prototype.slice.call(document.querySelectorAll('section.slide'));
+    var dots = Array.prototype.slice.call(document.querySelectorAll('.rail a'));
+    var counter = document.getElementById('counter-current');
+
+    if (!('IntersectionObserver' in window)) return;
+
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting){
+          var idx = sections.indexOf(entry.target);
+          dots.forEach(function(d){ d.classList.remove('active'); });
+          if (dots[idx]) dots[idx].classList.add('active');
+          if (counter) counter.textContent = String(idx + 1).padStart(2, '0');
+        }
+      });
+    }, { threshold: 0.55 });
+
+    sections.forEach(function(s){ io.observe(s); });
+  })();
+</script>
+
+</body>
+</html>
