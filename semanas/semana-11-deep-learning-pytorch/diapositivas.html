@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Deep Learning: redes neuronales con PyTorch</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* =========================================================
+     Aprende con Gutyy IA — Semana 11 (v1.0)
+     Identidad: académico-editorial, claro, un acento, mucho aire.
+     Misma guía de marca fijada en la Semana 1 — sin cambios de
+     identidad, solo aplicada al contenido nuevo.
+     ========================================================= */
+
+  :root{
+    --bg:            #FFFFFF;
+    --bg-alt:        #F5F6FA;
+    --ink:           #171A24;
+    --ink-secondary: #4B4F5E;
+    --ink-tertiary:  #8A8FA3;
+    --accent:        #3548C4;
+    --accent-dark:   #24308C;
+    --accent-tint:   #EAEDFB;
+    --border:        #E2E4EC;
+    --code-bg:       #F3F4F8;
+    --code-border:   #E3E5EE;
+    --code-ink:      #23262F;
+    --code-comment:  #9297A8;
+    --code-string:   #5B5F70;
+
+    --font-display: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-body:    "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-mono:    "IBM Plex Mono", ui-monospace, "Consolas", monospace;
+
+    color-scheme: light;
+  }
+
+  *,*::before,*::after{ box-sizing: border-box; }
+
+  html{
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+  }
+
+  body{
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior: auto; }
+    *{ animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  .grid-field{
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      linear-gradient(to right, rgba(53,72,196,0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(53,72,196,0.05) 1px, transparent 1px);
+    background-size: 48px 48px;
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent 75%);
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent 75%);
+  }
+
+  .brand-mark{
+    position: fixed;
+    top: 28px;
+    left: clamp(24px, 5vw, 64px);
+    z-index: 20;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    pointer-events: none;
+  }
+  .brand-mark strong{
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .brand-mark .dot{ color: var(--accent); }
+
+  .slide-counter{
+    position: fixed;
+    top: 28px;
+    right: clamp(24px, 5vw, 64px);
+    z-index: 20;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--ink-tertiary);
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+  .slide-counter strong{ color: var(--ink); font-weight: 600; }
+
+  .rail{
+    position: fixed;
+    right: clamp(14px, 3vw, 30px);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .rail a{
+    position: relative;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    border: 1px solid var(--border);
+    display: block;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .rail a:hover{ transform: scale(1.3); }
+  .rail a.active{
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .rail a .rail-label{
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    color: var(--ink-secondary);
+    background: var(--bg);
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+  }
+  .rail a:hover .rail-label{ opacity: 1; }
+
+  a:focus-visible,
+  .rail a:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .deck{ position: relative; z-index: 1; }
+
+  section.slide{
+    min-height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    align-items: center;
+    padding: 120px clamp(24px, 8vw, 96px) 96px;
+    border-bottom: 1px solid var(--border);
+  }
+  section.slide.alt{ background: var(--bg-alt); }
+
+  .slide-inner{
+    max-width: 880px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .kicker{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 18px;
+  }
+  .kicker::before{
+    content: "";
+    width: 18px;
+    height: 1px;
+    background: var(--accent);
+    display: inline-block;
+  }
+
+  h1,h2,h3{
+    font-family: var(--font-display);
+    color: var(--ink);
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  h2{
+    font-size: clamp(28px, 3.6vw, 40px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  .lede{
+    font-size: 19px;
+    line-height: 1.6;
+    color: var(--ink-secondary);
+    max-width: 62ch;
+    margin: 22px 0 0;
+  }
+
+  p{ line-height: 1.65; color: var(--ink-secondary); }
+  p.body-text{ font-size: 16.5px; max-width: 66ch; }
+
+  strong.term{
+    color: var(--ink);
+    font-weight: 600;
+    background: linear-gradient(to bottom, transparent 62%, var(--accent-tint) 62%);
+    padding: 0 1px;
+  }
+
+  em.term-accent{
+    font-style: normal;
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+
+  .section-body{ margin-top: 36px; }
+  .section-body > * + *{ margin-top: 20px; }
+
+  .callout{
+    border-left: 2px solid var(--accent);
+    padding: 4px 0 4px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .callout .callout-label{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .callout p{ margin: 0; color: var(--ink); font-size: 16px; }
+
+  .pull-quote{
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 600;
+    color: var(--accent-dark);
+    line-height: 1.5;
+    max-width: 48ch;
+    margin: 0;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    text-wrap: balance;
+  }
+
+  .divider-row{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 34px 0 22px;
+  }
+  .divider-row::after{
+    content:"";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .divider-row .divider-label{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    white-space: nowrap;
+  }
+
+  .code-card{
+    border: 1px solid var(--code-border);
+    background: var(--code-bg);
+    overflow: hidden;
+  }
+  .code-card .code-bar{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--code-border);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+  }
+  .code-card .code-bar .lang-tag{
+    color: var(--accent-dark);
+    font-weight: 500;
+  }
+  .code-card pre{
+    margin: 0;
+    padding: 18px 20px 20px;
+    overflow-x: auto;
+  }
+  .code-card code{
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--code-ink);
+    white-space: pre;
+  }
+  .code-card .cm{ color: var(--code-comment); font-style: italic; }
+  .code-card .kw{ color: var(--accent-dark); font-weight: 600; }
+  .code-card .st{ color: var(--code-string); }
+  .code-card .fn{ color: var(--accent); }
+
+  .code-card.compact pre{ padding: 14px 18px 16px; }
+  .code-card.compact code{ font-size: 13.5px; }
+
+  .code-result{
+    margin-top: 10px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink-secondary);
+  }
+  .code-result .result-tag{
+    color: var(--ink-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 11px;
+  }
+  .code-result .result-val{ color: var(--accent-dark); font-weight: 500; }
+
+  .blocks-grid{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 8px;
+  }
+  .blocks-grid.cols-3{ grid-template-columns: repeat(3, 1fr); }
+  .blocks-grid.cols-5{ grid-template-columns: repeat(5, 1fr); }
+  .block-card{
+    background: var(--bg);
+    padding: 26px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .block-card .block-letter{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+  .block-card h3{
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .block-card p{ font-size: 14.5px; margin: 0; }
+  .block-card .block-example{
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+    font-size: 13px;
+    color: var(--ink-tertiary);
+    font-style: italic;
+  }
+
+  .progression{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 26px;
+  }
+  .progression .chip{
+    border: 1px solid var(--border);
+    background: var(--bg);
+    padding: 8px 14px;
+    font-size: 13px;
+    color: var(--ink-secondary);
+    font-family: var(--font-mono);
+  }
+  .progression .chip strong{ color: var(--ink); font-weight: 600; }
+  .progression .arrow{ color: var(--ink-tertiary); font-family: var(--font-mono); }
+
+  .obj-list{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .obj-list li{
+    display: flex;
+    gap: 20px;
+    padding: 18px 0;
+    border-top: 1px solid var(--border);
+  }
+  .obj-list li:last-child{ border-bottom: 1px solid var(--border); }
+  .obj-list .obj-num{
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-size: 14px;
+    padding-top: 2px;
+    flex-shrink: 0;
+    width: 24px;
+  }
+  .obj-list p{ margin: 0; color: var(--ink); font-size: 16px; }
+
+  .two-col{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  @media (max-width: 760px){
+    .two-col{ grid-template-columns: 1fr; }
+    .blocks-grid{ grid-template-columns: 1fr; }
+    .blocks-grid.cols-3{ grid-template-columns: 1fr; }
+    .blocks-grid.cols-5{ grid-template-columns: 1fr; }
+    section.slide{ padding-top: 96px; }
+    .type-table{ font-size: 13px; }
+  }
+
+  .qa-list{
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .qa-item{
+    padding: 18px 0;
+    border-top: 1px solid var(--border);
+  }
+  .qa-item:last-child{ border-bottom: 1px solid var(--border); }
+  .qa-item .q{
+    display: flex;
+    gap: 14px;
+    font-size: 15.5px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .qa-item .q .q-num{
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .qa-item .a{
+    margin: 8px 0 0 34px;
+    font-size: 14.5px;
+    color: var(--ink-secondary);
+  }
+  .qa-item .a .a-tag{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    margin-right: 8px;
+  }
+
+  .status-row{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--accent-dark);
+    background: var(--accent-tint);
+    border: 1px solid #DADFF6;
+    padding: 10px 16px;
+    width: fit-content;
+  }
+  .status-row .status-dot{
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .meta-list{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    margin-top: 8px;
+  }
+  .meta-list div{ font-size: 14px; color: var(--ink-secondary); }
+  .meta-list dt{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-tertiary);
+    margin: 0 0 3px;
+  }
+  .meta-list dd{ margin: 0; color: var(--ink); font-weight: 500; }
+
+  /* type table */
+  .type-table{
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 14.5px;
+  }
+  .type-table th, .type-table td{
+    text-align: left;
+    padding: 12px 14px;
+    border-top: 1px solid var(--border);
+  }
+  .type-table thead th{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    border-top: none;
+    padding-top: 0;
+  }
+  .type-table tbody tr:last-child td{ border-bottom: 1px solid var(--border); }
+  .type-table td.type-name{
+    font-family: var(--font-mono);
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+  .type-table td.type-ex{ font-family: var(--font-mono); color: var(--ink); }
+
+  .cover{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 0 clamp(24px, 8vw, 96px);
+  }
+  .cover-eyebrow{
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .cover-eyebrow::before{
+    content:"";
+    width: 34px;
+    height: 1px;
+    background: var(--accent);
+  }
+  .cover h1{
+    font-size: clamp(40px, 6.4vw, 76px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    max-width: 14ch;
+    margin-top: 26px;
+  }
+  .cover h1 em{
+    font-style: normal;
+    color: var(--accent);
+  }
+  .cover .cover-sub{
+    font-size: clamp(17px, 2vw, 20px);
+    color: var(--ink-secondary);
+    max-width: 56ch;
+    margin-top: 22px;
+    line-height: 1.6;
+  }
+  .cover-footer{
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    margin-top: 56px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .cover-footer .fmeta dt{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-tertiary);
+    margin: 0 0 4px;
+  }
+  .cover-footer .fmeta dd{
+    margin: 0;
+    font-size: 14.5px;
+    color: var(--ink);
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+  .scroll-cue{
+    position: absolute;
+    bottom: 40px;
+    left: clamp(24px, 8vw, 96px);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .scroll-cue .chevron{
+    display: inline-block;
+    animation: bob 1.8s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce){ .scroll-cue .chevron{ animation: none; } }
+  @keyframes bob{
+    0%,100%{ transform: translateY(0); }
+    50%{ transform: translateY(4px); }
+  }
+
+  footer.end{
+    padding: 64px clamp(24px, 8vw, 96px) 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-tertiary);
+    position: relative;
+    z-index: 1;
+  }
+</style>
+</head>
+<body>
+<div class="grid-field" aria-hidden="true"></div>
+<div class="brand-mark"><strong>Aprende con Gutyy IA</strong><span class="dot">·</span><span>Semana 11</span></div>
+<div class="slide-counter"><strong id="counter-current">01</strong> / 22</div>
+<nav class="rail" aria-label="Navegación de diapositivas"><a href="#s01" data-label="Portada" class="active"><span class="rail-label">Portada</span></a><a href="#s02" data-label="Objetivos"><span class="rail-label">Objetivos</span></a><a href="#s03" data-label="De lineal a red"><span class="rail-label">De lineal a red</span></a><a href="#s04" data-label="Neurona en NumPy"><span class="rail-label">Neurona en NumPy</span></a><a href="#s05" data-label="No linealidad"><span class="rail-label">No linealidad</span></a><a href="#s06" data-label="Cómo aprende"><span class="rail-label">Cómo aprende</span></a><a href="#s07" data-label="Autograd"><span class="rail-label">Autograd</span></a><a href="#s08" data-label="nn.Sequential"><span class="rail-label">nn.Sequential</span></a><a href="#s09" data-label="Bucle"><span class="rail-label">Bucle</span></a><a href="#s10" data-label="Evaluar"><span class="rail-label">Evaluar</span></a><a href="#s11" data-label="Sobreajuste"><span class="rail-label">Sobreajuste</span></a><a href="#s12" data-label="Por qué importa"><span class="rail-label">Por qué importa</span></a><a href="#s13" data-label="Ejemplo: pseudocódigo"><span class="rail-label">Ejemplo: pseudocódigo</span></a><a href="#s14" data-label="Ejemplo: código"><span class="rail-label">Ejemplo: código</span></a><a href="#s15" data-label="Iris con red"><span class="rail-label">Iris con red</span></a><a href="#s16" data-label="Pruebas"><span class="rail-label">Pruebas</span></a><a href="#s17" data-label="Vigencia"><span class="rail-label">Vigencia</span></a><a href="#s18" data-label="Errores comunes"><span class="rail-label">Errores comunes</span></a><a href="#s19" data-label="Ejercicio"><span class="rail-label">Ejercicio</span></a><a href="#s20" data-label="Autoevaluación I"><span class="rail-label">Autoevaluación I</span></a><a href="#s21" data-label="Autoevaluación II"><span class="rail-label">Autoevaluación II</span></a><a href="#s22" data-label="Dependencias"><span class="rail-label">Dependencias</span></a></nav>
+<main class="deck">
+<section class="slide" id="s01"><div class="cover">
+<p class="cover-eyebrow">Aprende con Gutyy IA — Academia de programación, IA y Machine Learning</p>
+<h1>Deep Learning con <em>PyTorch</em></h1>
+<p class="cover-sub">Semana 11 del roadmap — de la neurona a la red: forward, pérdida, retropropagación y actualización.</p>
+<div class="cover-footer"><dl class="fmeta"><dt>Nivel</dt><dd>Intermedio-avanzado</dd></dl><dl class="fmeta"><dt>Prerrequisitos</dt><dd>Semanas 3–10</dd></dl><dl class="fmeta"><dt>Versión</dt><dd>v1.0</dd></dl><dl class="fmeta"><dt>Fecha</dt><dd>2026-11-02</dd></dl></div></div>
+<div class="scroll-cue"><span>Desplázate</span><span class="chevron">↓</span></div></section>
+
+<section class="slide alt" id="s02"><div class="slide-inner"><p class="kicker">Objetivos de aprendizaje</p><h2>Al terminar esta semana, vas a poder…</h2><div class="section-body"><ol class="obj-list section-body" style="margin-top:36px;"><li><span class="obj-num">01</span><p>Describir una <strong class="term">neurona artificial</strong> y una red como capas apiladas.</p></li><li><span class="obj-num">02</span><p>Explicar por qué las <strong class="term">activaciones no lineales</strong> son imprescindibles.</p></li><li><span class="obj-num">03</span><p>Explicar el ciclo: <em class="term-accent">forward → pérdida → retropropagación → actualización</em>.</p></li><li><span class="obj-num">04</span><p>Usar <strong class="term">tensores</strong> y <strong class="term">autograd</strong> de PyTorch.</p></li><li><span class="obj-num">05</span><p>Construir y entrenar una red con <code>nn.Sequential</code>, una pérdida y <code>Adam</code>.</p></li><li><span class="obj-num">06</span><p>Evaluar con <code>eval()</code> y <code>no_grad()</code> y reconocer el sobreajuste.</p></li></ol></div></div></section>
+
+<section class="slide" id="s03"><div class="slide-inner"><p class="kicker">01 · Neurona y red</p><h2>La regresión logística ya era una neurona</h2><p class="lede">Una red es una línea de ensamblaje de inspectores, organizados en capas.</p><div class="section-body"><div class="blocks-grid cols-3" style="grid-template-columns:repeat(3,1fr);"><div class="block-card"><span class="block-letter">A</span><h3>Neurona</h3><p>Pondera señales: <code>z = w·x + b</code>, y luego aplica una activación.</p></div><div class="block-card"><span class="block-letter">B</span><h3>Capa</h3><p>Varias neuronas en paralelo miran las mismas entradas.</p></div><div class="block-card"><span class="block-letter">C</span><h3>Red profunda</h3><p>Capas apiladas: las primeras detectan lo simple, las siguientes lo combinan.</p></div></div><div class="callout"><span class="callout-label">Analogía · línea de ensamblaje</span><p>Cada inspector pondera lo que ve; el siguiente combina esos informes en ideas más complejas.</p></div></div></div></section>
+
+<section class="slide alt" id="s04"><div class="slide-inner"><p class="kicker">01 · Neurona y red</p><h2>Una neurona en NumPy</h2><div class="section-body"><div class="code-card compact"><div class="code-bar"><span>neurona.py</span><span class="lang-tag">python</span></div><pre><code><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="kw">def</span> <span class="fn">relu</span>(z):     <span class="kw">return</span> np.maximum(0, z)
+<span class="kw">def</span> <span class="fn">sigmoide</span>(z): <span class="kw">return</span> 1 / (1 + np.exp(-z))
+
+x = np.array([1.0, 2.0]); w = np.array([0.5, -0.25]); b = 0.1
+z = x @ w + b          <span class="cm"># producto punto (Semana 7) + sesgo</span>
+print(z, relu(z), sigmoide(z))</code></pre><div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">0.1  0.1  0.52497918747894</span></div></div></div></div></section>
+
+<section class="slide" id="s05"><div class="slide-inner"><p class="kicker">01 · Neurona y red</p><h2>¿Por qué una activación no lineal?</h2><div class="section-body"><p class="body-text">Mil capas que solo hacen <code>w·x + b</code> equivalen a una sola operación lineal. La activación entre capas permite fronteras curvas.</p><table class="type-table"><thead><tr><th>Activación</th><th>Fórmula</th><th>Uso típico</th></tr></thead><tbody><tr><td class="type-name">ReLU</td><td class="">max(0, z)</td><td class="">Capas ocultas</td></tr><tr><td class="type-name">Sigmoide</td><td class="">1 / (1 + e^-z)</td><td class="">Salida, 2 clases</td></tr><tr><td class="type-name">Softmax</td><td class="">exponenciales normalizadas</td><td class="">Salida, varias clases</td></tr></tbody></table><div class="callout"><span class="callout-label">XOR</span><p>Ninguna recta separa XOR: la regresión logística se queda en 50 % de exactitud.</p></div></div></div></section>
+
+<section class="slide alt" id="s06"><div class="slide-inner"><p class="kicker">02 · Entrenamiento</p><h2>El ciclo de entrenamiento</h2><div class="section-body"><div class="progression"><span class="chip"><strong>1</strong> forward</span><span class="arrow">→</span><span class="chip"><strong>2</strong> pérdida</span><span class="arrow">→</span><span class="chip"><strong>3</strong> backward</span><span class="arrow">→</span><span class="chip"><strong>4</strong> actualizar</span></div><div class="blocks-grid cols-3" style="grid-template-columns:repeat(3,1fr);"><div class="block-card"><span class="block-letter">A</span><h3>Pérdida</h3><p>Un número que mide qué tan mal predijo (entropía cruzada en clasificación).</p></div><div class="block-card"><span class="block-letter">B</span><h3>Retropropagación</h3><p>Regla de la cadena hacia atrás: reparte la culpa del error entre los pesos.</p></div><div class="block-card"><span class="block-letter">C</span><h3>Actualización</h3><p><code>w ← w − tasa · gradiente</code>, el descenso de la Semana 7.</p></div></div><div class="callout"><span class="callout-label">Época y lote</span><p>Una época es una pasada completa por los datos; los lotes (<em>batches</em>) son porciones pequeñas.</p></div></div></div></section>
+
+<section class="slide" id="s07"><div class="slide-inner"><p class="kicker">03 · PyTorch</p><h2>Tensores y autograd</h2><div class="section-body"><div class="code-card compact"><div class="code-bar"><span>autograd.py</span><span class="lang-tag">python</span></div><pre><code><span class="kw">import</span> torch
+
+w = torch.tensor(3.0, requires_grad=<span class="kw">True</span>)
+x, y_real = torch.tensor(2.0), torch.tensor(10.0)
+
+error = (w * x - y_real) ** 2   <span class="cm"># (3·2 − 10)² = 16</span>
+error.backward()                <span class="cm"># calcula d(error)/dw</span>
+print(error.item(), w.grad.item())</code></pre><div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">16.0  -16.0 (a mano: 2·(−4)·2 = −16)</span></div></div><div class="callout"><span class="callout-label">Autograd</span><p>Calcula la derivada por ti. Gradiente negativo: subir <code>w</code> reduce el error.</p></div></div></div></section>
+
+<section class="slide alt" id="s08"><div class="slide-inner"><p class="kicker">04 · Construir la red</p><h2>Capas listas con torch.nn</h2><div class="section-body"><div class="code-card compact"><div class="code-bar"><span>red.py</span><span class="lang-tag">python</span></div><pre><code><span class="kw">from</span> torch <span class="kw">import</span> nn
+
+red = nn.Sequential(
+    nn.Linear(2, 4),   <span class="cm"># 2 entradas → 4 neuronas ocultas</span>
+    nn.ReLU(),
+    nn.Linear(4, 1),   <span class="cm"># 4 → 1 salida (logit)</span>
+)</code></pre></div><div class="callout"><span class="callout-label">POO</span><p>Cada capa es un objeto (Semana 6); <code>nn.Module</code> es la clase base.</p></div></div></div></section>
+
+<section class="slide" id="s09"><div class="slide-inner"><p class="kicker">04 · Construir la red</p><h2>El bucle de entrenamiento: siempre igual</h2><div class="section-body"><div class="code-card compact"><div class="code-bar"><span>entrenar.py</span><span class="lang-tag">python</span></div><pre><code>perdida_fn  = nn.BCEWithLogitsLoss()
+optimizador = torch.optim.Adam(red.parameters(), lr=0.05)
+
+<span class="kw">for</span> epoca <span class="kw">in</span> range(2000):
+    optimizador.zero_grad()            <span class="cm"># 1. borrar gradientes</span>
+    perdida = perdida_fn(red(X), y)    <span class="cm"># 2. forward + pérdida</span>
+    perdida.backward()                 <span class="cm"># 3. retropropagación</span>
+    optimizador.step()                 <span class="cm"># 4. actualizar pesos</span></code></pre></div><div class="callout"><span class="callout-label">Error clásico</span><p>Olvidar <code>zero_grad()</code>: PyTorch acumula gradientes.</p></div></div></div></section>
+
+<section class="slide alt" id="s10"><div class="slide-inner"><p class="kicker">05 · Evaluar</p><h2>Modo evaluación y sin gradientes</h2><div class="section-body"><div class="code-card compact"><div class="code-bar"><span>evaluar.py</span><span class="lang-tag">python</span></div><pre><code>red.eval()                    <span class="cm"># apaga Dropout y similares</span>
+<span class="kw">with</span> torch.no_grad():         <span class="cm"># no registrar operaciones</span>
+    probabilidades = torch.sigmoid(red(X_nuevos))</code></pre></div><div class="callout"><span class="callout-label">Semana 10 sigue vigente</span><p>Entrenamiento/prueba, escalar solo con el entrenamiento y desconfiar de una nota excelente solo en entrenamiento.</p></div></div></div></section>
+
+<section class="slide" id="s11"><div class="slide-inner"><p class="kicker">05 · Evaluar</p><h2>Las redes sobreajustan con facilidad</h2><div class="section-body"><div class="blocks-grid cols-4" style="grid-template-columns:repeat(4,1fr);"><div class="block-card"><span class="block-letter">A</span><h3>Más datos</h3><p>La cura más fiable.</p></div><div class="block-card"><span class="block-letter">B</span><h3>Red más pequeña</h3><p>Menos capacidad para memorizar.</p></div><div class="block-card"><span class="block-letter">C</span><h3>Dropout</h3><p>Apagar neuronas al azar al entrenar.</p></div><div class="block-card"><span class="block-letter">D</span><h3>Detención temprana</h3><p>Parar cuando la pérdida de validación deja de mejorar.</p></div></div></div></div></section>
+
+<section class="slide alt" id="s12"><div class="slide-inner"><p class="kicker">06 · Por qué importa</p><h2>Por qué esto importa para IA/ML</h2><div class="section-body"><ol class="obj-list section-body" style="margin-top:12px;"><li><span class="obj-num">01</span><p><strong class="term">Todo el ecosistema moderno</strong> (visión, traducción, LLM) usa este ciclo; solo cambian tamaño y arquitectura.</p></li><li><span class="obj-num">02</span><p>Una red grande es la neurona de la Semana 7 apilada millones de veces: <strong class="term">nada conceptual nuevo</strong>.</p></li><li><span class="obj-num">03</span><p>Las redes brillan con <strong class="term">datos no estructurados</strong>; en tablas pequeñas, los modelos clásicos suelen igualar o ganar.</p></li><li><span class="obj-num">04</span><p>La <strong class="term">disciplina de evaluación</strong> es idéntica a la de la Semana 10.</p></li></ol></div></div></section>
+
+<section class="slide" id="s13"><div class="slide-inner"><p class="kicker">07 · Ejemplo práctico: XOR</p><h2>Una red que aprende XOR</h2><div class="section-body"><div class="code-card compact"><div class="code-bar"><span>pseudocodigo.txt</span><span class="lang-tag">texto</span></div><pre><code>datos: (0,0)→0, (0,1)→1, (1,0)→1, (1,1)→0
+crear red: 2 entradas → 4 ocultas (ReLU) → 1 salida
+repetir 2000 veces:
+    borrar gradientes
+    predecir los 4 casos y calcular la pérdida
+    retropropagar
+    actualizar los pesos
+convertir salidas en 0/1 (probabilidad > 0.5)</code></pre></div><div class="callout"><span class="callout-label">Reto</span><p>Una regresión logística no puede resolver esto. Una capa oculta sí.</p></div></div></div></section>
+
+<section class="slide alt" id="s14"><div class="slide-inner"><p class="kicker">07 · Ejemplo práctico: XOR</p><h2>red_xor.py</h2><div class="section-body"><div class="code-card compact"><div class="code-bar"><span>red_xor.py</span><span class="lang-tag">python</span></div><pre><code><span class="kw">def</span> <span class="fn">crear_red</span>():
+    <span class="kw">return</span> nn.Sequential(nn.Linear(2, 4), nn.ReLU(), nn.Linear(4, 1))
+
+<span class="kw">def</span> <span class="fn">entrenar</span>(modelo, X, y, epocas=2000, tasa=0.05):
+    perdida_fn = nn.BCEWithLogitsLoss()
+    optimizador = torch.optim.Adam(modelo.parameters(), lr=tasa)
+    <span class="kw">for</span> _ <span class="kw">in</span> range(epocas):
+        optimizador.zero_grad()
+        perdida = perdida_fn(modelo(X), y)
+        perdida.backward()
+        optimizador.step()
+    <span class="kw">return</span> perdida.item()
+
+<span class="kw">def</span> <span class="fn">predecir</span>(modelo, X):
+    modelo.eval()
+    <span class="kw">with</span> torch.no_grad():
+        <span class="kw">return</span> (torch.sigmoid(modelo(X)) &gt; 0.5).int().flatten().tolist()</code></pre><div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">pérdida 0.0001 · predicciones [0, 1, 1, 0] · LogisticRegression: 0.5</span></div></div></div></div></section>
+
+<section class="slide" id="s15"><div class="slide-inner"><p class="kicker">08 · Segundo ejemplo</p><h2>Iris con una red: el mismo flujo de la Semana 10</h2><div class="section-body"><div class="code-card compact"><div class="code-bar"><span>iris_torch.py</span><span class="lang-tag">python</span></div><pre><code>escalador = StandardScaler().fit(X_ent)   <span class="cm"># solo con entrenamiento</span>
+modelo = nn.Sequential(nn.Linear(4, 16), nn.ReLU(), nn.Linear(16, 3))
+perdida_fn = nn.CrossEntropyLoss()        <span class="cm"># ya incluye softmax</span>
+<span class="cm"># ...mismo bucle: zero_grad, forward, backward, step</span>
+modelo.eval()
+<span class="kw">with</span> torch.no_grad():
+    acierto = (modelo(X).argmax(dim=1) == y).float().mean()</code></pre><div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">entrenamiento 0.983 · prueba 1.0 (30 flores: una sola división es poco concluyente)</span></div></div></div></div></section>
+
+<section class="slide alt" id="s16"><div class="slide-inner"><p class="kicker">09 · Pruebas</p><h2>Pruebas con pytest</h2><div class="section-body"><div class="code-card compact"><div class="code-bar"><span>test_red.py</span><span class="lang-tag">python</span></div><pre><code><span class="kw">def</span> <span class="fn">test_autograd_calcula_la_derivada</span>():
+    w = torch.tensor(3.0, requires_grad=<span class="kw">True</span>)
+    ((w * 2.0 - 10.0) ** 2).backward()
+    <span class="kw">assert</span> w.grad.item() == -16.0
+
+<span class="kw">def</span> <span class="fn">test_red_aprende_xor</span>():
+    torch.manual_seed(0)
+    X, y = crear_datos()
+    modelo = crear_red()
+    entrenar(modelo, X, y)
+    <span class="kw">assert</span> predecir(modelo, X) == [0, 1, 1, 0]</code></pre><div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">5 pruebas pasan · PyTorch 2.15, scikit-learn 1.9, NumPy 2.5</span></div></div></div></div></section>
+
+<section class="slide" id="s17"><div class="slide-inner"><p class="kicker">10 · Vigencia técnica</p><h2>Notas de vigencia (2026)</h2><div class="section-body"><ol class="obj-list section-body" style="margin-top:12px;"><li><span class="obj-num">01</span><p><strong class="term">PyTorch</strong> es el estándar de facto; Keras 3 (multi-backend) y JAX son alternativas.</p></li><li><span class="obj-num">02</span><p>Obsoletos: <code>autograd.Variable</code> y TensorFlow 1.x con <code>Session</code>.</p></li><li><span class="obj-num">03</span><p>Prefiere <code>BCEWithLogitsLoss</code> y <code>CrossEntropyLoss</code> (sobre logits).</p></li><li><span class="obj-num">04</span><p><code>Adam</code>/<code>AdamW</code> por defecto; GPU con <code>.to(dispositivo)</code>; <code>DataLoader</code> para lotes.</p></li><li><span class="obj-num">05</span><p>Fija <code>torch.manual_seed</code> y versiones; en tablas, el gradient boosting sigue siendo fuerte.</p></li></ol></div></div></section>
+
+<section class="slide alt" id="s18"><div class="slide-inner"><p class="kicker">11 · Errores comunes</p><h2>Errores comunes de principiante</h2><div class="section-body"><div class="blocks-grid cols-3" style="grid-template-columns:repeat(3,1fr);"><div class="block-card"><span class="block-letter">A</span><h3>zero_grad</h3><p>Olvidarlo: se acumulan gradientes.</p></div><div class="block-card"><span class="block-letter">B</span><h3>Doble activación</h3><p>softmax/sigmoid antes de una pérdida que ya lo incluye.</p></div><div class="block-card"><span class="block-letter">C</span><h3>Tipos de etiqueta</h3><p><code>long</code> para CrossEntropy, <code>float</code> para BCE.</p></div><div class="block-card"><span class="block-letter">D</span><h3>Fuga de datos</h3><p>Escalar usando también la prueba.</p></div><div class="block-card"><span class="block-letter">E</span><h3>Sin eval()</h3><p>Predecir sin <code>eval()</code>/<code>no_grad()</code>.</p></div><div class="block-card"><span class="block-letter">F</span><h3>Red de más</h3><p>No comparar con una línea base simple.</p></div></div></div></div></section>
+
+<section class="slide" id="s19"><div class="slide-inner"><p class="kicker">12 · Ejercicio</p><h2>Ejercicio propuesto: vinos con una red</h2><div class="section-body"><p class="body-text">Escribe <code>red_vinos.py</code> con <code>cargar_datos()</code>, <code>crear_red()</code>, <code>entrenar()</code> y <code>exactitud()</code> usando <code>load_wine</code> (13 características, 3 clases). Compara con la <code>LogisticRegression</code> de la Semana 10, comenta si hay sobreajuste, añade pruebas y versiona con Git.</p><div class="callout"><span class="callout-label">Pista</span><p>¿Cuántas entradas y salidas tienen la primera y la última <code>nn.Linear</code>?</p></div></div></div></section>
+
+<section class="slide alt" id="s20"><div class="slide-inner"><p class="kicker">13 · Autoevaluación</p><h2>Autoevaluación (1/2)</h2><div class="section-body"><div class="qa-list"><div class="qa-item"><div class="q"><span class="q-num">01</span><span>¿Qué dos operaciones hace una neurona?</span></div><p class="a"><span class="a-tag">Respuesta</span>Combinación lineal <code>w·x + b</code> y luego una activación.</p></div><div class="qa-item"><div class="q"><span class="q-num">02</span><span>¿Por qué activaciones no lineales?</span></div><p class="a"><span class="a-tag">Respuesta</span>Sin ellas, apilar capas equivale a una sola operación lineal.</p></div><div class="qa-item"><div class="q"><span class="q-num">03</span><span>Ordena el ciclo de entrenamiento.</span></div><p class="a"><span class="a-tag">Respuesta</span>Forward → pérdida → retropropagación → actualizar pesos.</p></div><div class="qa-item"><div class="q"><span class="q-num">04</span><span>¿Qué es una época?</span></div><p class="a"><span class="a-tag">Respuesta</span>Una pasada completa por los datos de entrenamiento.</p></div><div class="qa-item"><div class="q"><span class="q-num">05</span><span>¿Qué hace <code>.backward()</code>?</span></div><p class="a"><span class="a-tag">Respuesta</span>Calcula gradientes y los guarda en <code>.grad</code>.</p></div><div class="qa-item"><div class="q"><span class="q-num">06</span><span>¿Para qué <code>zero_grad()</code>?</span></div><p class="a"><span class="a-tag">Respuesta</span>PyTorch acumula gradientes; hay que borrarlos en cada paso.</p></div></div></div></div></section>
+
+<section class="slide" id="s21"><div class="slide-inner"><p class="kicker">13 · Autoevaluación</p><h2>Autoevaluación (2/2)</h2><div class="section-body"><div class="qa-list"><div class="qa-item"><div class="q"><span class="q-num">07</span><span>¿Para qué <code>eval()</code> y <code>no_grad()</code>?</span></div><p class="a"><span class="a-tag">Respuesta</span>Predecir en modo evaluación sin registrar gradientes.</p></div><div class="qa-item"><div class="q"><span class="q-num">08</span><span>99 % entrenamiento, 70 % prueba: ¿qué pasa?</span></div><p class="a"><span class="a-tag">Respuesta</span>Sobreajuste: más datos, red menor, dropout o detención temprana.</p></div><div class="qa-item"><div class="q"><span class="q-num">09</span><span>V/F: con datos tabulares pequeños una red siempre gana.</span></div><p class="a"><span class="a-tag">Respuesta</span>Falso: los modelos clásicos suelen igualar o ganar.</p></div></div></div></div></section>
+
+<section class="slide alt" id="s22"><div class="slide-inner"><p class="kicker">Cierre</p><h2>Verificación de dependencias</h2><div class="section-body"><p class="body-text">Depende de la Semana 10 (flujo <code>X</code>/<code>y</code>, entrenamiento/prueba, sobreajuste, regresión logística), la 9 (NumPy), la 8 (sigmoide, semilla), la 7 (producto punto, derivada, gradiente), la 6 (clases, pytest, Git) y la 3 (funciones y bucles).</p><p class="body-text">PyTorch se introduce desde cero; nada de la Semana 12 es necesario. Es prerrequisito directo del Módulo 12 (LLM y Transformers).</p><div class="status-row"><span class="status-dot"></span>Sin dependencias de semanas no publicadas</div></div></div></section>
+
+<footer class="end"><span>Aprende con Gutyy IA — Semana 11 · v1.0</span><span>2026-11-02</span></footer>
+</main>
+<script>
+  (function(){
+    var sections = Array.prototype.slice.call(document.querySelectorAll('section.slide'));
+    var dots = Array.prototype.slice.call(document.querySelectorAll('.rail a'));
+    var counter = document.getElementById('counter-current');
+
+    if (!('IntersectionObserver' in window)) return;
+
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting){
+          var idx = sections.indexOf(entry.target);
+          dots.forEach(function(d){ d.classList.remove('active'); });
+          if (dots[idx]) dots[idx].classList.add('active');
+          if (counter) counter.textContent = String(idx + 1).padStart(2, '0');
+        }
+      });
+    }, { threshold: 0.55 });
+
+    sections.forEach(function(s){ io.observe(s); });
+  })();
+</script>
+</body>
+</html>

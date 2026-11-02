@@ -23,9 +23,8 @@ Cada clase queda versionada (`vX.Y`) con fecha, y el [CHANGELOG.md](CHANGELOG.md
 | 7 | Matemáticas para ML I: álgebra lineal y cálculo esencial *(Semana 7)* |
 | 8 | Matemáticas para ML II: probabilidad y estadística aplicada *(Semana 8)* |
 | 9 | Python científico: NumPy, Pandas, Matplotlib *(Semana 9)* |
-| 10 | Machine Learning clásico: regresión, clasificación y scikit-learn | v1.0 | [clase.md](semanas/semana-10-ml-clasico-scikit-learn/clase.md) · [diapositivas.html](semanas/semana-10-ml-clasico-scikit-learn/diapositivas.html) · [clase.pdf](semanas/semana-10-ml-clasico-scikit-learn/clase.pdf) |
 | 10 | Machine Learning clásico: regresión, clasificación, scikit-learn *(Semana 10)* |
-| 11 | Deep Learning: redes neuronales, PyTorch/TensorFlow |
+| 11 | Deep Learning: redes neuronales, PyTorch/TensorFlow *(Semana 11)* |
 | 12 | IA generativa y agentes: LLMs, prompting, RAG, frameworks de agentes |
 
 ## Semanas publicadas
@@ -41,6 +40,8 @@ Cada clase queda versionada (`vX.Y`) con fecha, y el [CHANGELOG.md](CHANGELOG.md
 | 7 | Matemáticas para ML I: álgebra lineal y cálculo esencial | v1.0 | [clase.md](semanas/semana-07-algebra-lineal-calculo/clase.md) · [diapositivas.html](semanas/semana-07-algebra-lineal-calculo/diapositivas.html) · [clase.pdf](semanas/semana-07-algebra-lineal-calculo/clase.pdf) |
 | 8 | Matemáticas para ML II: probabilidad y estadística aplicada | v1.0 | [clase.md](semanas/semana-08-probabilidad-estadistica/clase.md) · [diapositivas.html](semanas/semana-08-probabilidad-estadistica/diapositivas.html) · [clase.pdf](semanas/semana-08-probabilidad-estadistica/clase.pdf) |
 | 9 | Python científico: NumPy, Pandas, Matplotlib | v1.0 | [clase.md](semanas/semana-09-python-cientifico/clase.md) · [diapositivas.html](semanas/semana-09-python-cientifico/diapositivas.html) · [clase.pdf](semanas/semana-09-python-cientifico/clase.pdf) |
+| 10 | Machine Learning clásico: regresión, clasificación y scikit-learn | v1.0 | [clase.md](semanas/semana-10-ml-clasico-scikit-learn/clase.md) · [diapositivas.html](semanas/semana-10-ml-clasico-scikit-learn/diapositivas.html) · [clase.pdf](semanas/semana-10-ml-clasico-scikit-learn/clase.pdf) |
+| 11 | Deep Learning: redes neuronales con PyTorch | v1.0 | [clase.md](semanas/semana-11-deep-learning-pytorch/clase.md) · [diapositivas.html](semanas/semana-11-deep-learning-pytorch/diapositivas.html) · [clase.pdf](semanas/semana-11-deep-learning-pytorch/clase.pdf) |
 
 ## Guía de marca
 

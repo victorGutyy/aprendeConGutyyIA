@@ -2,6 +2,14 @@
 
 Registro de cambios semana a semana. Cada clase mantiene su propio número de versión (`vX.Y`) independiente del historial de Git.
 
+## Semana 11 — Deep Learning: redes neuronales con PyTorch
+
+### v1.0 — 2026-11-02
+- Primera publicación: de la regresión logística a la neurona artificial (analogía de la línea de ensamblaje de inspectores; neurona en NumPy), por qué las activaciones no lineales son imprescindibles (ReLU, sigmoide, softmax; el caso XOR), el ciclo de entrenamiento (forward, pérdida, retropropagación, actualización; épocas y lotes), tensores y autograd de PyTorch (verificado: error 16.0 y gradiente -16.0), `nn.Sequential`/`nn.Linear`/`nn.ReLU`, el bucle de entrenamiento con `Adam` y el error clásico de `zero_grad()`, evaluación con `eval()` y `torch.no_grad()`, sobreajuste en redes, sección "Por qué esto importa para IA/ML", ejemplo práctico de una red que aprende XOR (pseudocódigo + Python, verificado por ejecución: predicciones [0, 1, 1, 0] frente a 0.5 de exactitud de la regresión logística), segundo ejemplo con Iris (entrenamiento 0.983, prueba 1.0), pruebas con `pytest` (5 pruebas verificadas con PyTorch 2.15, scikit-learn 1.9 y NumPy 2.5), notas de vigencia técnica (PyTorch frente a TensorFlow/Keras 3/JAX, pérdidas sobre logits, AdamW, GPU, DataLoader), errores comunes de principiante, ejercicio propuesto (red para el dataset de vinos, sin resolver), autoevaluación de 9 preguntas, verificación de dependencias.
+- Diapositivas: 22, mismo diseño y guía de marca fijada en la Semana 1.
+- PDF generado a partir de un documento HTML con la misma guía de marca, vía Python + weasyprint.
+- Mantenimiento del README: se eliminó una fila duplicada y malformada de la Semana 10 en la tabla del roadmap.
+
 ## Semana 10 — Machine Learning clásico: regresión, clasificación y scikit-learn
 
 ### v1.0 — 2026-10-26
