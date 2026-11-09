@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>IA generativa y agentes</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* =========================================================
+     Aprende con Gutyy IA — Semana 12 (v1.0)
+     Identidad: académico-editorial, claro, un acento, mucho aire.
+     Misma guía de marca fijada en la Semana 1 — sin cambios de
+     identidad, solo aplicada al contenido nuevo.
+     ========================================================= */
+
+  :root{
+    --bg:            #FFFFFF;
+    --bg-alt:        #F5F6FA;
+    --ink:           #171A24;
+    --ink-secondary: #4B4F5E;
+    --ink-tertiary:  #8A8FA3;
+    --accent:        #3548C4;
+    --accent-dark:   #24308C;
+    --accent-tint:   #EAEDFB;
+    --border:        #E2E4EC;
+    --code-bg:       #F3F4F8;
+    --code-border:   #E3E5EE;
+    --code-ink:      #23262F;
+    --code-comment:  #9297A8;
+    --code-string:   #5B5F70;
+
+    --font-display: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-body:    "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-mono:    "IBM Plex Mono", ui-monospace, "Consolas", monospace;
+
+    color-scheme: light;
+  }
+
+  *,*::before,*::after{ box-sizing: border-box; }
+
+  html{
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+  }
+
+  body{
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior: auto; }
+    *{ animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  .grid-field{
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      linear-gradient(to right, rgba(53,72,196,0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(53,72,196,0.05) 1px, transparent 1px);
+    background-size: 48px 48px;
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent 75%);
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 40%, black, transparent 75%);
+  }
+
+  .brand-mark{
+    position: fixed;
+    top: 28px;
+    left: clamp(24px, 5vw, 64px);
+    z-index: 20;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    pointer-events: none;
+  }
+  .brand-mark strong{
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .brand-mark .dot{ color: var(--accent); }
+
+  .slide-counter{
+    position: fixed;
+    top: 28px;
+    right: clamp(24px, 5vw, 64px);
+    z-index: 20;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--ink-tertiary);
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+  .slide-counter strong{ color: var(--ink); font-weight: 600; }
+
+  .rail{
+    position: fixed;
+    right: clamp(14px, 3vw, 30px);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .rail a{
+    position: relative;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    border: 1px solid var(--border);
+    display: block;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .rail a:hover{ transform: scale(1.3); }
+  .rail a.active{
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .rail a .rail-label{
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    color: var(--ink-secondary);
+    background: var(--bg);
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+  }
+  .rail a:hover .rail-label{ opacity: 1; }
+
+  a:focus-visible,
+  .rail a:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .deck{ position: relative; z-index: 1; }
+
+  section.slide{
+    min-height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    align-items: center;
+    padding: 120px clamp(24px, 8vw, 96px) 96px;
+    border-bottom: 1px solid var(--border);
+  }
+  section.slide.alt{ background: var(--bg-alt); }
+
+  .slide-inner{
+    max-width: 880px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .kicker{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 18px;
+  }
+  .kicker::before{
+    content: "";
+    width: 18px;
+    height: 1px;
+    background: var(--accent);
+    display: inline-block;
+  }
+
+  h1,h2,h3{
+    font-family: var(--font-display);
+    color: var(--ink);
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  h2{
+    font-size: clamp(28px, 3.6vw, 40px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  .lede{
+    font-size: 19px;
+    line-height: 1.6;
+    color: var(--ink-secondary);
+    max-width: 62ch;
+    margin: 22px 0 0;
+  }
+
+  p{ line-height: 1.65; color: var(--ink-secondary); }
+  p.body-text{ font-size: 16.5px; max-width: 66ch; }
+
+  strong.term{
+    color: var(--ink);
+    font-weight: 600;
+    background: linear-gradient(to bottom, transparent 62%, var(--accent-tint) 62%);
+    padding: 0 1px;
+  }
+
+  em.term-accent{
+    font-style: normal;
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+
+  .section-body{ margin-top: 36px; }
+  .section-body > * + *{ margin-top: 20px; }
+
+  .callout{
+    border-left: 2px solid var(--accent);
+    padding: 4px 0 4px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .callout .callout-label{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .callout p{ margin: 0; color: var(--ink); font-size: 16px; }
+
+  .pull-quote{
+    font-family: var(--font-display);
+    font-size: 21px;
+    font-weight: 600;
+    color: var(--accent-dark);
+    line-height: 1.5;
+    max-width: 48ch;
+    margin: 0;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    text-wrap: balance;
+  }
+
+  .divider-row{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 34px 0 22px;
+  }
+  .divider-row::after{
+    content:"";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .divider-row .divider-label{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    white-space: nowrap;
+  }
+
+  .code-card{
+    border: 1px solid var(--code-border);
+    background: var(--code-bg);
+    overflow: hidden;
+  }
+  .code-card .code-bar{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 16px;
+    border-bottom: 1px solid var(--code-border);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+  }
+  .code-card .code-bar .lang-tag{
+    color: var(--accent-dark);
+    font-weight: 500;
+  }
+  .code-card pre{
+    margin: 0;
+    padding: 18px 20px 20px;
+    overflow-x: auto;
+  }
+  .code-card code{
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--code-ink);
+    white-space: pre;
+  }
+  .code-card .cm{ color: var(--code-comment); font-style: italic; }
+  .code-card .kw{ color: var(--accent-dark); font-weight: 600; }
+  .code-card .st{ color: var(--code-string); }
+  .code-card .fn{ color: var(--accent); }
+
+  .code-card.compact pre{ padding: 14px 18px 16px; }
+  .code-card.compact code{ font-size: 13.5px; }
+
+  .code-result{
+    margin-top: 10px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink-secondary);
+  }
+  .code-result .result-tag{
+    color: var(--ink-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 11px;
+  }
+  .code-result .result-val{ color: var(--accent-dark); font-weight: 500; }
+
+  .blocks-grid{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 8px;
+  }
+  .blocks-grid.cols-3{ grid-template-columns: repeat(3, 1fr); }
+  .blocks-grid.cols-5{ grid-template-columns: repeat(5, 1fr); }
+  .block-card{
+    background: var(--bg);
+    padding: 26px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .block-card .block-letter{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+  .block-card h3{
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .block-card p{ font-size: 14.5px; margin: 0; }
+  .block-card .block-example{
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+    font-size: 13px;
+    color: var(--ink-tertiary);
+    font-style: italic;
+  }
+
+  .progression{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 26px;
+  }
+  .progression .chip{
+    border: 1px solid var(--border);
+    background: var(--bg);
+    padding: 8px 14px;
+    font-size: 13px;
+    color: var(--ink-secondary);
+    font-family: var(--font-mono);
+  }
+  .progression .chip strong{ color: var(--ink); font-weight: 600; }
+  .progression .arrow{ color: var(--ink-tertiary); font-family: var(--font-mono); }
+
+  .obj-list{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .obj-list li{
+    display: flex;
+    gap: 20px;
+    padding: 18px 0;
+    border-top: 1px solid var(--border);
+  }
+  .obj-list li:last-child{ border-bottom: 1px solid var(--border); }
+  .obj-list .obj-num{
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-size: 14px;
+    padding-top: 2px;
+    flex-shrink: 0;
+    width: 24px;
+  }
+  .obj-list p{ margin: 0; color: var(--ink); font-size: 16px; }
+
+  .two-col{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  @media (max-width: 760px){
+    .two-col{ grid-template-columns: 1fr; }
+    .blocks-grid{ grid-template-columns: 1fr; }
+    .blocks-grid.cols-3{ grid-template-columns: 1fr; }
+    .blocks-grid.cols-5{ grid-template-columns: 1fr; }
+    section.slide{ padding-top: 96px; }
+    .type-table{ font-size: 13px; }
+  }
+
+  .qa-list{
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .qa-item{
+    padding: 18px 0;
+    border-top: 1px solid var(--border);
+  }
+  .qa-item:last-child{ border-bottom: 1px solid var(--border); }
+  .qa-item .q{
+    display: flex;
+    gap: 14px;
+    font-size: 15.5px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .qa-item .q .q-num{
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .qa-item .a{
+    margin: 8px 0 0 34px;
+    font-size: 14.5px;
+    color: var(--ink-secondary);
+  }
+  .qa-item .a .a-tag{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    margin-right: 8px;
+  }
+
+  .status-row{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--accent-dark);
+    background: var(--accent-tint);
+    border: 1px solid #DADFF6;
+    padding: 10px 16px;
+    width: fit-content;
+  }
+  .status-row .status-dot{
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .meta-list{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    margin-top: 8px;
+  }
+  .meta-list div{ font-size: 14px; color: var(--ink-secondary); }
+  .meta-list dt{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-tertiary);
+    margin: 0 0 3px;
+  }
+  .meta-list dd{ margin: 0; color: var(--ink); font-weight: 500; }
+
+  /* type table */
+  .type-table{
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 14.5px;
+  }
+  .type-table th, .type-table td{
+    text-align: left;
+    padding: 12px 14px;
+    border-top: 1px solid var(--border);
+  }
+  .type-table thead th{
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    border-top: none;
+    padding-top: 0;
+  }
+  .type-table tbody tr:last-child td{ border-bottom: 1px solid var(--border); }
+  .type-table td.type-name{
+    font-family: var(--font-mono);
+    color: var(--accent-dark);
+    font-weight: 600;
+  }
+  .type-table td.type-ex{ font-family: var(--font-mono); color: var(--ink); }
+
+  .cover{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 0 clamp(24px, 8vw, 96px);
+  }
+  .cover-eyebrow{
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .cover-eyebrow::before{
+    content:"";
+    width: 34px;
+    height: 1px;
+    background: var(--accent);
+  }
+  .cover h1{
+    font-size: clamp(40px, 6.4vw, 76px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    max-width: 14ch;
+    margin-top: 26px;
+  }
+  .cover h1 em{
+    font-style: normal;
+    color: var(--accent);
+  }
+  .cover .cover-sub{
+    font-size: clamp(17px, 2vw, 20px);
+    color: var(--ink-secondary);
+    max-width: 56ch;
+    margin-top: 22px;
+    line-height: 1.6;
+  }
+  .cover-footer{
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    margin-top: 56px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .cover-footer .fmeta dt{
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-tertiary);
+    margin: 0 0 4px;
+  }
+  .cover-footer .fmeta dd{
+    margin: 0;
+    font-size: 14.5px;
+    color: var(--ink);
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+  .scroll-cue{
+    position: absolute;
+    bottom: 40px;
+    left: clamp(24px, 8vw, 96px);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .scroll-cue .chevron{
+    display: inline-block;
+    animation: bob 1.8s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce){ .scroll-cue .chevron{ animation: none; } }
+  @keyframes bob{
+    0%,100%{ transform: translateY(0); }
+    50%{ transform: translateY(4px); }
+  }
+
+  footer.end{
+    padding: 64px clamp(24px, 8vw, 96px) 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-tertiary);
+    position: relative;
+    z-index: 1;
+  }
+</style>
+</head>
+<body>
+<div class="grid-field" aria-hidden="true"></div>
+<div class="brand-mark"><strong>Aprende con Gutyy IA</strong><span class="dot">·</span><span>Semana 12</span></div>
+<div class="slide-counter"><strong id="counter-current">01</strong> / 23</div>
+<nav class="rail" aria-label="Navegación de diapositivas"><a href="#s01" data-label="Portada" class="active"><span class="rail-label">Portada</span></a><a href="#s02" data-label="Objetivos de aprendizaje"><span class="rail-label">Objetivos de aprendizaje</span></a><a href="#s03" data-label="01 · LLM"><span class="rail-label">01 · LLM</span></a><a href="#s04" data-label="01 · LLM"><span class="rail-label">01 · LLM</span></a><a href="#s05" data-label="01 · LLM"><span class="rail-label">01 · LLM</span></a><a href="#s06" data-label="02 · Prompting"><span class="rail-label">02 · Prompting</span></a><a href="#s07" data-label="02 · Prompting"><span class="rail-label">02 · Prompting</span></a><a href="#s08" data-label="03 · API"><span class="rail-label">03 · API</span></a><a href="#s09" data-label="04 · RAG"><span class="rail-label">04 · RAG</span></a><a href="#s10" data-label="04 · RAG"><span class="rail-label">04 · RAG</span></a><a href="#s11" data-label="05 · Agentes"><span class="rail-label">05 · Agentes</span></a><a href="#s12" data-label="05 · Agentes"><span class="rail-label">05 · Agentes</span></a><a href="#s13" data-label="06 · Por qué importa"><span class="rail-label">06 · Por qué importa</span></a><a href="#s14" data-label="07 · Ejemplo práctico"><span class="rail-label">07 · Ejemplo práctico</span></a><a href="#s15" data-label="07 · Ejemplo práctico"><span class="rail-label">07 · Ejemplo práctico</span></a><a href="#s16" data-label="08 · Segundo ejemplo"><span class="rail-label">08 · Segundo ejemplo</span></a><a href="#s17" data-label="09 · Pruebas"><span class="rail-label">09 · Pruebas</span></a><a href="#s18" data-label="10 · Vigencia técnica"><span class="rail-label">10 · Vigencia técnica</span></a><a href="#s19" data-label="11 · Errores comunes"><span class="rail-label">11 · Errores comunes</span></a><a href="#s20" data-label="12 · Ejercicio"><span class="rail-label">12 · Ejercicio</span></a><a href="#s21" data-label="13 · Autoevaluación"><span class="rail-label">13 · Autoevaluación</span></a><a href="#s22" data-label="13 · Autoevaluación"><span class="rail-label">13 · Autoevaluación</span></a><a href="#s23" data-label="Cierre"><span class="rail-label">Cierre</span></a></nav>
+<main class="deck">
+<section class="slide" id="s01"><div class="cover">
+<p class="cover-eyebrow">Aprende con Gutyy IA — Academia de programación, IA y Machine Learning</p>
+<h1>IA generativa y <em>agentes</em></h1>
+<p class="cover-sub">Semana 12 del roadmap — LLMs, prompting, RAG y agentes con herramientas.</p>
+<div class="cover-footer"><dl class="fmeta"><dt>Nivel</dt><dd>Avanzado</dd></dl><dl class="fmeta"><dt>Prerrequisitos</dt><dd>Semanas 4–11</dd></dl><dl class="fmeta"><dt>Versión</dt><dd>v1.0</dd></dl><dl class="fmeta"><dt>Fecha</dt><dd>2026-11-09</dd></dl></div>
+<div class="scroll-cue"><span>Desplázate</span><span class="chevron">↓</span></div></div></section>
+<section class="slide alt" id="s02"><div class="slide-inner"><p class="kicker">Objetivos de aprendizaje</p><h2>Al terminar esta semana, vas a poder…</h2><div class="section-body"><ol class="obj-list section-body" style="margin-top:12px;"><li><span class="obj-num">01</span><p>Explicar qué es un <strong class="term">LLM</strong> y su relación con las redes de la Semana 11.</p></li><li><span class="obj-num">02</span><p>Escribir <strong class="term">prompts</strong> efectivos y reconocer las alucinaciones.</p></li><li><span class="obj-num">03</span><p>Describir e implementar un <strong class="term">RAG</strong> mínimo con similitud coseno.</p></li><li><span class="obj-num">04</span><p>Explicar e implementar un <strong class="term">agente</strong> con herramientas y tope de pasos.</p></li><li><span class="obj-num">05</span><p>Probar con <code>pytest</code> código que depende de un LLM.</p></li></ol></div></div></section>
+<section class="slide" id="s03"><div class="slide-inner"><p class="kicker">01 · LLM</p><h2>Un LLM es una red que predice el siguiente token</h2><div class="section-body"><p class="body-text">La misma idea de la Semana 11, escalada a miles de millones de pesos. <em class="term-accent">Analogía:</em> el autocompletado del teléfono que leyó una biblioteca entera.</p><div class="progression"><span class="chip"><strong>1</strong> texto</span><span class="arrow">→</span><span class="chip"><strong>2</strong> tokens</span><span class="arrow">→</span><span class="chip"><strong>3</strong> red profunda</span><span class="arrow">→</span><span class="chip"><strong>4</strong> probabilidades</span><span class="arrow">→</span><span class="chip"><strong>5</strong> siguiente token</span></div></div></div></section>
+<section class="slide alt" id="s04"><div class="slide-inner"><p class="kicker">01 · LLM</p><h2>Cuatro ideas clave</h2><div class="section-body"><div class="blocks-grid cols-3" style="grid-template-columns:repeat(3,1fr)"><div class="block-card"><span class="block-letter">TOKEN</span><h3>Token</h3><p>Trozo de texto que el modelo lee y escribe.</p></div><div class="block-card"><span class="block-letter">CONTEXTO</span><h3>Ventana de contexto</h3><p>Lo que no cabe, el modelo no lo ve.</p></div><div class="block-card"><span class="block-letter">AZAR</span><h3>Temperatura</h3><p>Baja = predecible; alta = variada (Semana 8).</p></div></div></div></div></section>
+<section class="slide" id="s05"><div class="slide-inner"><p class="kicker">01 · LLM</p><h2>Plausible no es lo mismo que verdadero</h2><div class="section-body"><div class="callout"><span class="callout-label">Alucinación</span><p>El modelo puede inventar datos con total aplomo. Por eso existen RAG, verificación y pruebas.</p></div><p class="body-text">Tú casi nunca entrenas un LLM: lo <strong class="term">usas</strong> por API o lo ejecutas ya entrenado.</p></div></div></section>
+<section class="slide" id="s06"><div class="slide-inner"><p class="kicker">02 · Prompting</p><h2>Un buen prompt tiene cuatro partes</h2><div class="section-body"><div class="blocks-grid cols-4" style="grid-template-columns:repeat(4,1fr)"><div class="block-card"><span class="block-letter">1</span><h3>Rol</h3><p>«Eres un tutor de Python para principiantes.»</p></div><div class="block-card"><span class="block-letter">2</span><h3>Contexto</h3><p>«El alumno ya vio listas y bucles.»</p></div><div class="block-card"><span class="block-letter">3</span><h3>Tarea</h3><p>«Explica qué hace enumerate.»</p></div><div class="block-card"><span class="block-letter">4</span><h3>Formato</h3><p>«Máximo 3 líneas y un ejemplo.»</p></div></div></div></div></section>
+<section class="slide alt" id="s07"><div class="slide-inner"><p class="kicker">02 · Prompting</p><h2>Técnicas y buenas prácticas</h2><div class="section-body"><ol class="obj-list section-body" style="margin-top:12px;"><li><span class="obj-num">01</span><p>Dar <strong class="term">ejemplos</strong> dentro del prompt (<em class="term-accent">few-shot</em>).</p></li><li><span class="obj-num">02</span><p>Pedir salida estructurada (JSON) si otro programa la lee.</p></li><li><span class="obj-num">03</span><p>Versionar los prompts con Git y probarlos como código.</p></li></ol></div></div></section>
+<section class="slide" id="s08"><div class="slide-inner"><p class="kicker">03 · API</p><h2>Llamar a un LLM desde Python</h2><div class="section-body"><div class="code-card compact"><div class="code-bar"><span>llamada_llm.py</span><span class="lang-tag">Python</span></div><pre><code><span class="kw">import</span> anthropic
+
+cliente = anthropic.Anthropic()   <span class="cm"># lee ANTHROPIC_API_KEY del entorno</span>
+respuesta = cliente.messages.create(
+    model=&quot;claude-sonnet-5-5&quot;,    <span class="cm"># consulta la doc. para el modelo vigente</span>
+    max_tokens=300,
+    system=&quot;Eres un tutor de Python para principiantes.&quot;,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Explica enumerate.&quot;}],
+)
+print(respuesta.content[0].text)</code></pre></div><div class="callout"><span class="callout-label">Seguridad</span><p>Nunca escribas la clave en el código ni la subas a Git. Fragmento ilustrativo: no se ejecutó en la verificación.</p></div></div></div></section>
+<section class="slide alt" id="s09"><div class="slide-inner"><p class="kicker">04 · RAG</p><h2>RAG: examen a libro abierto</h2><div class="section-body"><div class="progression"><span class="chip"><strong>1</strong> Recuperar fragmentos</span><span class="arrow">→</span><span class="chip"><strong>2</strong> Aumentar el prompt</span><span class="arrow">→</span><span class="chip"><strong>3</strong> Generar la respuesta</span></div><p class="body-text">El modelo no memoriza tus documentos: busca la página correcta y responde con ella delante.</p></div></div></section>
+<section class="slide" id="s10"><div class="slide-inner"><p class="kicker">04 · RAG</p><h2>Parecido = similitud coseno de embeddings</h2><div class="section-body"><p class="body-text">Un <strong class="term">embedding</strong> es un vector que representa el significado de un texto. Textos parecidos quedan cerca, y la cercanía se mide con el producto punto de la Semana 7.</p><div class="callout"><span class="callout-label">Realidad</span><p>Los sistemas reales usan un modelo de embeddings y una base vectorial; hoy usamos una bolsa de palabras de juguete.</p></div></div></div></section>
+<section class="slide alt" id="s11"><div class="slide-inner"><p class="kicker">05 · Agentes</p><h2>Un agente es un LLM dentro de un bucle</h2><div class="section-body"><div class="progression"><span class="chip"><strong>1</strong> Observar</span><span class="arrow">→</span><span class="chip"><strong>2</strong> Decidir</span><span class="arrow">→</span><span class="chip"><strong>3</strong> Usar herramienta</span><span class="arrow">→</span><span class="chip"><strong>4</strong> Ver resultado</span><span class="arrow">→</span><span class="chip"><strong>5</strong> Repetir o responder</span></div><p class="body-text"><em class="term-accent">Analogía:</em> un asistente con teléfono y calculadora. No sabe todo, pero sabe cuándo usar cada herramienta.</p></div></div></section>
+<section class="slide" id="s12"><div class="slide-inner"><p class="kicker">05 · Agentes</p><h2>Reglas de diseño de un agente seguro</h2><div class="section-body"><ol class="obj-list section-body" style="margin-top:12px;"><li><span class="obj-num">01</span><p>El modelo <strong class="term">propone</strong>, tu código <strong class="term">ejecuta</strong> y valida.</p></li><li><span class="obj-num">02</span><p>Lista cerrada de herramientas y permisos mínimos.</p></li><li><span class="obj-num">03</span><p>Tope de pasos y confirmación humana en acciones irreversibles.</p></li><li><span class="obj-num">04</span><p>Contenido externo = datos, no órdenes (<em class="term-accent">inyección de prompt</em>).</p></li></ol></div></div></section>
+<section class="slide alt" id="s13"><div class="slide-inner"><p class="kicker">06 · Por qué importa</p><h2>Por qué esto importa para IA/ML</h2><div class="section-body"><ol class="obj-list section-body" style="margin-top:12px;"><li><span class="obj-num">01</span><p>Es la capa de producto del Deep Learning de la Semana 11.</p></li><li><span class="obj-num">02</span><p>RAG une vectores, diccionarios, búsqueda y evaluación de todo el curso.</p></li><li><span class="obj-num">03</span><p>Evaluar no es opcional: pruebas, casos de referencia y métricas.</p></li><li><span class="obj-num">04</span><p>Siguiente paso: orquestación, evaluación, seguridad y costos.</p></li></ol></div></div></section>
+<section class="slide" id="s14"><div class="slide-inner"><p class="kicker">07 · Ejemplo práctico</p><h2>RAG mínimo: de texto a vectores</h2><div class="section-body"><div class="code-card compact"><div class="code-bar"><span>rag_minimo.py (1/2)</span><span class="lang-tag">Python</span></div><pre><code><span class="kw">def</span> tokenizar(texto):
+    <span class="kw">return</span> re.findall(r&quot;\w+&quot;, texto.lower())
+
+<span class="kw">def</span> vectorizar(texto):
+    <span class="cm"># &quot;Embedding&quot; de juguete: cuántas veces aparece cada palabra (bolsa de palabras).</span>
+    <span class="kw">return</span> Counter(tokenizar(texto))
+
+<span class="kw">def</span> similitud_coseno(a, b):
+    <span class="cm"># Mismo producto punto de la Semana 7, sobre diccionarios dispersos.</span>
+    punto = sum(a[p] * b[p] <span class="kw">for</span> p <span class="kw">in</span> a <span class="kw">if</span> p <span class="kw">in</span> b)
+    norma = math.sqrt(sum(v * v <span class="kw">for</span> v <span class="kw">in</span> a.values())) * math.sqrt(sum(v * v <span class="kw">for</span> v <span class="kw">in</span> b.values()))
+    <span class="kw">return</span> punto / norma <span class="kw">if</span> norma else 0.0</code></pre></div></div></div></section>
+<section class="slide alt" id="s15"><div class="slide-inner"><p class="kicker">07 · Ejemplo práctico</p><h2>RAG mínimo: recuperar y armar el prompt</h2><div class="section-body"><div class="code-card compact"><div class="code-bar"><span>rag_minimo.py (2/2)</span><span class="lang-tag">Python</span></div><pre><code><span class="kw">def</span> recuperar(pregunta, documentos, k=2):
+    q = vectorizar(pregunta)
+    puntuados = [(similitud_coseno(q, vectorizar(d)), d) <span class="kw">for</span> d <span class="kw">in</span> documentos]
+    puntuados.sort(key=lambda par: par[0], reverse=<span class="kw">True</span>)
+    <span class="kw">return</span> [d <span class="kw">for</span> s, d <span class="kw">in</span> puntuados[:k] <span class="kw">if</span> s &gt; 0]
+
+<span class="kw">def</span> construir_prompt(pregunta, fragmentos):
+    contexto = &quot;\n&quot;.join(f&quot;- {f}&quot; <span class="kw">for</span> f <span class="kw">in</span> fragmentos) or &quot;(sin contexto)&quot;
+    <span class="kw">return</span> (
+        &quot;Responde SOLO con el contexto. Si no alcanza, di que no lo sabes.\n&quot;
+        f&quot;Contexto:\n{contexto}\n\nPregunta: {pregunta}&quot;
+    )
+
+<span class="kw">if</span> __name__ == &quot;__main__&quot;:</code></pre><div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">recupera el fragmento sobre sobreajuste y arma el prompt</span></div></div></div></div></section>
+<section class="slide" id="s16"><div class="slide-inner"><p class="kicker">08 · Segundo ejemplo</p><h2>Agente con herramientas</h2><div class="section-body"><div class="code-card compact"><div class="code-bar"><span>agente.py</span><span class="lang-tag">Python</span></div><pre><code>HERRAMIENTAS = {&quot;sumar&quot;: sumar}   <span class="cm"># lista cerrada: el agente solo puede llamar lo que registres</span>
+
+<span class="kw">def</span> ejecutar_agente(llm, pregunta, max_pasos=5):
+    &quot;&quot;&quot;`llm` es cualquier función mensajes -&gt; dict. Así se prueba sin red ni claves.&quot;&quot;&quot;
+    mensajes = [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: pregunta}]
+    <span class="kw">for</span> _ <span class="kw">in</span> range(max_pasos):                      <span class="cm"># tope de pasos: evita bucles infinitos</span>
+        decision = llm(mensajes)
+        <span class="kw">if</span> decision[&quot;tipo&quot;] == &quot;respuesta&quot;:
+            <span class="kw">return</span> decision[&quot;texto&quot;]
+        nombre, args = decision[&quot;herramienta&quot;], decision[&quot;args&quot;]
+        <span class="kw">if</span> nombre <span class="kw">not</span> <span class="kw">in</span> HERRAMIENTAS:
+            resultado = f&quot;error: herramienta desconocida &<span class="cm">#x27;{nombre}&#x27;&quot;</span>
+        else:
+            resultado = HERRAMIENTAS[nombre](**args)
+        mensajes.append({&quot;role&quot;: &quot;tool&quot;, &quot;content&quot;: json.dumps({&quot;resultado&quot;: resultado})})
+    <span class="kw">return</span> &quot;No pude terminar dentro del límite de pasos.&quot;</code></pre><div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">La suma es 5.</span></div></div></div></div></section>
+<section class="slide alt" id="s17"><div class="slide-inner"><p class="kicker">09 · Pruebas</p><h2>Probar sin llamar a ninguna API</h2><div class="section-body"><div class="code-card compact"><div class="code-bar"><span>test_genai.py</span><span class="lang-tag">Python</span></div><pre><code><span class="kw">def</span> test_prompt_incluye_contexto_y_pregunta():
+    p = construir_prompt(&quot;¿X?&quot;, [&quot;dato A&quot;])
+    assert &quot;dato A&quot; <span class="kw">in</span> p and &quot;¿X?&quot; <span class="kw">in</span> p
+
+<span class="kw">def</span> test_agente_usa_la_herramienta():
+    assert agente.ejecutar_agente(agente.llm_simulado, &quot;2+3&quot;) == &quot;La suma es 5.&quot;</code></pre><div class="code-result" style="padding:0 20px 18px;"><span class="result-tag">Resultado</span><span class="result-val">7 pruebas pasan</span></div></div><div class="callout"><span class="callout-label">Técnica</span><p>Inyectar el LLM como dependencia permite probar el bucle, el tope de pasos y el rechazo de herramientas.</p></div></div></div></section>
+<section class="slide" id="s18"><div class="slide-inner"><p class="kicker">10 · Vigencia técnica</p><h2>Notas de vigencia (2026)</h2><div class="section-body"><ol class="obj-list section-body" style="margin-top:12px;"><li><span class="obj-num">01</span><p>Los modelos cambian rápido: nombres en configuración, no fijos en el código.</p></li><li><span class="obj-num">02</span><p>Contextos largos no eliminan RAG.</p></li><li><span class="obj-num">03</span><p>Salida estructurada y llamada a herramientas ya son nativas; MCP estandariza herramientas.</p></li><li><span class="obj-num">04</span><p>Frameworks de agentes evolucionan: entiende el bucle primero.</p></li><li><span class="obj-num">05</span><p>Modelos abiertos locales cuando importa la privacidad o el costo.</p></li></ol></div></div></section>
+<section class="slide alt" id="s19"><div class="slide-inner"><p class="kicker">11 · Errores comunes</p><h2>Errores comunes de principiante</h2><div class="section-body"><div class="blocks-grid cols-3" style="grid-template-columns:repeat(3,1fr)"><div class="block-card"><span class="block-letter">01</span><h3>Confiar a ciegas</h3><p>Verifica hechos, cifras y código generado.</p></div><div class="block-card"><span class="block-letter">02</span><h3>Claves en Git</h3><p>Usa variables de entorno.</p></div><div class="block-card"><span class="block-letter">03</span><h3>Prompts vagos</h3><p>Sin rol, contexto ni formato.</p></div><div class="block-card"><span class="block-letter">04</span><h3>RAG sin evaluar</h3><p>Si recupera mal, responde mal.</p></div><div class="block-card"><span class="block-letter">05</span><h3>Agente sin tope</h3><p>Sin validar herramientas ni pasos.</p></div><div class="block-card"><span class="block-letter">06</span><h3>Datos sensibles</h3><p>No pegues datos confidenciales sin revisar la política.</p></div></div></div></div></section>
+<section class="slide" id="s20"><div class="slide-inner"><p class="kicker">12 · Ejercicio</p><h2>Ejercicio propuesto: dos herramientas encadenadas</h2><div class="section-body"><p class="body-text">Amplía <code>agente.py</code> con <code>multiplicar</code> y un <code>llm_simulado</code> que resuelva <code>(2 + 3) * 4</code>. Prueba el caso normal y los argumentos inválidos (devuelve el error al modelo en vez de romper). Versiona con Git.</p><div class="callout"><span class="callout-label">Pista</span><p>¿Qué excepción lanza <code>HERRAMIENTAS[nombre](**args)</code> si faltan argumentos?</p></div></div></div></section>
+<section class="slide alt" id="s21"><div class="slide-inner"><p class="kicker">13 · Autoevaluación</p><h2>Autoevaluación (1/2)</h2><div class="section-body"><div class="qa-list"><div class="qa-item"><div class="q"><span class="q-num">1.</span>¿Qué tarea simple se entrena en un LLM?</div><div class="a"><span class="a-tag">Resp.</span>Predecir el siguiente token.</div></div><div class="qa-item"><div class="q"><span class="q-num">2.</span>¿Qué es una alucinación?</div><div class="a"><span class="a-tag">Resp.</span>Texto plausible pero falso dicho con seguridad.</div></div><div class="qa-item"><div class="q"><span class="q-num">3.</span>¿Cuatro partes de un buen prompt?</div><div class="a"><span class="a-tag">Resp.</span>Rol, contexto, tarea y formato.</div></div><div class="qa-item"><div class="q"><span class="q-num">4.</span>¿Qué problema resuelve RAG?</div><div class="a"><span class="a-tag">Resp.</span>Responder con tus datos actuales o privados sin reentrenar; reduce alucinaciones.</div></div><div class="qa-item"><div class="q"><span class="q-num">5.</span>Ordena los pasos de RAG.</div><div class="a"><span class="a-tag">Resp.</span>Recuperar → aumentar el prompt → generar.</div></div></div></div></div></section>
+<section class="slide" id="s22"><div class="slide-inner"><p class="kicker">13 · Autoevaluación</p><h2>Autoevaluación (2/2)</h2><div class="section-body"><div class="qa-list"><div class="qa-item"><div class="q"><span class="q-num">6.</span>¿Qué mide la similitud coseno entre embeddings?</div><div class="a"><span class="a-tag">Resp.</span>Qué tan parecido es el significado (cercanía de vectores).</div></div><div class="qa-item"><div class="q"><span class="q-num">7.</span>¿Agente vs. una sola llamada al LLM?</div><div class="a"><span class="a-tag">Resp.</span>El agente repite el bucle decidir → herramienta → observar.</div></div><div class="qa-item"><div class="q"><span class="q-num">8.</span>Dos medidas de seguridad para un agente.</div><div class="a"><span class="a-tag">Resp.</span>Tope de pasos, lista cerrada de herramientas, validar argumentos, confirmación humana.</div></div><div class="qa-item"><div class="q"><span class="q-num">9.</span>V/F: si el texto recuperado dice «ignora tus instrucciones», se obedece.</div><div class="a"><span class="a-tag">Resp.</span>Falso: es inyección de prompt; el contenido externo son datos, no órdenes.</div></div></div></div></div></section>
+<section class="slide alt" id="s23"><div class="slide-inner"><p class="kicker">Cierre</p><h2>Verificación de dependencias</h2><div class="section-body"><p class="body-text">Depende de las Semanas 11 (redes y entrenamiento), 10 (evaluación), 8 (probabilidad), 7 (producto punto y coseno), 6 (<code>pytest</code>, Git), 5 (ordenar) y 4 (diccionarios, <code>Counter</code>). No requiere nada posterior: es el último módulo del roadmap.</p><div class="status-row"><span class="status-dot"></span>Curso completo: del pensamiento computacional a los agentes</div></div></div></section>
+<footer class="end"><span>Aprende con Gutyy IA — Semana 12 · v1.0</span><span>2026-11-09</span></footer>
+</main>
+<script>
+  (function(){
+    var sections = Array.prototype.slice.call(document.querySelectorAll('section.slide'));
+    var dots = Array.prototype.slice.call(document.querySelectorAll('.rail a'));
+    var counter = document.getElementById('counter-current');
+
+    if (!('IntersectionObserver' in window)) return;
+
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting){
+          var idx = sections.indexOf(entry.target);
+          dots.forEach(function(d){ d.classList.remove('active'); });
+          if (dots[idx]) dots[idx].classList.add('active');
+          if (counter) counter.textContent = String(idx + 1).padStart(2, '0');
+        }
+      });
+    }, { threshold: 0.55 });
+
+    sections.forEach(function(s){ io.observe(s); });
+  })();
+</script>
+</body>
+</html>

@@ -2,6 +2,13 @@
 
 Registro de cambios semana a semana. Cada clase mantiene su propio número de versión (`vX.Y`) independiente del historial de Git.
 
+## Semana 12 — IA generativa y agentes: LLMs, prompting, RAG y agentes
+
+### v1.0 — 2026-11-09
+- Primera publicación: qué es un LLM (analogía del autocompletado, tokens, ventana de contexto, temperatura, alucinaciones), prompting con rol/contexto/tarea/formato, llamada a un LLM desde Python (fragmento ilustrativo, no ejecutado), RAG (analogía del examen a libro abierto, embeddings y similitud coseno), agentes con herramientas (bucle, tope de pasos, lista cerrada de herramientas, inyección de prompt), sección "Por qué esto importa para IA/ML", ejemplo práctico con RAG mínimo y agente con LLM simulado (verificados por ejecución), 7 pruebas con `pytest` (inyección del LLM como dependencia), notas de vigencia técnica (modelos cambiantes, MCP, contextos largos vs. RAG, modelos abiertos), errores comunes, ejercicio propuesto (agente con dos herramientas, sin resolver), autoevaluación de 9 preguntas, verificación de dependencias. Cierra el roadmap de 12 módulos.
+- Diapositivas: 23, mismo diseño y guía de marca fijada en la Semana 1.
+- PDF generado a partir de un documento HTML con la misma guía de marca, vía Python + weasyprint.
+
 ## Semana 11 — Deep Learning: redes neuronales con PyTorch
 
 ### v1.0 — 2026-11-02

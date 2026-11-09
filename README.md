@@ -25,7 +25,7 @@ Cada clase queda versionada (`vX.Y`) con fecha, y el [CHANGELOG.md](CHANGELOG.md
 | 9 | Python científico: NumPy, Pandas, Matplotlib *(Semana 9)* |
 | 10 | Machine Learning clásico: regresión, clasificación, scikit-learn *(Semana 10)* |
 | 11 | Deep Learning: redes neuronales, PyTorch/TensorFlow *(Semana 11)* |
-| 12 | IA generativa y agentes: LLMs, prompting, RAG, frameworks de agentes |
+| 12 | IA generativa y agentes: LLMs, prompting, RAG, frameworks de agentes *(Semana 12)* |
 
 ## Semanas publicadas
 
@@ -42,6 +42,7 @@ Cada clase queda versionada (`vX.Y`) con fecha, y el [CHANGELOG.md](CHANGELOG.md
 | 9 | Python científico: NumPy, Pandas, Matplotlib | v1.0 | [clase.md](semanas/semana-09-python-cientifico/clase.md) · [diapositivas.html](semanas/semana-09-python-cientifico/diapositivas.html) · [clase.pdf](semanas/semana-09-python-cientifico/clase.pdf) |
 | 10 | Machine Learning clásico: regresión, clasificación y scikit-learn | v1.0 | [clase.md](semanas/semana-10-ml-clasico-scikit-learn/clase.md) · [diapositivas.html](semanas/semana-10-ml-clasico-scikit-learn/diapositivas.html) · [clase.pdf](semanas/semana-10-ml-clasico-scikit-learn/clase.pdf) |
 | 11 | Deep Learning: redes neuronales con PyTorch | v1.0 | [clase.md](semanas/semana-11-deep-learning-pytorch/clase.md) · [diapositivas.html](semanas/semana-11-deep-learning-pytorch/diapositivas.html) · [clase.pdf](semanas/semana-11-deep-learning-pytorch/clase.pdf) |
+| 12 | IA generativa y agentes: LLMs, prompting, RAG y agentes | v1.0 | [clase.md](semanas/semana-12-ia-generativa-agentes/clase.md) · [diapositivas.html](semanas/semana-12-ia-generativa-agentes/diapositivas.html) · [clase.pdf](semanas/semana-12-ia-generativa-agentes/clase.pdf) |
 
 ## Guía de marca
 
